@@ -1,6 +1,6 @@
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
-import { toCsv, type CsvColumn } from "../../lib/csv.ts";
+import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { assertBusinessDate, fromDbDate, toDbDate, type IsoDate } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
@@ -239,8 +239,6 @@ export async function listTrips(db: Db, query: TripListQuery): Promise<TripPage>
     totals: { count: total, amountPaise, receivedPaise, duePaise: amountPaise - receivedPaise },
   };
 }
-
-export const MAX_EXPORT_ROWS = 10_000;
 
 const exportColumns: CsvColumn<TripDto>[] = [
   { header: "Trip #", value: (trip) => trip.id },

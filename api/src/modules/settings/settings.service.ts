@@ -104,6 +104,8 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
       SELECT MIN("tripDate") AS day FROM "Trip" WHERE "deletedAt" IS NULL AND "kind" = 'TRIP'
       UNION ALL
       SELECT MIN("paidOn") FROM "CustomerPayment" WHERE "deletedAt" IS NULL
+      UNION ALL
+      SELECT MIN("spentOn") FROM "Expense" WHERE "deletedAt" IS NULL
     ) AS dated`;
   return row?.earliest ? fromDbDate(row.earliest) : null;
 }

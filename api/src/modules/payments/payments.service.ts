@@ -1,6 +1,6 @@
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
-import { toCsv, type CsvColumn } from "../../lib/csv.ts";
+import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { assertBusinessDate, fromDbDate, toDbDate } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
@@ -10,7 +10,7 @@ import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import { customerBalance } from "../customer-ledger/balance.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
-import { assertReferenceFree, MAX_EXPORT_ROWS } from "../trips/trips.service.ts";
+import { assertReferenceFree } from "../trips/trips.service.ts";
 import {
   checkManualPlan,
   planFifo,

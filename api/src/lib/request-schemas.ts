@@ -7,9 +7,9 @@ export const dbIdSchema = z.coerce.number().int().positive().max(MAX_DB_ID);
 
 export const idParams = z.object({ id: dbIdSchema });
 
-/** A PATCH body must change something. */
+/** A PATCH body must change something, and an unknown field is an error, not ignored. */
 export function nonEmptyPatch<Shape extends z.ZodRawShape>(shape: Shape) {
   return z
-    .object(shape)
+    .strictObject(shape)
     .refine((body) => Object.keys(body).length > 0, "send at least one field to change");
 }

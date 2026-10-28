@@ -1,4 +1,4 @@
-import { AppError, notFound } from "../../lib/errors.ts";
+import { assertUsable } from "../../lib/usable.ts";
 import type { Tx } from "../../lib/prisma.ts";
 
 export interface TripMasterIds {
@@ -6,26 +6,6 @@ export interface TripMasterIds {
   driverId: number;
   tractorId: number;
   khetId: number;
-}
-
-interface Named {
-  id: number;
-  isActive: boolean;
-}
-
-/** New entries need active masters; an edit may keep pointing at one deactivated since. */
-function assertUsable<Row extends Named>(
-  entity: string,
-  row: Row | null,
-  id: number,
-  previousId: number | undefined,
-  label: (row: Row) => string,
-): Row {
-  if (!row) throw notFound(entity, id);
-  if (!row.isActive && row.id !== previousId) {
-    throw new AppError("CONFLICT", `${entity} ${label(row)} is inactive`);
-  }
-  return row;
 }
 
 /**

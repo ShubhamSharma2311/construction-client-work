@@ -97,15 +97,16 @@ model Customer {
 }
 
 model Tractor {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   /// Upper-case, no spaces or dashes, e.g. RJ19AB1234.
-  regNumber     String   @unique
+  regNumber     String    @unique
   label         String
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
   defaultDriver Driver?
   trips         Trip[]
+  expenses      Expense[]
 }
 
 model Driver {
@@ -122,6 +123,7 @@ model Driver {
   updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
   salaryRates      DriverSalaryRate[]
   trips            Trip[]
+  expenses         Expense[]
 }
 
 model DriverSalaryRate {
@@ -148,13 +150,14 @@ model Khet {
 }
 
 model Labourer {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   phone     String?
   notes     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  expenses  Expense[]
 }
 
 model Partner {
@@ -192,11 +195,11 @@ model Trip {
   customerId      Int
   customer        Customer            @relation(fields: [customerId], references: [id])
   driverId        Int?
-  driver          Driver?             @relation(fields: [driverId], references: [id])
+  driver          Driver?             @relation(fields: [driverId], references: [id], onDelete: Restrict)
   tractorId       Int?
-  tractor         Tractor?            @relation(fields: [tractorId], references: [id])
+  tractor         Tractor?            @relation(fields: [tractorId], references: [id], onDelete: Restrict)
   khetId          Int?
-  khet            Khet?               @relation(fields: [khetId], references: [id])
+  khet            Khet?               @relation(fields: [khetId], references: [id], onDelete: Restrict)
   amountPaise     Int
   /// Kept equal to the sum of this trip's allocations by a database trigger.
   receivedPaise   Int                 @default(0)
@@ -250,4 +253,48 @@ model PaymentAllocation {
 
   @@unique([paymentId, tripId])
   @@index([tripId])
+}
+
+enum ExpenseCategory {
+  LABOUR
+  DIESEL
+  ROYALTY
+  POLICE
+  OTHER
+  EMERGENCY
+  TRACTOR_SERVICE
+  TRACTOR_EMI
+}
+
+/// Money the business paid out. Which optional columns are filled depends on the category;
+/// CHECK constraints in the migration hold those rules.
+model Expense {
+  id          Int             @id @default(autoincrement())
+  category    ExpenseCategory
+  spentOn     DateTime        @db.Date
+  amountPaise Int
+  mode        PayMode
+  driverId    Int?
+  driver      Driver?         @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  tractorId   Int?
+  tractor     Tractor?        @relation(fields: [tractorId], references: [id], onDelete: Restrict)
+  labourerId  Int?
+  labourer    Labourer?       @relation(fields: [labourerId], references: [id], onDelete: Restrict)
+  /// Diesel only: litres in millilitres, so 45.5 L is 45500.
+  dieselMl    Int?
+  /// Tractor service only: hour-meter reading in whole hours.
+  hourMeter   Int?
+  /// Royalty only: the period the payment covers.
+  periodFrom  DateTime?       @db.Date
+  periodTo    DateTime?       @db.Date
+  reference   String?
+  notes       String?
+  deletedAt   DateTime?       @db.Timestamptz(3)
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([spentOn])
+  @@index([category, spentOn])
+  @@index([tractorId, spentOn])
+  @@index([driverId, spentOn])
 }

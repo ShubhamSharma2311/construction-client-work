@@ -1,3 +1,6 @@
+/** Exports larger than this must be narrowed by date; Excel and phones choke on more. */
+export const MAX_EXPORT_ROWS = 10_000;
+
 export type CsvCell = string | number | null;
 
 export interface CsvColumn<Row> {
