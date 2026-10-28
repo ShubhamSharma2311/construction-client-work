@@ -237,25 +237,6 @@ describe("editing, deleting and restoring", () => {
     expect((await t.post(`/expenses/${String(old.expense.id)}/restore`)).statusCode).toBe(400);
   });
 
-  it("refuses editing a tractor service entry here", async () => {
-    const tractor = await makeTractor(t);
-    const service = await t.db.expense.create({
-      data: {
-        category: "TRACTOR_SERVICE",
-        spentOn: new Date("2026-10-20"),
-        amountPaise: 100,
-        mode: "CASH",
-        tractorId: tractor.id,
-        notes: "oil change",
-      },
-    });
-
-    const response = await t.patch(`/expenses/${String(service.id)}`, { amount: 5 });
-
-    expect(response.statusCode).toBe(409);
-    expect((await t.delete(`/expenses/${String(service.id)}`)).statusCode).toBe(409);
-  });
-
   it("404s an unknown expense", async () => {
     expect((await t.get("/expenses/99999")).statusCode).toBe(404);
     expect((await t.patch("/expenses/99999", { amount: 1 })).statusCode).toBe(404);

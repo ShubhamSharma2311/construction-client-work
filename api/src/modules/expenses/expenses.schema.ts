@@ -20,6 +20,9 @@ export const EXPENSE_CATEGORIES = [
 export const expenseCategorySchema = z.enum(EXPENSE_CATEGORIES);
 export type ExpenseCategory = z.infer<typeof expenseCategorySchema>;
 
+/** Tractor hour-meter reading in whole hours. */
+const hourMeterSchema = z.number().int().min(0).max(1_000_000);
+
 /** What the money was for: police, other and emergency spends need it written down. */
 const requiredNotes = z.string().trim().min(1, "say what this was for").max(500);
 
@@ -59,6 +62,15 @@ export const expenseCreateBody = z.discriminatedUnion("category", [
   z.object({ category: z.literal("OTHER"), ...common, notes: requiredNotes }).strict(),
   z
     .object({
+      category: z.literal("TRACTOR_SERVICE"),
+      ...common,
+      notes: requiredNotes,
+      tractorId: dbIdSchema,
+      hourMeter: hourMeterSchema.optional(),
+    })
+    .strict(),
+  z
+    .object({
       category: z.literal("DIESEL"),
       ...common,
       tractorId: dbIdSchema,
@@ -91,6 +103,7 @@ export const expenseUpdateBody = nonEmptyPatch({
   periodFrom: isoDateSchema.nullable().optional(),
   periodTo: isoDateSchema.nullable().optional(),
   litres: litresSchema.optional(),
+  hourMeter: hourMeterSchema.nullable().optional(),
 });
 export type ExpenseUpdateInput = z.infer<typeof expenseUpdateBody>;
 
@@ -122,6 +135,9 @@ export const expenseDto = z.object({
   labourer: ref.nullable(),
   dieselLitres: z.number().nullable(),
   hourMeter: z.number().int().nullable(),
+  tractorLoanId: z.number().int().nullable(),
+  emiMonth: z.string().nullable(),
+  lateFeePaise: z.number().int().nullable(),
   periodFrom: z.string().nullable(),
   periodTo: z.string().nullable(),
   reference: z.string().nullable(),

@@ -2,7 +2,7 @@ import { Prisma } from "../generated/prisma/client.ts";
 import type { Tx } from "./prisma.ts";
 
 /** Tables whose rows are locked to serialise rule checks that read one row and write another. */
-export type LockableTable = "Customer" | "Driver" | "Expense" | "Tractor";
+export type LockableTable = "Customer" | "Driver" | "Expense" | "Tractor" | "TractorLoan";
 
 /**
  * Locks one row until the transaction ends. Two requests that check-then-write the same

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { AppError } from "./errors.ts";
 import {
+  addMonths,
   assertBusinessDate,
+  dayOfMonth,
   dateRangeSchema,
   daysBetween,
   fromDbDate,
@@ -113,5 +115,23 @@ describe("daysBetween", () => {
     expect(daysBetween(iso("2026-12-31"), iso("2027-01-01"))).toBe(1);
     expect(daysBetween(iso("2028-02-28"), iso("2028-03-01"))).toBe(2);
     expect(daysBetween(iso("2026-10-28"), iso("2026-10-01"))).toBe(-27);
+  });
+});
+
+describe("addMonths and dayOfMonth", () => {
+  const month = (value: string) => isoMonthSchema.parse(value);
+
+  it.each([
+    ["2026-10", 0, "2026-10"],
+    ["2026-10", 3, "2027-01"],
+    ["2026-01", -1, "2025-12"],
+    ["2026-12", 1, "2027-01"],
+    ["2026-04", 119, "2036-03"],
+  ])("%s plus %d months is %s", (start, count, expected) => {
+    expect(addMonths(month(start), count)).toBe(expected);
+  });
+
+  it("builds the due date inside the month", () => {
+    expect(dayOfMonth(month("2026-02"), 5)).toBe("2026-02-05");
   });
 });

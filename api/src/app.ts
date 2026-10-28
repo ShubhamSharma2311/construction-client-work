@@ -23,9 +23,11 @@ import { expenseRoutes } from "./modules/expenses/expenses.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
 import { khetRoutes } from "./modules/khets/khets.routes.ts";
 import { labourerRoutes } from "./modules/labourers/labourers.routes.ts";
+import { loanRoutes } from "./modules/loans/loans.routes.ts";
 import { partnerRoutes } from "./modules/partners/partners.routes.ts";
 import { paymentRoutes } from "./modules/payments/payments.routes.ts";
 import { settingsRoutes } from "./modules/settings/settings.routes.ts";
+import { serviceHistoryRoutes } from "./modules/tractor-service/service-history.routes.ts";
 import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
 import { tripRoutes } from "./modules/trips/trips.routes.ts";
 
@@ -105,6 +107,8 @@ export function buildApp(deps: AppDeps): App {
     scope.register(ledgerRoutes, ctx);
     scope.register(expenseRoutes, ctx);
     scope.register(dieselRoutes, ctx);
+    scope.register(loanRoutes, ctx);
+    scope.register(serviceHistoryRoutes, ctx);
     done();
   });
 

@@ -97,16 +97,17 @@ model Customer {
 }
 
 model Tractor {
-  id            Int       @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   /// Upper-case, no spaces or dashes, e.g. RJ19AB1234.
-  regNumber     String    @unique
+  regNumber     String        @unique
   label         String
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
   defaultDriver Driver?
   trips         Trip[]
   expenses      Expense[]
+  loans         TractorLoan[]
 }
 
 model Driver {
@@ -269,32 +270,65 @@ enum ExpenseCategory {
 /// Money the business paid out. Which optional columns are filled depends on the category;
 /// CHECK constraints in the migration hold those rules.
 model Expense {
-  id          Int             @id @default(autoincrement())
-  category    ExpenseCategory
-  spentOn     DateTime        @db.Date
-  amountPaise Int
-  mode        PayMode
-  driverId    Int?
-  driver      Driver?         @relation(fields: [driverId], references: [id], onDelete: Restrict)
-  tractorId   Int?
-  tractor     Tractor?        @relation(fields: [tractorId], references: [id], onDelete: Restrict)
-  labourerId  Int?
-  labourer    Labourer?       @relation(fields: [labourerId], references: [id], onDelete: Restrict)
+  id            Int             @id @default(autoincrement())
+  category      ExpenseCategory
+  spentOn       DateTime        @db.Date
+  amountPaise   Int
+  mode          PayMode
+  driverId      Int?
+  driver        Driver?         @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  tractorId     Int?
+  tractor       Tractor?        @relation(fields: [tractorId], references: [id], onDelete: Restrict)
+  labourerId    Int?
+  labourer      Labourer?       @relation(fields: [labourerId], references: [id], onDelete: Restrict)
   /// Diesel only: litres in millilitres, so 45.5 L is 45500.
-  dieselMl    Int?
+  dieselMl      Int?
   /// Tractor service only: hour-meter reading in whole hours.
-  hourMeter   Int?
+  hourMeter     Int?
   /// Royalty only: the period the payment covers.
-  periodFrom  DateTime?       @db.Date
-  periodTo    DateTime?       @db.Date
-  reference   String?
-  notes       String?
-  deletedAt   DateTime?       @db.Timestamptz(3)
-  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+  periodFrom    DateTime?       @db.Date
+  periodTo      DateTime?       @db.Date
+  reference     String?
+  notes         String?
+  /// EMI only: the loan paid, and the instalment month (null for a foreclosure payment).
+  tractorLoanId Int?
+  tractorLoan   TractorLoan?    @relation(fields: [tractorLoanId], references: [id], onDelete: Restrict)
+  emiMonth      DateTime?       @db.Date
+  /// EMI only: the part of amountPaise that was a late fee.
+  lateFeePaise  Int?
+  deletedAt     DateTime?       @db.Timestamptz(3)
+  createdAt     DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([spentOn])
   @@index([category, spentOn])
   @@index([tractorId, spentOn])
   @@index([driverId, spentOn])
+}
+
+enum LoanClosure {
+  PAID_OFF
+  FORECLOSED
+}
+
+/// A loan taken for a tractor, paid back in fixed monthly instalments (EMI).
+model TractorLoan {
+  id                Int          @id @default(autoincrement())
+  tractorId         Int
+  tractor           Tractor      @relation(fields: [tractorId], references: [id], onDelete: Restrict)
+  lender            String
+  emiPaise          Int
+  /// Day of the month the EMI falls due; 1-28 so every month has it.
+  emiDay            Int
+  /// First day of the month of the first instalment.
+  firstEmiMonth     DateTime     @db.Date
+  totalInstallments Int
+  closedOn          DateTime?    @db.Date
+  closedReason      LoanClosure?
+  notes             String?
+  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+  payments          Expense[]
+
+  @@index([tractorId])
 }

@@ -95,3 +95,17 @@ export function dayFilter(range: {
     ...(range.to ? { lte: toDbDate(range.to) } : {}),
   };
 }
+
+/** The month `count` months after `month` (negative goes back). */
+export function addMonths(month: IsoMonth, count: number): IsoMonth {
+  const [year = 0, monthNumber = 1] = month.split("-").map(Number);
+  const index = year * 12 + (monthNumber - 1) + count;
+  const newYear = Math.floor(index / 12);
+  const newMonth = (index % 12) + 1;
+  return `${String(newYear)}-${String(newMonth).padStart(2, "0")}` as IsoMonth;
+}
+
+/** A given day within a month; callers keep `day` within 1-28 so it always exists. */
+export function dayOfMonth(month: IsoMonth, day: number): IsoDate {
+  return `${month}-${String(day).padStart(2, "0")}` as IsoDate;
+}

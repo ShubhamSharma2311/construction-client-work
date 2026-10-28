@@ -3,10 +3,11 @@ import { writeAudit } from "../../lib/audit.ts";
 import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import {
   assertBusinessDate,
+  dayFilter,
   fromDbDate,
+  monthOf,
   toDbDate,
   type IsoDate,
-  dayFilter,
 } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
@@ -17,6 +18,7 @@ import { lockRow } from "../../lib/locks.ts";
 import { assertUsable } from "../../lib/usable.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
 import { dieselWarnings } from "./diesel-warnings.ts";
+import { hourMeterWarnings } from "./hour-meter-warnings.ts";
 import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
@@ -51,6 +53,9 @@ export function toExpenseDto(row: ExpenseRow): ExpenseDto {
     labourer: row.labourer,
     dieselLitres: row.dieselMl === null ? null : row.dieselMl / 1000,
     hourMeter: row.hourMeter,
+    tractorLoanId: row.tractorLoanId,
+    emiMonth: row.emiMonth ? monthOf(fromDbDate(row.emiMonth)) : null,
+    lateFeePaise: row.lateFeePaise,
     periodFrom: optionalDate(row.periodFrom),
     periodTo: optionalDate(row.periodTo),
     reference: row.reference,
@@ -70,6 +75,7 @@ const EDITABLE: Partial<Record<ExpenseCategory, ReadonlySet<keyof ExpenseUpdateI
   OTHER: new Set(COMMON_FIELDS),
   EMERGENCY: new Set([...COMMON_FIELDS, "tractorId", "driverId"]),
   DIESEL: new Set([...COMMON_FIELDS, "tractorId", "driverId", "litres"]),
+  TRACTOR_SERVICE: new Set([...COMMON_FIELDS, "tractorId", "hourMeter"]),
 };
 
 const NOTES_REQUIRED: ReadonlySet<ExpenseCategory> = new Set([
@@ -108,6 +114,8 @@ function linksOf(input: ExpenseCreateInput): Links {
     case "EMERGENCY":
     case "DIESEL":
       return { tractorId: input.tractorId, driverId: input.driverId };
+    case "TRACTOR_SERVICE":
+      return { tractorId: input.tractorId };
     case "ROYALTY":
     case "POLICE":
     case "OTHER":
@@ -147,6 +155,8 @@ interface WarnableExpense {
   tractorId: number | null;
   driverId: number | null;
   dieselMl: number | null;
+  hourMeter: number | null;
+  spentOn: IsoDate;
   period: { from: IsoDate | null; to: IsoDate | null };
 }
 
@@ -165,6 +175,17 @@ async function warningsFor(
     }
     return dieselWarnings(tx, { tractorId, driverId, dieselMl, amountPaise: expense.amountPaise });
   }
+  if (
+    expense.category === "TRACTOR_SERVICE" &&
+    expense.tractorId !== null &&
+    expense.hourMeter !== null
+  ) {
+    return hourMeterWarnings(
+      tx,
+      { tractorId: expense.tractorId, hourMeter: expense.hourMeter, spentOn: expense.spentOn },
+      excludeId,
+    );
+  }
   return [];
 }
 
@@ -176,6 +197,8 @@ function warnableFromInput(input: ExpenseCreateInput): WarnableExpense {
     tractorId: links.tractorId ?? null,
     driverId: links.driverId ?? null,
     dieselMl: input.category === "DIESEL" ? input.litres : null,
+    hourMeter: input.category === "TRACTOR_SERVICE" ? (input.hourMeter ?? null) : null,
+    spentOn: input.spentOn,
     period:
       input.category === "ROYALTY"
         ? { from: input.periodFrom ?? null, to: input.periodTo ?? null }
@@ -210,6 +233,8 @@ function createData(input: ExpenseCreateInput): Prisma.ExpenseUncheckedCreateInp
         driverId: input.driverId,
         dieselMl: input.litres,
       };
+    case "TRACTOR_SERVICE":
+      return { ...base, tractorId: input.tractorId, hourMeter: input.hourMeter ?? null };
     case "POLICE":
     case "OTHER":
       return base;
@@ -265,6 +290,9 @@ function assertEditable(expense: Expense, input: ExpenseUpdateInput): void {
   if (expense.category === "DIESEL" && (input.tractorId === null || input.driverId === null)) {
     throw new AppError("VALIDATION", "A diesel fill must keep its tractor and driver");
   }
+  if (expense.category === "TRACTOR_SERVICE" && input.tractorId === null) {
+    throw new AppError("VALIDATION", "A tractor service must keep its tractor");
+  }
 }
 
 export async function updateExpense(
@@ -295,6 +323,8 @@ export async function updateExpense(
         tractorId: input.tractorId === undefined ? before.tractorId : input.tractorId,
         driverId: input.driverId === undefined ? before.driverId : input.driverId,
         dieselMl: input.litres ?? before.dieselMl,
+        hourMeter: input.hourMeter === undefined ? before.hourMeter : input.hourMeter,
+        spentOn: input.spentOn ?? fromDbDate(before.spentOn),
         period,
       },
       id,
@@ -313,6 +343,7 @@ export async function updateExpense(
         tractorId: input.tractorId,
         driverId: input.driverId,
         dieselMl: input.litres,
+        hourMeter: input.hourMeter,
         periodFrom:
           input.periodFrom === undefined
             ? undefined
