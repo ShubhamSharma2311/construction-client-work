@@ -11,6 +11,8 @@ const MAX_RUPEE_DIGITS = 7;
 export interface PaiseRules {
   /** Opening balances may be zero; entries never are. */
   allowZero?: boolean;
+  /** A balance carried over may be owed either way; amounts paid never are negative. */
+  allowNegative?: boolean;
 }
 
 /** Converts a rupee amount typed by the owner into integer paise. */
@@ -27,12 +29,14 @@ export function toPaise(input: number | string, rules: PaiseRules = {}): PaiseRe
     const text = typeof input === "number" ? String(input) : input.trim();
     return { ok: false, reason: `"${text}" is not a valid amount` };
   }
-  if (parsed.negative) return { ok: false, reason: "amount cannot be negative" };
+  if (parsed.negative && !rules.allowNegative) {
+    return { ok: false, reason: "amount cannot be negative" };
+  }
   if (parsed.value === 0 && !rules.allowZero) {
     return { ok: false, reason: "amount must be greater than zero" };
   }
   if (parsed.value > MAX_ENTRY_PAISE) return overCap();
-  return { ok: true, paise: parsed.value };
+  return { ok: true, paise: parsed.negative ? -parsed.value : parsed.value };
 }
 
 function overCap(): PaiseResult {
@@ -53,6 +57,9 @@ export const rupeesSchema = rupeesField({});
 
 /** Like `rupeesSchema` but zero is allowed (opening balances). */
 export const rupeesOrZeroSchema = rupeesField({ allowZero: true });
+
+/** A non-zero amount that may be negative: a balance owed one way or the other. */
+export const signedRupeesSchema = rupeesField({ allowNegative: true });
 
 export function paiseToRupeeString(paise: number): string {
   const sign = paise < 0 ? "-" : "";

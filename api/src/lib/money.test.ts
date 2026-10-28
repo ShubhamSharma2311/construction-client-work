@@ -6,6 +6,7 @@ import {
   paiseToRupeeString,
   rupeesOrZeroSchema,
   rupeesSchema,
+  signedRupeesSchema,
   toPaise,
 } from "./money.ts";
 
@@ -61,6 +62,16 @@ describe("zero amounts", () => {
     expect(toPaise(0)).toMatchObject({ ok: false });
     expect(rupeesOrZeroSchema.parse("0.00")).toBe(0);
     expect(rupeesOrZeroSchema.safeParse("-1").success).toBe(false);
+  });
+});
+
+describe("signed amounts", () => {
+  it("keep their sign but are never zero", () => {
+    expect(signedRupeesSchema.parse("-1500.50")).toBe(-150_050);
+    expect(signedRupeesSchema.parse(2000)).toBe(200_000);
+    expect(signedRupeesSchema.safeParse(0).success).toBe(false);
+    expect(signedRupeesSchema.safeParse("-0").success).toBe(false);
+    expect(signedRupeesSchema.safeParse("-1000000.01").success).toBe(false);
   });
 });
 

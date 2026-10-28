@@ -66,8 +66,8 @@ export async function saveSettings(db: Db, input: SettingsInput, now: Date): Pro
 }
 
 /**
- * Moving the start later must not strand entries before it. Opening balances are dated
- * the start by definition, so they move with it.
+ * Moving the start later must not strand entries before it. Opening balances (customers'
+ * and drivers') are dated the start by definition, so they move with it.
  */
 async function moveBusinessStart(tx: Tx, from: IsoDate, to: IsoDate): Promise<void> {
   if (from === to) return;
@@ -80,6 +80,20 @@ async function moveBusinessStart(tx: Tx, from: IsoDate, to: IsoDate): Promise<vo
         { earliestEntryDate: earliest },
       );
     }
+  }
+  const driverOpenings = await tx.driverAccrual.findMany({ where: { kind: "OPENING_BALANCE" } });
+  for (const opening of driverOpenings) {
+    const moved = await tx.driverAccrual.update({
+      where: { id: opening.id },
+      data: { accruedOn: toDbDate(to) },
+    });
+    await writeAudit(tx, {
+      entity: "DriverAccrual",
+      entityId: opening.id,
+      action: "UPDATE",
+      before: opening,
+      after: moved,
+    });
   }
   const openings = await tx.trip.findMany({ where: { kind: "OPENING_BALANCE" } });
   for (const opening of openings) {
@@ -106,6 +120,11 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
       SELECT MIN("paidOn") FROM "CustomerPayment" WHERE "deletedAt" IS NULL
       UNION ALL
       SELECT MIN("spentOn") FROM "Expense" WHERE "deletedAt" IS NULL
+      UNION ALL
+      SELECT MIN("paidOn") FROM "DriverPayment" WHERE "deletedAt" IS NULL
+      UNION ALL
+      SELECT MIN("accruedOn") FROM "DriverAccrual"
+        WHERE "deletedAt" IS NULL AND "kind" <> 'OPENING_BALANCE'
     ) AS dated`;
   return row?.earliest ? fromDbDate(row.earliest) : null;
 }

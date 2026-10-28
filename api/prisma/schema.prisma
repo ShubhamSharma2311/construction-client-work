@@ -125,6 +125,8 @@ model Driver {
   salaryRates      DriverSalaryRate[]
   trips            Trip[]
   expenses         Expense[]
+  accruals         DriverAccrual[]
+  payments         DriverPayment[]
 }
 
 model DriverSalaryRate {
@@ -331,4 +333,61 @@ model TractorLoan {
   payments          Expense[]
 
   @@index([tractorId])
+}
+
+enum DriverAccrualKind {
+  /// Salary earned for a closed month.
+  MONTH_SALARY
+  BONUS
+  /// What the driver was owed (positive) or held as advance (negative) in the old register.
+  OPENING_BALANCE
+}
+
+enum DriverPaymentType {
+  ADVANCE
+  SALARY
+  BONUS
+}
+
+/// Money a driver has earned. Balance = earned - paid; positive means the owner owes the driver.
+model DriverAccrual {
+  id           Int               @id @default(autoincrement())
+  driverId     Int
+  driver       Driver            @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  kind         DriverAccrualKind
+  /// MONTH_SALARY only: first day of the month earned.
+  month        DateTime?         @db.Date
+  /// The day it counts in the ledger: month end for salary, the day given for others.
+  accruedOn    DateTime          @db.Date
+  amountPaise  Int
+  note         String?
+  deletedAt    DateTime?         @db.Timestamptz(3)
+  createdAt    DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime          @updatedAt @db.Timestamptz(3)
+  bonusPayment DriverPayment?
+
+  @@index([driverId, accruedOn])
+}
+
+/// Money paid to a driver: an advance during the month, the salary, or a bonus.
+model DriverPayment {
+  id             Int               @id @default(autoincrement())
+  driverId       Int
+  driver         Driver            @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  paidOn         DateTime          @db.Date
+  type           DriverPaymentType
+  amountPaise    Int
+  mode           PayMode
+  /// The month this payment is for, when the owner says so.
+  forMonth       DateTime?         @db.Date
+  /// BONUS only: the earning recorded together with this payment.
+  bonusAccrualId Int?              @unique
+  bonusAccrual   DriverAccrual?    @relation(fields: [bonusAccrualId], references: [id], onDelete: Restrict)
+  notes          String?
+  deletedAt      DateTime?         @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @db.Timestamptz(3)
+
+  @@index([driverId, paidOn])
+  @@index([paidOn])
 }

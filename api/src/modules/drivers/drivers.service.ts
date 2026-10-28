@@ -9,10 +9,13 @@ import {
   type IsoDate,
 } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
+import { formatPaise } from "../../lib/money.ts";
 import { activeWhere, paged, type MasterListQuery, type Page } from "../../lib/listing.ts";
 import { lockRow } from "../../lib/locks.ts";
 import { phoneSearchTerm } from "../../lib/phone.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
+import { driverBalance } from "../driver-salary/driver-balance.ts";
+import { prorate } from "../driver-salary/salary-calc.ts";
 import type {
   DriverCreateInput,
   DriverDto,
@@ -137,8 +140,19 @@ export async function updateDriver(
       input.leftOn === undefined ? storedLeftOn : input.leftOn,
       today,
     );
+    await assertDateChangeKeepsClosedMonths(
+      tx,
+      id,
+      { joinedOn: fromDbDate(before.joinedOn), leftOn: storedLeftOn },
+      {
+        joinedOn: input.joinedOn ?? fromDbDate(before.joinedOn),
+        leftOn: input.leftOn === undefined ? storedLeftOn : input.leftOn,
+      },
+    );
     if (input.joinedOn) await moveFirstRateToJoinMonth(tx, before, input.joinedOn);
     const tractor = await resolveDefaultTractor(tx, before, input);
+    const warnings = [...tractor.warnings];
+    if (input.isActive === false) warnings.push(...(await outstandingBalanceWarning(tx, before)));
 
     // Prisma leaves fields that are undefined untouched; null clears an optional field.
     await tx.driver.update({
@@ -154,8 +168,78 @@ export async function updateDriver(
     });
     const after = await tx.driver.findUniqueOrThrow({ where: { id }, include: driverInclude });
     await writeAudit(tx, { entity: "Driver", entityId: id, action: "UPDATE", before, after });
-    return { driver: toDto(after, today), warnings: tractor.warnings };
+    return { driver: toDto(after, today), warnings };
   });
+}
+
+interface WorkingDates {
+  joinedOn: IsoDate;
+  leftOn: IsoDate | null;
+}
+
+/**
+ * A closed month keeps the salary it was closed at. A date change that would alter the days
+ * paid in any closed month (or put it outside the driver's time) must wait for a reopen.
+ */
+async function assertDateChangeKeepsClosedMonths(
+  tx: Tx,
+  driverId: number,
+  before: WorkingDates,
+  after: WorkingDates,
+): Promise<void> {
+  if (after.joinedOn === before.joinedOn && after.leftOn === before.leftOn) return;
+  const closedMonths = await tx.driverAccrual.findMany({
+    where: { driverId, kind: "MONTH_SALARY", deletedAt: null },
+    orderBy: { month: "asc" },
+  });
+  for (const closed of closedMonths) {
+    if (!closed.month) continue;
+    const month = monthOf(fromDbDate(closed.month));
+    const daysBefore = prorate(1, month, before.joinedOn, before.leftOn).daysWorked;
+    const daysAfter = prorate(1, month, after.joinedOn, after.leftOn).daysWorked;
+    if (daysBefore !== daysAfter) {
+      throw new AppError(
+        "CONFLICT",
+        `Salary for ${month} is already closed; reopen it before changing the dates`,
+      );
+    }
+  }
+}
+
+/** A driver leaving with money owed either way should be settled; say how much. */
+async function outstandingBalanceWarning(
+  tx: Tx,
+  driver: { id: number; name: string },
+): Promise<string[]> {
+  const balance = await driverBalance(tx, driver.id);
+  if (balance > 0) return [`${driver.name} is still owed ${formatPaise(balance)}`];
+  if (balance < 0) return [`${driver.name} still holds ${formatPaise(-balance)} of advance`];
+  return [];
+}
+
+/** Closed months keep the salary they were closed at; a rate change for them must go through a reopen. */
+async function assertNoClosedMonthsFrom(
+  tx: Tx,
+  driverId: number,
+  from: Date,
+  until: Date | null,
+  action: string,
+): Promise<void> {
+  const closed = await tx.driverAccrual.findFirst({
+    where: {
+      driverId,
+      kind: "MONTH_SALARY",
+      deletedAt: null,
+      month: { gte: from, ...(until ? { lt: until } : {}) },
+    },
+    orderBy: { month: "asc" },
+  });
+  if (closed?.month) {
+    throw new AppError(
+      "CONFLICT",
+      `Salary for ${monthOf(fromDbDate(closed.month))} is already closed; reopen it before you ${action}`,
+    );
+  }
 }
 
 function assertDriverDates(joinedOn: IsoDate, leftOn: IsoDate | null, today: IsoDate): void {
@@ -214,6 +298,17 @@ export async function addSalaryRate(
       );
     }
     const effectiveFrom = toDbDate(monthStart(input.effectiveFrom));
+    const nextRate = await tx.driverSalaryRate.findFirst({
+      where: { driverId, effectiveFrom: { gt: effectiveFrom } },
+      orderBy: { effectiveFrom: "asc" },
+    });
+    await assertNoClosedMonthsFrom(
+      tx,
+      driverId,
+      effectiveFrom,
+      nextRate?.effectiveFrom ?? null,
+      "add a rate from that month",
+    );
     const clash = await tx.driverSalaryRate.findUnique({
       where: { driverId_effectiveFrom: { driverId, effectiveFrom } },
     });
@@ -257,6 +352,17 @@ export async function deleteSalaryRate(
         "The first salary rate starts at joining and cannot be deleted; change its amount by adding a rate instead",
       );
     }
+    const next = await tx.driverSalaryRate.findFirst({
+      where: { driverId, effectiveFrom: { gt: rate.effectiveFrom } },
+      orderBy: { effectiveFrom: "asc" },
+    });
+    await assertNoClosedMonthsFrom(
+      tx,
+      driverId,
+      rate.effectiveFrom,
+      next?.effectiveFrom ?? null,
+      "delete the rate those months used",
+    );
     await tx.driverSalaryRate.delete({ where: { id: rateId } });
     await writeAudit(tx, {
       entity: "DriverSalaryRate",

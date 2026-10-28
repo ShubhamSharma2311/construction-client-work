@@ -18,6 +18,7 @@ import { auditRoutes } from "./modules/audit/audit.routes.ts";
 import { ledgerRoutes } from "./modules/customer-ledger/ledger.routes.ts";
 import { customerRoutes } from "./modules/customers/customers.routes.ts";
 import { dieselRoutes } from "./modules/diesel/diesel.routes.ts";
+import { driverSalaryRoutes } from "./modules/driver-salary/driver-salary.routes.ts";
 import { driverRoutes } from "./modules/drivers/drivers.routes.ts";
 import { expenseRoutes } from "./modules/expenses/expenses.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
@@ -109,6 +110,7 @@ export function buildApp(deps: AppDeps): App {
     scope.register(dieselRoutes, ctx);
     scope.register(loanRoutes, ctx);
     scope.register(serviceHistoryRoutes, ctx);
+    scope.register(driverSalaryRoutes, ctx);
     done();
   });
 
