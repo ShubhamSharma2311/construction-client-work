@@ -83,3 +83,15 @@ const DAY_MS = 86_400_000;
 export function daysBetween(from: IsoDate, to: IsoDate): number {
   return Math.round((toDbDate(to).getTime() - toDbDate(from).getTime()) / DAY_MS);
 }
+
+/** Prisma filter for a DATE column within an optional inclusive range; undefined means no limit. */
+export function dayFilter(range: {
+  from?: IsoDate;
+  to?: IsoDate;
+}): { gte?: Date; lte?: Date } | undefined {
+  if (!range.from && !range.to) return undefined;
+  return {
+    ...(range.from ? { gte: toDbDate(range.from) } : {}),
+    ...(range.to ? { lte: toDbDate(range.to) } : {}),
+  };
+}

@@ -1,5 +1,12 @@
 import { toCsv, type CsvColumn } from "../../lib/csv.ts";
-import { daysBetween, fromDbDate, toDbDate, todayIST, type IsoDate } from "../../lib/dates.ts";
+import {
+  daysBetween,
+  fromDbDate,
+  toDbDate,
+  todayIST,
+  type IsoDate,
+  dayFilter,
+} from "../../lib/dates.ts";
 import { notFound } from "../../lib/errors.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
@@ -17,13 +24,6 @@ type EntryWithoutBalance = Omit<LedgerEntry, "balancePaise"> & { order: number }
 
 // Same-day order: the register due first, then deliveries, then money received.
 const ORDER = { OPENING_BALANCE: 0, TRIP: 1, PAYMENT: 2, WRITE_OFF: 2 } as const;
-
-function dateFilter(range: LedgerQuery): { gte?: Date; lte?: Date } {
-  return {
-    ...(range.from ? { gte: toDbDate(range.from) } : {}),
-    ...(range.to ? { lte: toDbDate(range.to) } : {}),
-  };
-}
 
 async function balanceBefore(tx: Tx, customerId: number, day: IsoDate): Promise<number> {
   const before = toDbDate(day);
@@ -47,11 +47,11 @@ async function entriesIn(
 ): Promise<EntryWithoutBalance[]> {
   const [trips, payments] = await Promise.all([
     tx.trip.findMany({
-      where: { customerId, deletedAt: null, tripDate: dateFilter(range) },
+      where: { customerId, deletedAt: null, tripDate: dayFilter(range) },
       include: { khet: { select: { name: true } }, tractor: { select: { regNumber: true } } },
     }),
     tx.customerPayment.findMany({
-      where: { customerId, deletedAt: null, paidOn: dateFilter(range) },
+      where: { customerId, deletedAt: null, paidOn: dayFilter(range) },
     }),
   ]);
   const tripEntries = trips.map((trip): EntryWithoutBalance => ({

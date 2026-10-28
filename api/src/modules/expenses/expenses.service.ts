@@ -1,7 +1,13 @@
 import type { Expense, Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
-import { assertBusinessDate, fromDbDate, toDbDate, type IsoDate } from "../../lib/dates.ts";
+import {
+  assertBusinessDate,
+  fromDbDate,
+  toDbDate,
+  type IsoDate,
+  dayFilter,
+} from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";
@@ -10,6 +16,7 @@ import type { Db, Tx } from "../../lib/prisma.ts";
 import { lockRow } from "../../lib/locks.ts";
 import { assertUsable } from "../../lib/usable.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
+import { dieselWarnings } from "./diesel-warnings.ts";
 import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
@@ -62,6 +69,7 @@ const EDITABLE: Partial<Record<ExpenseCategory, ReadonlySet<keyof ExpenseUpdateI
   POLICE: new Set(COMMON_FIELDS),
   OTHER: new Set(COMMON_FIELDS),
   EMERGENCY: new Set([...COMMON_FIELDS, "tractorId", "driverId"]),
+  DIESEL: new Set([...COMMON_FIELDS, "tractorId", "driverId", "litres"]),
 };
 
 const NOTES_REQUIRED: ReadonlySet<ExpenseCategory> = new Set([
@@ -98,6 +106,7 @@ function linksOf(input: ExpenseCreateInput): Links {
     case "LABOUR":
       return { labourerId: input.labourerId };
     case "EMERGENCY":
+    case "DIESEL":
       return { tractorId: input.tractorId, driverId: input.driverId };
     case "ROYALTY":
     case "POLICE":
@@ -131,6 +140,49 @@ async function royaltyOverlapWarnings(
   });
 }
 
+/** The stored or about-to-be-stored shape of an expense, for the warnings it raises. */
+interface WarnableExpense {
+  category: ExpenseCategory;
+  amountPaise: number;
+  tractorId: number | null;
+  driverId: number | null;
+  dieselMl: number | null;
+  period: { from: IsoDate | null; to: IsoDate | null };
+}
+
+async function warningsFor(
+  tx: Tx,
+  expense: WarnableExpense,
+  excludeId?: number,
+): Promise<string[]> {
+  if (expense.category === "ROYALTY") return royaltyOverlapWarnings(tx, expense.period, excludeId);
+  if (expense.category === "DIESEL") {
+    const { tractorId, driverId, dieselMl } = expense;
+    if (tractorId === null || driverId === null || dieselMl === null) {
+      throw new Error(
+        "A diesel expense reached the warnings without its tractor, driver or litres",
+      );
+    }
+    return dieselWarnings(tx, { tractorId, driverId, dieselMl, amountPaise: expense.amountPaise });
+  }
+  return [];
+}
+
+function warnableFromInput(input: ExpenseCreateInput): WarnableExpense {
+  const links = linksOf(input);
+  return {
+    category: input.category,
+    amountPaise: input.amount,
+    tractorId: links.tractorId ?? null,
+    driverId: links.driverId ?? null,
+    dieselMl: input.category === "DIESEL" ? input.litres : null,
+    period:
+      input.category === "ROYALTY"
+        ? { from: input.periodFrom ?? null, to: input.periodTo ?? null }
+        : { from: null, to: null },
+  };
+}
+
 function createData(input: ExpenseCreateInput): Prisma.ExpenseUncheckedCreateInput {
   const base = {
     category: input.category,
@@ -151,6 +203,13 @@ function createData(input: ExpenseCreateInput): Prisma.ExpenseUncheckedCreateInp
       };
     case "EMERGENCY":
       return { ...base, tractorId: input.tractorId ?? null, driverId: input.driverId ?? null };
+    case "DIESEL":
+      return {
+        ...base,
+        tractorId: input.tractorId,
+        driverId: input.driverId,
+        dieselMl: input.litres,
+      };
     case "POLICE":
     case "OTHER":
       return base;
@@ -169,14 +228,9 @@ export async function createExpense(
     async (tx) => {
       assertBusinessDate(input.spentOn, await getBusinessBounds(tx, now));
       await checkLinks(tx, linksOf(input));
-      const warnings =
-        input.category === "ROYALTY"
-          ? await royaltyOverlapWarnings(tx, {
-              from: input.periodFrom ?? null,
-              to: input.periodTo ?? null,
-            })
-          : [];
-      const created = await tx.expense.create({ data: createData(input), include: expenseInclude });
+      const data = createData(input);
+      const warnings = await warningsFor(tx, warnableFromInput(input));
+      const created = await tx.expense.create({ data, include: expenseInclude });
       await writeAudit(tx, {
         entity: "Expense",
         entityId: created.id,
@@ -208,6 +262,9 @@ function assertEditable(expense: Expense, input: ExpenseUpdateInput): void {
   if (input.notes === null && NOTES_REQUIRED.has(expense.category)) {
     throw new AppError("VALIDATION", `A ${expense.category} expense must say what it was for`);
   }
+  if (expense.category === "DIESEL" && (input.tractorId === null || input.driverId === null)) {
+    throw new AppError("VALIDATION", "A diesel fill must keep its tractor and driver");
+  }
 }
 
 export async function updateExpense(
@@ -230,8 +287,18 @@ export async function updateExpense(
     };
     const problem = periodProblem(period.from, period.to);
     if (problem) throw new AppError("VALIDATION", problem);
-    const warnings =
-      before.category === "ROYALTY" ? await royaltyOverlapWarnings(tx, period, id) : [];
+    const warnings = await warningsFor(
+      tx,
+      {
+        category: before.category,
+        amountPaise: input.amount ?? before.amountPaise,
+        tractorId: input.tractorId === undefined ? before.tractorId : input.tractorId,
+        driverId: input.driverId === undefined ? before.driverId : input.driverId,
+        dieselMl: input.litres ?? before.dieselMl,
+        period,
+      },
+      id,
+    );
 
     // Prisma leaves fields that are undefined untouched; null clears an optional field.
     const after = await tx.expense.update({
@@ -245,6 +312,7 @@ export async function updateExpense(
         labourerId: input.labourerId,
         tractorId: input.tractorId,
         driverId: input.driverId,
+        dieselMl: input.litres,
         periodFrom:
           input.periodFrom === undefined
             ? undefined
@@ -323,12 +391,7 @@ export function expenseWhere(filter: ExpenseFilter): Prisma.ExpenseWhereInput {
     labourerId: filter.labourerId,
     mode: filter.mode,
   };
-  if (filter.from || filter.to) {
-    where.spentOn = {
-      ...(filter.from ? { gte: toDbDate(filter.from) } : {}),
-      ...(filter.to ? { lte: toDbDate(filter.to) } : {}),
-    };
-  }
+  where.spentOn = dayFilter(filter);
   return where;
 }
 

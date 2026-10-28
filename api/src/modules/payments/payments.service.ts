@@ -1,7 +1,7 @@
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
-import { assertBusinessDate, fromDbDate, toDbDate } from "../../lib/dates.ts";
+import { assertBusinessDate, fromDbDate, toDbDate, dayFilter } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
 import { lockRow } from "../../lib/locks.ts";
@@ -323,12 +323,7 @@ function paymentWhere(filter: PaymentFilter): Prisma.CustomerPaymentWhereInput {
     kind: filter.kind,
     mode: filter.mode,
   };
-  if (filter.from || filter.to) {
-    where.paidOn = {
-      ...(filter.from ? { gte: toDbDate(filter.from) } : {}),
-      ...(filter.to ? { lte: toDbDate(filter.to) } : {}),
-    };
-  }
+  where.paidOn = dayFilter(filter);
   return where;
 }
 

@@ -17,6 +17,7 @@ import { requireAuth } from "./modules/auth/authenticate.ts";
 import { auditRoutes } from "./modules/audit/audit.routes.ts";
 import { ledgerRoutes } from "./modules/customer-ledger/ledger.routes.ts";
 import { customerRoutes } from "./modules/customers/customers.routes.ts";
+import { dieselRoutes } from "./modules/diesel/diesel.routes.ts";
 import { driverRoutes } from "./modules/drivers/drivers.routes.ts";
 import { expenseRoutes } from "./modules/expenses/expenses.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
@@ -103,6 +104,7 @@ export function buildApp(deps: AppDeps): App {
     scope.register(paymentRoutes, ctx);
     scope.register(ledgerRoutes, ctx);
     scope.register(expenseRoutes, ctx);
+    scope.register(dieselRoutes, ctx);
     done();
   });
 

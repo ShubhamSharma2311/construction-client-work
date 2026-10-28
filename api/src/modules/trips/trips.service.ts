@@ -1,7 +1,13 @@
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
-import { assertBusinessDate, fromDbDate, toDbDate, type IsoDate } from "../../lib/dates.ts";
+import {
+  assertBusinessDate,
+  fromDbDate,
+  toDbDate,
+  type IsoDate,
+  dayFilter,
+} from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
 import { lockRow } from "../../lib/locks.ts";
@@ -199,12 +205,7 @@ export function tripWhere(filter: TripFilter, db: Db): Prisma.TripWhereInput {
     khetId: filter.khetId,
     kind: filter.kind,
   };
-  if (filter.from || filter.to) {
-    where.tripDate = {
-      ...(filter.from ? { gte: toDbDate(filter.from) } : {}),
-      ...(filter.to ? { lte: toDbDate(filter.to) } : {}),
-    };
-  }
+  where.tripDate = dayFilter(filter);
   const amount = db.trip.fields.amountPaise;
   if (filter.status === "DUE") where.receivedPaise = 0;
   if (filter.status === "PAID") where.receivedPaise = { equals: amount };

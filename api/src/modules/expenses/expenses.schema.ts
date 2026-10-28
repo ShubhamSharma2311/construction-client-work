@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { dateRangeSchema, isoDateSchema } from "../../lib/dates.ts";
 import { rupeesSchema } from "../../lib/money.ts";
+import { litresSchema } from "../../lib/quantity.ts";
 import { paginationSchema } from "../../lib/pagination.ts";
 import { dbIdSchema, nonEmptyPatch } from "../../lib/request-schemas.ts";
 import { optionalText } from "../../lib/text.ts";
@@ -58,6 +59,15 @@ export const expenseCreateBody = z.discriminatedUnion("category", [
   z.object({ category: z.literal("OTHER"), ...common, notes: requiredNotes }).strict(),
   z
     .object({
+      category: z.literal("DIESEL"),
+      ...common,
+      tractorId: dbIdSchema,
+      driverId: dbIdSchema,
+      litres: litresSchema,
+    })
+    .strict(),
+  z
+    .object({
       category: z.literal("EMERGENCY"),
       ...common,
       notes: requiredNotes,
@@ -80,6 +90,7 @@ export const expenseUpdateBody = nonEmptyPatch({
   driverId: dbIdSchema.nullable().optional(),
   periodFrom: isoDateSchema.nullable().optional(),
   periodTo: isoDateSchema.nullable().optional(),
+  litres: litresSchema.optional(),
 });
 export type ExpenseUpdateInput = z.infer<typeof expenseUpdateBody>;
 
