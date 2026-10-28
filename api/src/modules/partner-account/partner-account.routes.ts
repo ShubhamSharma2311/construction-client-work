@@ -4,6 +4,9 @@ import { dateRangeSchema } from "../../lib/dates.ts";
 import { csvFileName, sendCsv, sendIdempotent } from "../../lib/http.ts";
 import { readIdempotencyKey } from "../../lib/idempotency.ts";
 import { idParams } from "../../lib/request-schemas.ts";
+import { assertReportRange } from "../reports/report-range.ts";
+import { partnerShareResponse, reportRangeQuery } from "../reports/reports.schema.ts";
+import { partnerShare } from "./partner-share.service.ts";
 import {
   partnerLedgerResponse,
   partnerTxnBody,
@@ -86,6 +89,20 @@ export const partnerAccountRoutes: FastifyPluginCallbackZod<AppContext> = (app, 
     "/partner-txns/:id",
     { schema: { params: idParams, response: { 200: partnerTxnSavedResponse } } },
     (request) => deletePartnerTxn(ctx.db, request.params.id, ctx.clock()),
+  );
+  app.get(
+    "/partners/:id/share",
+    {
+      schema: {
+        params: idParams,
+        querystring: reportRangeQuery,
+        response: { 200: partnerShareResponse },
+      },
+    },
+    async (request) => {
+      await assertReportRange(ctx.db, request.query, ctx.clock());
+      return partnerShare(ctx.db, request.params.id, request.query);
+    },
   );
   done();
 };

@@ -109,3 +109,19 @@ export function addMonths(month: IsoMonth, count: number): IsoMonth {
 export function dayOfMonth(month: IsoMonth, day: number): IsoDate {
   return `${month}-${String(day).padStart(2, "0")}` as IsoDate;
 }
+
+export function addDays(date: IsoDate, count: number): IsoDate {
+  const shifted = new Date(toDbDate(date).getTime() + count * DAY_MS);
+  return fromDbDate(shifted);
+}
+
+/** Noon IST on a business day: a moment that is unambiguously inside that day. */
+export function noonIST(date: IsoDate): Date {
+  return new Date(`${date}T06:30:00.000Z`);
+}
+
+/** An inclusive range with both ends, as reports use. */
+export interface ClosedRange {
+  from: IsoDate;
+  to: IsoDate;
+}

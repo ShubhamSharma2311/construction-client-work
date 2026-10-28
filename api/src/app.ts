@@ -28,6 +28,7 @@ import { loanRoutes } from "./modules/loans/loans.routes.ts";
 import { partnerAccountRoutes } from "./modules/partner-account/partner-account.routes.ts";
 import { partnerRoutes } from "./modules/partners/partners.routes.ts";
 import { paymentRoutes } from "./modules/payments/payments.routes.ts";
+import { reportRoutes } from "./modules/reports/reports.routes.ts";
 import { settingsRoutes } from "./modules/settings/settings.routes.ts";
 import { serviceHistoryRoutes } from "./modules/tractor-service/service-history.routes.ts";
 import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
@@ -113,6 +114,7 @@ export function buildApp(deps: AppDeps): App {
     scope.register(serviceHistoryRoutes, ctx);
     scope.register(driverSalaryRoutes, ctx);
     scope.register(partnerAccountRoutes, ctx);
+    scope.register(reportRoutes, ctx);
     done();
   });
 

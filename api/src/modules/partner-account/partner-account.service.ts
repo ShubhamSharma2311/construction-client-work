@@ -194,51 +194,52 @@ export async function deletePartnerTxn(db: Db, id: number, now: Date): Promise<P
 }
 
 /** The partner's account: what went to them, what came back, and the net paid over time. */
+export async function partnerLedgerIn(
+  tx: Tx,
+  partnerId: number,
+  range: { from?: IsoDate; to?: IsoDate },
+): Promise<PartnerLedger> {
+  const partner = await readPartner(tx, partnerId);
+  const live = { partnerId, deletedAt: null };
+  const opening = range.from
+    ? (await directionTotals(tx, { ...live, txnDate: { lt: toDbDate(range.from) } })).netPaidPaise
+    : 0;
+  const rows = await tx.partnerTxn.findMany({
+    where: { ...live, txnDate: dayFilter(range) },
+    orderBy: [{ txnDate: "asc" }, { id: "asc" }],
+  });
+  let running = opening;
+  const entries = rows.map((row) => {
+    running += signed(row.direction, row.amountPaise);
+    return {
+      date: fromDbDate(row.txnDate),
+      direction: row.direction,
+      refId: row.id,
+      amountPaise: row.amountPaise,
+      mode: row.mode,
+      notes: row.notes,
+      netPaidPaise: running,
+    };
+  });
+  return {
+    partner: { id: partner.id, name: partner.name },
+    from: range.from ?? null,
+    to: range.to ?? null,
+    openingNetPaidPaise: opening,
+    entries,
+    totals: directionTotalsOf(sumOf(rows, "PAID_TO_PARTNER"), sumOf(rows, "RECEIVED_FROM_PARTNER")),
+    closingNetPaidPaise: running,
+  };
+}
+
 export async function partnerLedger(
   db: Db,
   partnerId: number,
   range: { from?: IsoDate; to?: IsoDate },
 ): Promise<PartnerLedger> {
-  return db.$transaction(
-    async (tx) => {
-      const partner = await readPartner(tx, partnerId);
-      const live = { partnerId, deletedAt: null };
-      const opening = range.from
-        ? (await directionTotals(tx, { ...live, txnDate: { lt: toDbDate(range.from) } }))
-            .netPaidPaise
-        : 0;
-      const rows = await tx.partnerTxn.findMany({
-        where: { ...live, txnDate: dayFilter(range) },
-        orderBy: [{ txnDate: "asc" }, { id: "asc" }],
-      });
-      let running = opening;
-      const entries = rows.map((row) => {
-        running += signed(row.direction, row.amountPaise);
-        return {
-          date: fromDbDate(row.txnDate),
-          direction: row.direction,
-          refId: row.id,
-          amountPaise: row.amountPaise,
-          mode: row.mode,
-          notes: row.notes,
-          netPaidPaise: running,
-        };
-      });
-      return {
-        partner: { id: partner.id, name: partner.name },
-        from: range.from ?? null,
-        to: range.to ?? null,
-        openingNetPaidPaise: opening,
-        entries,
-        totals: directionTotalsOf(
-          sumOf(rows, "PAID_TO_PARTNER"),
-          sumOf(rows, "RECEIVED_FROM_PARTNER"),
-        ),
-        closingNetPaidPaise: running,
-      };
-    },
-    { isolationLevel: "RepeatableRead" },
-  );
+  return db.$transaction((tx) => partnerLedgerIn(tx, partnerId, range), {
+    isolationLevel: "RepeatableRead",
+  });
 }
 
 function txnWhere(filter: PartnerTxnFilter): Prisma.PartnerTxnWhereInput {
