@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { testDeps } from "../test/app.ts";
 import { createTestPrisma } from "../test/db.ts";
 import { buildApp } from "./app.ts";
 import { AppError, ERROR_STATUS, type ErrorCode } from "./lib/errors.ts";
@@ -12,7 +13,7 @@ afterAll(async () => {
 });
 
 function appWithProbeRoutes() {
-  const app = buildApp({ db, logLevel: "silent" });
+  const app = buildApp(testDeps(db, () => new Date()));
   app.get<{ Params: { code: ErrorCode } }>("/probe/app-error/:code", (request) => {
     throw new AppError(request.params.code, `probe ${request.params.code}`, { field: "x" });
   });
@@ -117,7 +118,7 @@ describe("error mapping", () => {
 
 describe("GET /health", () => {
   it("reports ok when the database answers", async () => {
-    const app = buildApp({ db, logLevel: "silent" });
+    const app = buildApp(testDeps(db, () => new Date()));
 
     const response = await app.inject({ method: "GET", url: "/health" });
 
@@ -128,7 +129,7 @@ describe("GET /health", () => {
 
   it("reports 503 when the database is unreachable", async () => {
     const deadDb = createPrisma("postgresql://bajri:bajri@127.0.0.1:1/none");
-    const app = buildApp({ db: deadDb, logLevel: "silent" });
+    const app = buildApp(testDeps(deadDb, () => new Date()));
 
     const response = await app.inject({ method: "GET", url: "/health" });
 

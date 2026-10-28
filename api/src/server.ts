@@ -1,10 +1,18 @@
 import { buildApp } from "./app.ts";
 import { loadEnv } from "./config/env.ts";
+import { systemClock } from "./lib/clock.ts";
 import { createPrisma } from "./lib/prisma.ts";
 
 const env = loadEnv();
 const db = createPrisma(env.DATABASE_URL);
-const app = buildApp({ db, logLevel: env.LOG_LEVEL });
+const app = buildApp({
+  db,
+  clock: systemClock,
+  jwtSecret: env.JWT_SECRET,
+  logLevel: env.LOG_LEVEL,
+  corsOrigins: env.CORS_ORIGINS,
+  trustProxyHops: env.TRUST_PROXY_HOPS,
+});
 
 app.addHook("onClose", async () => {
   await db.$disconnect();

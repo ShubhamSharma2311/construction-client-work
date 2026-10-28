@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
+import cors from "@fastify/cors";
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify";
 import {
   hasZodFastifySchemaValidationErrors,
@@ -7,14 +8,17 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
+import type { AppContext } from "./app-context.ts";
 import type { Env } from "./config/env.ts";
 import { AppError, type ErrorBody } from "./lib/errors.ts";
-import type { Db } from "./lib/prisma.ts";
+import { authPrivateRoutes, authPublicRoutes } from "./modules/auth/auth.routes.ts";
+import { requireAuth } from "./modules/auth/authenticate.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
 
-export interface AppDeps {
-  db: Db;
+export interface AppDeps extends AppContext {
   logLevel: Env["LOG_LEVEL"];
+  corsOrigins: string[];
+  trustProxyHops: number;
 }
 
 export type App = FastifyInstance<
@@ -33,10 +37,12 @@ export function buildApp(deps: AppDeps): App {
     logger: { level: deps.logLevel },
     genReqId: () => randomUUID(),
     requestIdHeader: false,
+    trustProxy: trustFirstHops(deps.trustProxyHops),
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  app.decorateRequest("userId", 0);
 
   app.addHook("onSend", async (request, reply) => {
     reply.header("x-request-id", request.id);
@@ -57,9 +63,34 @@ export function buildApp(deps: AppDeps): App {
     return reply.status(404).send(body);
   });
 
+  const ctx: AppContext = { db: deps.db, clock: deps.clock, jwtSecret: deps.jwtSecret };
+
+  app.register(cors, {
+    origin: deps.corsOrigins,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    allowedHeaders: ["Authorization", "Content-Type", "Idempotency-Key"],
+    exposedHeaders: ["x-request-id"],
+  });
   app.register(healthRoutes, { db: deps.db });
+  app.register(authPublicRoutes, ctx);
+
+  // Everything registered in this scope requires a valid access token.
+  app.register((scope, _opts, done) => {
+    scope.addHook("onRequest", requireAuth(ctx));
+    scope.register(authPrivateRoutes, ctx);
+    done();
+  });
 
   return app;
+}
+
+/**
+ * Fastify 5 ignores a numeric trustProxy because a hop count cannot check who the peer is.
+ * On Cloud Run every request arrives through Google's front end, so the first `hops`
+ * addresses are proxies we control and the next one is the real client.
+ */
+function trustFirstHops(hops: number): false | ((address: string, hop: number) => boolean) {
+  return hops > 0 ? (_address, hop) => hop < hops : false;
 }
 
 function toErrorResponse(

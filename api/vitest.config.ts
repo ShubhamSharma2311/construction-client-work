@@ -12,7 +12,7 @@ export default defineConfig({
     fileParallelism: false,
     coverage: {
       provider: "v8",
-      include: ["src/lib/**/*.ts", "src/modules/**/*.service.ts"],
+      include: ["src/lib/**/*.ts", "src/modules/**/*.ts"],
       exclude: ["src/**/*.test.ts"],
       thresholds: { lines: 90 },
     },
