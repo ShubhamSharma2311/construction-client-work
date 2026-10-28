@@ -80,16 +80,18 @@ model Setting {
 }
 
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   name      String
   /// Lower-cased, space-collapsed name used for search and duplicate hints.
   nameKey   String
   phone     String?
   village   String?
   notes     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime          @updatedAt @db.Timestamptz(3)
+  trips     Trip[]
+  payments  CustomerPayment[]
 
   @@index([nameKey])
 }
@@ -103,6 +105,7 @@ model Tractor {
   createdAt     DateTime @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @db.Timestamptz(3)
   defaultDriver Driver?
+  trips         Trip[]
 }
 
 model Driver {
@@ -118,6 +121,7 @@ model Driver {
   createdAt        DateTime           @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
   salaryRates      DriverSalaryRate[]
+  trips            Trip[]
 }
 
 model DriverSalaryRate {
@@ -140,6 +144,7 @@ model Khet {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  trips     Trip[]
 }
 
 model Labourer {
@@ -161,4 +166,88 @@ model Partner {
   isActive         Boolean  @default(true)
   createdAt        DateTime @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+}
+
+enum PayMode {
+  CASH
+  ONLINE
+}
+
+enum TripKind {
+  TRIP
+  /// The customer's due carried over from the paper register, dated the business start.
+  OPENING_BALANCE
+}
+
+enum CustomerPaymentKind {
+  PAYMENT
+  /// Forgiven amount (discount at settlement); no money moves.
+  WRITE_OFF
+}
+
+model Trip {
+  id              Int                 @id @default(autoincrement())
+  kind            TripKind            @default(TRIP)
+  tripDate        DateTime            @db.Date
+  customerId      Int
+  customer        Customer            @relation(fields: [customerId], references: [id])
+  driverId        Int?
+  driver          Driver?             @relation(fields: [driverId], references: [id])
+  tractorId       Int?
+  tractor         Tractor?            @relation(fields: [tractorId], references: [id])
+  khetId          Int?
+  khet            Khet?               @relation(fields: [khetId], references: [id])
+  amountPaise     Int
+  /// Kept equal to the sum of this trip's allocations by a database trigger.
+  receivedPaise   Int                 @default(0)
+  quantityNote    String?
+  notes           String?
+  deletedAt       DateTime?           @db.Timestamptz(3)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime            @updatedAt @db.Timestamptz(3)
+  allocations     PaymentAllocation[]
+  /// Money taken when this trip was delivered; it moves with the trip's date.
+  deliveryPayment CustomerPayment?    @relation("DeliveryPayment")
+
+  @@index([customerId, tripDate])
+  @@index([tripDate])
+}
+
+model CustomerPayment {
+  id             Int                 @id @default(autoincrement())
+  customerId     Int
+  customer       Customer            @relation(fields: [customerId], references: [id])
+  paidOn         DateTime            @db.Date
+  kind           CustomerPaymentKind @default(PAYMENT)
+  /// Null exactly when kind is WRITE_OFF.
+  mode           PayMode?
+  amountPaise    Int
+  /// Kept equal to the sum of this payment's allocations by a database trigger.
+  allocatedPaise Int                 @default(0)
+  reference      String?
+  notes          String?
+  /// Set when the money was taken at a trip's delivery rather than paid later.
+  deliveryTripId Int?                @unique
+  deliveryTrip   Trip?               @relation("DeliveryPayment", fields: [deliveryTripId], references: [id])
+  deletedAt      DateTime?           @db.Timestamptz(3)
+  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+  allocations    PaymentAllocation[]
+
+  @@index([customerId, paidOn])
+  @@index([paidOn])
+}
+
+/// How much of one payment settles one trip. Rows are inserted or deleted, never updated.
+model PaymentAllocation {
+  id          Int             @id @default(autoincrement())
+  paymentId   Int
+  payment     CustomerPayment @relation(fields: [paymentId], references: [id])
+  tripId      Int
+  trip        Trip            @relation(fields: [tripId], references: [id])
+  amountPaise Int
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@unique([paymentId, tripId])
+  @@index([tripId])
 }

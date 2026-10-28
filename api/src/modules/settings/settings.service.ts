@@ -1,6 +1,12 @@
 import type { Setting } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
-import { fromDbDate, toDbDate, todayIST, type BusinessDateBounds } from "../../lib/dates.ts";
+import {
+  fromDbDate,
+  toDbDate,
+  todayIST,
+  type BusinessDateBounds,
+  type IsoDate,
+} from "../../lib/dates.ts";
 import { AppError } from "../../lib/errors.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import type { SettingsDto, SettingsInput } from "./settings.schema.ts";
@@ -38,7 +44,11 @@ export async function saveSettings(db: Db, input: SettingsInput, now: Date): Pro
   };
 
   return db.$transaction(async (tx) => {
+    // Exclusive lock: entries hold a share lock while they check dates (getBusinessBounds).
+    await tx.$executeRaw`SELECT 1 FROM "Setting" WHERE id = ${SETTINGS_ID} FOR UPDATE`;
     const before = await tx.setting.findUnique({ where: { id: SETTINGS_ID } });
+    if (before)
+      await moveBusinessStart(tx, fromDbDate(before.businessStartDate), input.businessStartDate);
     const saved = await tx.setting.upsert({
       where: { id: SETTINGS_ID },
       create: { id: SETTINGS_ID, ...data },
@@ -55,9 +65,56 @@ export async function saveSettings(db: Db, input: SettingsInput, now: Date): Pro
   });
 }
 
-/** The date window every dated entry must fall in. Fails until settings exist. */
+/**
+ * Moving the start later must not strand entries before it. Opening balances are dated
+ * the start by definition, so they move with it.
+ */
+async function moveBusinessStart(tx: Tx, from: IsoDate, to: IsoDate): Promise<void> {
+  if (from === to) return;
+  if (to > from) {
+    const earliest = await earliestEntryDate(tx);
+    if (earliest && earliest < to) {
+      throw new AppError(
+        "CONFLICT",
+        `Entries exist from ${earliest}; the business start date cannot move after them`,
+        { earliestEntryDate: earliest },
+      );
+    }
+  }
+  const openings = await tx.trip.findMany({ where: { kind: "OPENING_BALANCE" } });
+  for (const opening of openings) {
+    const moved = await tx.trip.update({
+      where: { id: opening.id },
+      data: { tripDate: toDbDate(to) },
+    });
+    await writeAudit(tx, {
+      entity: "Trip",
+      entityId: opening.id,
+      action: "UPDATE",
+      before: opening,
+      after: moved,
+    });
+  }
+}
+
+/** Oldest live dated entry. Every table with a business date must be listed here. */
+async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
+  const [row] = await tx.$queryRaw<{ earliest: Date | null }[]>`
+    SELECT MIN(day) AS earliest FROM (
+      SELECT MIN("tripDate") AS day FROM "Trip" WHERE "deletedAt" IS NULL AND "kind" = 'TRIP'
+      UNION ALL
+      SELECT MIN("paidOn") FROM "CustomerPayment" WHERE "deletedAt" IS NULL
+    ) AS dated`;
+  return row?.earliest ? fromDbDate(row.earliest) : null;
+}
+
+/**
+ * The date window every dated entry must fall in. Fails until settings exist. Inside a
+ * transaction the share lock keeps the start date fixed until the entry is saved.
+ */
 export async function getBusinessBounds(db: Db | Tx, now: Date): Promise<BusinessDateBounds> {
-  const row = await db.setting.findUnique({ where: { id: SETTINGS_ID } });
+  const [row] = await db.$queryRaw<{ businessStartDate: Date }[]>`
+    SELECT "businessStartDate" FROM "Setting" WHERE id = ${SETTINGS_ID} FOR SHARE`;
   if (!row) {
     throw new AppError(
       "CONFLICT",

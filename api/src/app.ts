@@ -23,6 +23,7 @@ import { labourerRoutes } from "./modules/labourers/labourers.routes.ts";
 import { partnerRoutes } from "./modules/partners/partners.routes.ts";
 import { settingsRoutes } from "./modules/settings/settings.routes.ts";
 import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
+import { tripRoutes } from "./modules/trips/trips.routes.ts";
 
 export interface AppDeps extends AppContext {
   logLevel: Env["LOG_LEVEL"];
@@ -95,6 +96,7 @@ export function buildApp(deps: AppDeps): App {
     scope.register(khetRoutes, ctx);
     scope.register(labourerRoutes, ctx);
     scope.register(partnerRoutes, ctx);
+    scope.register(tripRoutes, ctx);
     done();
   });
 
