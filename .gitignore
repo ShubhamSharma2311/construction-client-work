@@ -4,5 +4,7 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.test
+api/src/generated/
 *.log
 .DS_Store

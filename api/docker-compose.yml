@@ -1,0 +1,28 @@
+name: bajri-hisab
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bajri
+      POSTGRES_PASSWORD: bajri
+      POSTGRES_DB: bajri_hisab
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # Tests truncate every table between cases, so they get their own throwaway database.
+  db-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bajri
+      POSTGRES_PASSWORD: bajri
+      POSTGRES_DB: bajri_hisab_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+
+volumes:
+  db-data:
