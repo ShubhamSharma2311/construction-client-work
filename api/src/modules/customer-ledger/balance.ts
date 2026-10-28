@@ -12,27 +12,18 @@ export const customerBalanceDto = z.object({
 export type CustomerBalance = z.infer<typeof customerBalanceDto>;
 
 /**
- * A customer's standing from live (not deleted) rows. balance = due - credit holds because
- * a live write-off is always fully set against trips (a deferred database trigger refuses
- * anything else at commit).
+ * A customer's standing from live (not deleted) rows, read from the CustomerTotals view that
+ * the dues list also uses. balance = due - credit holds because a live write-off is always
+ * fully set against trips (a deferred database trigger refuses anything else at commit).
  */
-export async function customerBalance(tx: Db | Tx, customerId: number): Promise<CustomerBalance> {
-  const [rows] = await tx.$queryRaw<
-    { billed: bigint; paid: bigint; due: bigint; credit: bigint }[]
-  >`
-    SELECT
-      (SELECT COALESCE(SUM("amountPaise"), 0) FROM "Trip"
-        WHERE "customerId" = ${customerId} AND "deletedAt" IS NULL) AS billed,
-      (SELECT COALESCE(SUM("amountPaise" - "receivedPaise"), 0) FROM "Trip"
-        WHERE "customerId" = ${customerId} AND "deletedAt" IS NULL) AS due,
-      (SELECT COALESCE(SUM("amountPaise"), 0) FROM "CustomerPayment"
-        WHERE "customerId" = ${customerId} AND "deletedAt" IS NULL) AS paid,
-      (SELECT COALESCE(SUM("amountPaise" - "allocatedPaise"), 0) FROM "CustomerPayment"
-        WHERE "customerId" = ${customerId} AND "deletedAt" IS NULL AND "kind" = 'PAYMENT') AS credit`;
-  if (!rows) throw new Error(`Balance query returned no row for customer ${String(customerId)}`);
+export async function customerBalance(db: Db | Tx, customerId: number): Promise<CustomerBalance> {
+  const [row] = await db.$queryRaw<{ balance: bigint; due: bigint; credit: bigint }[]>`
+    SELECT balance, due, credit FROM "CustomerTotals" WHERE "customerId" = ${customerId}`;
+  if (!row)
+    throw new Error(`No totals for customer ${String(customerId)}; does the customer exist?`);
   return {
-    balancePaise: Number(rows.billed - rows.paid),
-    duePaise: Number(rows.due),
-    creditPaise: Number(rows.credit),
+    balancePaise: Number(row.balance),
+    duePaise: Number(row.due),
+    creditPaise: Number(row.credit),
   };
 }

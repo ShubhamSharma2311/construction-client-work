@@ -3,6 +3,7 @@ import { AppError } from "./errors.ts";
 import {
   assertBusinessDate,
   dateRangeSchema,
+  daysBetween,
   fromDbDate,
   isoDateSchema,
   isoMonthSchema,
@@ -102,5 +103,15 @@ describe("dateRangeSchema", () => {
     const result = dateRangeSchema.safeParse({ from: "2026-10-02", to: "2026-10-01" });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe("from must be on or before to");
+  });
+});
+
+describe("daysBetween", () => {
+  it("counts whole days across month and year ends", () => {
+    expect(daysBetween(iso("2026-10-28"), iso("2026-10-28"))).toBe(0);
+    expect(daysBetween(iso("2026-10-28"), iso("2026-11-04"))).toBe(7);
+    expect(daysBetween(iso("2026-12-31"), iso("2027-01-01"))).toBe(1);
+    expect(daysBetween(iso("2028-02-28"), iso("2028-03-01"))).toBe(2);
+    expect(daysBetween(iso("2026-10-28"), iso("2026-10-01"))).toBe(-27);
   });
 });

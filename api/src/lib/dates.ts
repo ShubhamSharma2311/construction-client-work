@@ -76,3 +76,10 @@ export const dateRangeSchema = z
     message: "from must be on or before to",
     path: ["from"],
   });
+
+const DAY_MS = 86_400_000;
+
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return Math.round((toDbDate(to).getTime() - toDbDate(from).getTime()) / DAY_MS);
+}

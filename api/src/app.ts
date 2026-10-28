@@ -15,12 +15,14 @@ import { fromPrismaError } from "./lib/prisma-errors.ts";
 import { authPrivateRoutes, authPublicRoutes } from "./modules/auth/auth.routes.ts";
 import { requireAuth } from "./modules/auth/authenticate.ts";
 import { auditRoutes } from "./modules/audit/audit.routes.ts";
+import { ledgerRoutes } from "./modules/customer-ledger/ledger.routes.ts";
 import { customerRoutes } from "./modules/customers/customers.routes.ts";
 import { driverRoutes } from "./modules/drivers/drivers.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
 import { khetRoutes } from "./modules/khets/khets.routes.ts";
 import { labourerRoutes } from "./modules/labourers/labourers.routes.ts";
 import { partnerRoutes } from "./modules/partners/partners.routes.ts";
+import { paymentRoutes } from "./modules/payments/payments.routes.ts";
 import { settingsRoutes } from "./modules/settings/settings.routes.ts";
 import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
 import { tripRoutes } from "./modules/trips/trips.routes.ts";
@@ -97,6 +99,8 @@ export function buildApp(deps: AppDeps): App {
     scope.register(labourerRoutes, ctx);
     scope.register(partnerRoutes, ctx);
     scope.register(tripRoutes, ctx);
+    scope.register(paymentRoutes, ctx);
+    scope.register(ledgerRoutes, ctx);
     done();
   });
 

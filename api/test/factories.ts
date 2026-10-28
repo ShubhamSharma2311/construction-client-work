@@ -4,8 +4,10 @@ import type { DriverDto } from "../src/modules/drivers/drivers.schema.ts";
 import type { KhetDto } from "../src/modules/khets/khets.schema.ts";
 import type { LabourerDto } from "../src/modules/labourers/labourers.schema.ts";
 import type { PartnerDto } from "../src/modules/partners/partners.schema.ts";
+import type { PaymentSaved } from "../src/modules/payments/payments.schema.ts";
 import type { SettingsDto } from "../src/modules/settings/settings.schema.ts";
 import type { TractorDto } from "../src/modules/tractors/tractors.schema.ts";
+import type { TripSaved } from "../src/modules/trips/trips.schema.ts";
 import type { TestContext } from "./app.ts";
 
 /** Builds records through the real API, so tests exercise the same rules the owner hits. */
@@ -92,4 +94,52 @@ export async function makePartner(
   overrides: Record<string, unknown> = {},
 ): Promise<PartnerDto> {
   return created<PartnerDto>(t, "/partners", { name: "Manish", sharePercent: 50, ...overrides });
+}
+
+export interface TripMasters {
+  customer: CustomerDto;
+  driver: DriverDto;
+  tractor: TractorDto;
+  khet: KhetDto;
+}
+
+/** Settings plus one of each master a trip needs; the driver usually drives the tractor. */
+export async function makeTripMasters(t: TestContext): Promise<TripMasters> {
+  await makeSettings(t);
+  const tractor = await makeTractor(t);
+  const driver = await makeDriver(t, { defaultTractorId: tractor.id });
+  const customer = await makeCustomer(t);
+  const khet = await makeKhet(t);
+  return { customer, driver, tractor, khet };
+}
+
+export async function makeTrip(
+  t: TestContext,
+  masters: TripMasters,
+  overrides: Record<string, unknown> = {},
+): Promise<TripSaved> {
+  return created<TripSaved>(t, "/trips", {
+    tripDate: "2026-10-20",
+    customerId: masters.customer.id,
+    driverId: masters.driver.id,
+    tractorId: masters.tractor.id,
+    khetId: masters.khet.id,
+    amount: 1000,
+    payment: { type: "DUE" },
+    ...overrides,
+  });
+}
+
+export async function makePayment(
+  t: TestContext,
+  customerId: number,
+  overrides: Record<string, unknown> = {},
+): Promise<PaymentSaved> {
+  return created<PaymentSaved>(t, `/customers/${String(customerId)}/payments`, {
+    kind: "PAYMENT",
+    paidOn: "2026-10-25",
+    amount: 1000,
+    mode: "CASH",
+    ...overrides,
+  });
 }
