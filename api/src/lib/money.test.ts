@@ -4,6 +4,7 @@ import {
   formatPaise,
   MAX_ENTRY_PAISE,
   paiseToRupeeString,
+  rupeesOrZeroSchema,
   rupeesSchema,
   toPaise,
 } from "./money.ts";
@@ -25,8 +26,9 @@ describe("toPaise", () => {
   it.each([
     [0, "must be greater than zero"],
     ["0.00", "must be greater than zero"],
-    [-5, "must be greater than zero"],
-    ["-5", "must be greater than zero"],
+    [-5, "cannot be negative"],
+    ["-5", "cannot be negative"],
+    ["-0", "must be greater than zero"],
     ["12.345", "at most 2 decimal places"],
     [12.345, "at most 2 decimal places"],
     ["1,000", "not a valid amount"],
@@ -50,6 +52,15 @@ describe("toPaise", () => {
         expect(toPaise(paiseToRupeeString(paise))).toEqual({ ok: true, paise });
       }),
     );
+  });
+});
+
+describe("zero amounts", () => {
+  it("are allowed only when the rule says so", () => {
+    expect(toPaise("0", { allowZero: true })).toEqual({ ok: true, paise: 0 });
+    expect(toPaise(0)).toMatchObject({ ok: false });
+    expect(rupeesOrZeroSchema.parse("0.00")).toBe(0);
+    expect(rupeesOrZeroSchema.safeParse("-1").success).toBe(false);
   });
 });
 

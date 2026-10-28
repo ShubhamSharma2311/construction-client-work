@@ -11,9 +11,18 @@ import {
 import type { AppContext } from "./app-context.ts";
 import type { Env } from "./config/env.ts";
 import { AppError, type ErrorBody } from "./lib/errors.ts";
+import { fromPrismaError } from "./lib/prisma-errors.ts";
 import { authPrivateRoutes, authPublicRoutes } from "./modules/auth/auth.routes.ts";
 import { requireAuth } from "./modules/auth/authenticate.ts";
+import { auditRoutes } from "./modules/audit/audit.routes.ts";
+import { customerRoutes } from "./modules/customers/customers.routes.ts";
+import { driverRoutes } from "./modules/drivers/drivers.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
+import { khetRoutes } from "./modules/khets/khets.routes.ts";
+import { labourerRoutes } from "./modules/labourers/labourers.routes.ts";
+import { partnerRoutes } from "./modules/partners/partners.routes.ts";
+import { settingsRoutes } from "./modules/settings/settings.routes.ts";
+import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
 
 export interface AppDeps extends AppContext {
   logLevel: Env["LOG_LEVEL"];
@@ -78,6 +87,14 @@ export function buildApp(deps: AppDeps): App {
   app.register((scope, _opts, done) => {
     scope.addHook("onRequest", requireAuth(ctx));
     scope.register(authPrivateRoutes, ctx);
+    scope.register(settingsRoutes, ctx);
+    scope.register(auditRoutes, ctx);
+    scope.register(customerRoutes, ctx);
+    scope.register(tractorRoutes, ctx);
+    scope.register(driverRoutes, ctx);
+    scope.register(khetRoutes, ctx);
+    scope.register(labourerRoutes, ctx);
+    scope.register(partnerRoutes, ctx);
     done();
   });
 
@@ -97,10 +114,11 @@ function toErrorResponse(
   error: HandledError,
   requestId: string,
 ): { status: number; body: ErrorBody } {
-  if (error instanceof AppError) {
+  const appError = error instanceof AppError ? error : fromPrismaError(error);
+  if (appError) {
     return {
-      status: error.httpStatus,
-      body: errorBody(error.code, error.message, requestId, error.details),
+      status: appError.httpStatus,
+      body: errorBody(appError.code, appError.message, requestId, appError.details),
     };
   }
   if (hasZodFastifySchemaValidationErrors(error)) {

@@ -55,6 +55,21 @@ export function assertBusinessDate(date: IsoDate, bounds: BusinessDateBounds): v
   }
 }
 
+export const isoMonthSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "month must be YYYY-MM")
+  .brand<"IsoMonth">();
+
+export type IsoMonth = z.infer<typeof isoMonthSchema>;
+
+export function monthOf(date: IsoDate): IsoMonth {
+  return date.slice(0, 7) as IsoMonth;
+}
+
+export function monthStart(month: IsoMonth): IsoDate {
+  return `${month}-01` as IsoDate;
+}
+
 export const dateRangeSchema = z
   .object({ from: isoDateSchema.optional(), to: isoDateSchema.optional() })
   .refine((range) => !range.from || !range.to || range.from <= range.to, {

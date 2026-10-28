@@ -5,6 +5,9 @@ import {
   dateRangeSchema,
   fromDbDate,
   isoDateSchema,
+  isoMonthSchema,
+  monthOf,
+  monthStart,
   toDbDate,
   todayIST,
   type IsoDate,
@@ -68,6 +71,21 @@ describe("assertBusinessDate", () => {
     expect(() => {
       assertBusinessDate(iso("2026-03-31"), bounds);
     }).toThrow("before the business start date 2026-04-01");
+  });
+});
+
+describe("months", () => {
+  it.each(["2026-01", "2026-12"])("accepts %s", (value) => {
+    expect(isoMonthSchema.parse(value)).toBe(value);
+  });
+
+  it.each(["2026-00", "2026-13", "2026-1", "26-01", "2026-01-01"])("rejects %j", (value) => {
+    expect(isoMonthSchema.safeParse(value).success).toBe(false);
+  });
+
+  it("finds the month of a date and the first day of a month", () => {
+    expect(monthOf(iso("2026-10-28"))).toBe("2026-10");
+    expect(monthStart(isoMonthSchema.parse("2026-02"))).toBe("2026-02-01");
   });
 });
 

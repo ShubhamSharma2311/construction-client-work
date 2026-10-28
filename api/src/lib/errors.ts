@@ -25,6 +25,10 @@ export class AppError extends Error {
   }
 }
 
+export function notFound(entity: string, id: number | string): AppError {
+  return new AppError("NOT_FOUND", `${entity} #${String(id)} not found`);
+}
+
 export interface ErrorBody {
   error: {
     code: string;

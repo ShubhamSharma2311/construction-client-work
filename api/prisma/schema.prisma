@@ -68,3 +68,97 @@ model LoginAttempt {
 
   @@index([ip, at])
 }
+
+/// Single row (id = 1): the business-wide settings every dated entry is checked against.
+model Setting {
+  id                 Int      @id @default(1)
+  businessName       String
+  businessStartDate  DateTime @db.Date
+  openingCashPaise   Int      @default(0)
+  openingOnlinePaise Int      @default(0)
+  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  /// Lower-cased, space-collapsed name used for search and duplicate hints.
+  nameKey   String
+  phone     String?
+  village   String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([nameKey])
+}
+
+model Tractor {
+  id            Int      @id @default(autoincrement())
+  /// Upper-case, no spaces or dashes, e.g. RJ19AB1234.
+  regNumber     String   @unique
+  label         String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+  defaultDriver Driver?
+}
+
+model Driver {
+  id               Int                @id @default(autoincrement())
+  name             String
+  phone            String?
+  joinedOn         DateTime           @db.Date
+  leftOn           DateTime?          @db.Date
+  /// Each tractor is the usual tractor of at most one driver.
+  defaultTractorId Int?               @unique
+  defaultTractor   Tractor?           @relation(fields: [defaultTractorId], references: [id])
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
+  salaryRates      DriverSalaryRate[]
+}
+
+model DriverSalaryRate {
+  id            Int      @id @default(autoincrement())
+  driverId      Int
+  driver        Driver   @relation(fields: [driverId], references: [id])
+  monthlyPaise  Int
+  /// First day of the month the rate starts applying.
+  effectiveFrom DateTime @db.Date
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([driverId, effectiveFrom])
+}
+
+model Khet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  nameKey   String   @unique
+  location  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Labourer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Partner {
+  id               Int      @id @default(autoincrement())
+  name             String
+  /// Profit share in basis points (33.33% = 3333); null until agreed.
+  shareBasisPoints Int?
+  notes            String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+}
