@@ -25,6 +25,7 @@ import { healthRoutes } from "./modules/health/health.routes.ts";
 import { khetRoutes } from "./modules/khets/khets.routes.ts";
 import { labourerRoutes } from "./modules/labourers/labourers.routes.ts";
 import { loanRoutes } from "./modules/loans/loans.routes.ts";
+import { partnerAccountRoutes } from "./modules/partner-account/partner-account.routes.ts";
 import { partnerRoutes } from "./modules/partners/partners.routes.ts";
 import { paymentRoutes } from "./modules/payments/payments.routes.ts";
 import { settingsRoutes } from "./modules/settings/settings.routes.ts";
@@ -111,6 +112,7 @@ export function buildApp(deps: AppDeps): App {
     scope.register(loanRoutes, ctx);
     scope.register(serviceHistoryRoutes, ctx);
     scope.register(driverSalaryRoutes, ctx);
+    scope.register(partnerAccountRoutes, ctx);
     done();
   });
 

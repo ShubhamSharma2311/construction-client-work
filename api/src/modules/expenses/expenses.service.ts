@@ -1,6 +1,6 @@
 import type { Expense, Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
-import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
+import { assertExportable, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import {
   assertBusinessDate,
   dayFilter,
@@ -484,12 +484,7 @@ const exportColumns: CsvColumn<ExpenseDto>[] = [
 export async function exportExpenses(db: Db, filter: ExpenseFilter): Promise<string> {
   const where = expenseWhere(filter);
   const count = await db.expense.count({ where });
-  if (count > MAX_EXPORT_ROWS) {
-    throw new AppError(
-      "VALIDATION",
-      `${String(count)} expenses match; narrow the dates to export at most ${String(MAX_EXPORT_ROWS)}`,
-    );
-  }
+  assertExportable(count, "expenses");
   const rows = await db.expense.findMany({
     where,
     include: expenseInclude,

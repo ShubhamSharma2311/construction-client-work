@@ -125,6 +125,8 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
       UNION ALL
       SELECT MIN("accruedOn") FROM "DriverAccrual"
         WHERE "deletedAt" IS NULL AND "kind" <> 'OPENING_BALANCE'
+      UNION ALL
+      SELECT MIN("txnDate") FROM "PartnerTxn" WHERE "deletedAt" IS NULL
     ) AS dated`;
   return row?.earliest ? fromDbDate(row.earliest) : null;
 }

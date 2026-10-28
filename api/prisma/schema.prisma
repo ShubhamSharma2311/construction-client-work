@@ -164,14 +164,15 @@ model Labourer {
 }
 
 model Partner {
-  id               Int      @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   name             String
   /// Profit share in basis points (33.33% = 3333); null until agreed.
   shareBasisPoints Int?
   notes            String?
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+  isActive         Boolean      @default(true)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
+  txns             PartnerTxn[]
 }
 
 enum PayMode {
@@ -390,4 +391,27 @@ model DriverPayment {
 
   @@index([driverId, paidOn])
   @@index([paidOn])
+}
+
+enum PartnerTxnDirection {
+  PAID_TO_PARTNER
+  RECEIVED_FROM_PARTNER
+}
+
+/// Money between the business and a partner: profit share or drawings paid out, or capital put in.
+model PartnerTxn {
+  id          Int                 @id @default(autoincrement())
+  partnerId   Int
+  partner     Partner             @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  txnDate     DateTime            @db.Date
+  direction   PartnerTxnDirection
+  amountPaise Int
+  mode        PayMode
+  notes       String?
+  deletedAt   DateTime?           @db.Timestamptz(3)
+  createdAt   DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime            @updatedAt @db.Timestamptz(3)
+
+  @@index([partnerId, txnDate])
+  @@index([txnDate])
 }

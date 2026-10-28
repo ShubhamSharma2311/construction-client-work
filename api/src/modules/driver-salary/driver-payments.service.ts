@@ -1,6 +1,6 @@
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
-import { MAX_EXPORT_ROWS, toCsv, type CsvColumn } from "../../lib/csv.ts";
+import { assertExportable, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { assertBusinessDate, dayFilter, monthStart, toDbDate } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
@@ -229,12 +229,7 @@ const exportColumns: CsvColumn<DriverPaymentDto>[] = [
 export async function exportDriverPayments(db: Db, filter: DriverPaymentFilter): Promise<string> {
   const where = paymentWhere(filter);
   const count = await db.driverPayment.count({ where });
-  if (count > MAX_EXPORT_ROWS) {
-    throw new AppError(
-      "VALIDATION",
-      `${String(count)} payments match; narrow the dates to export at most ${String(MAX_EXPORT_ROWS)}`,
-    );
-  }
+  assertExportable(count, "payments");
   const rows = await db.driverPayment.findMany({
     where,
     include: driverPaymentInclude,

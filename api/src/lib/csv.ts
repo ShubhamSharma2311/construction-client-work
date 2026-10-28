@@ -1,5 +1,17 @@
+import { AppError } from "./errors.ts";
+
 /** Exports larger than this must be narrowed by date; Excel and phones choke on more. */
 export const MAX_EXPORT_ROWS = 10_000;
+
+/** Refuses an export too big to open comfortably; the owner narrows the dates instead. */
+export function assertExportable(count: number, what: string): void {
+  if (count > MAX_EXPORT_ROWS) {
+    throw new AppError(
+      "VALIDATION",
+      `${String(count)} ${what} match; narrow the dates to export at most ${String(MAX_EXPORT_ROWS)}`,
+    );
+  }
+}
 
 export type CsvCell = string | number | null;
 
