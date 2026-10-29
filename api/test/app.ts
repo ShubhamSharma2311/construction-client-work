@@ -23,6 +23,8 @@ export function testJwtSecret(): string {
 export interface TestAppOptions {
   /** Proxy hops to trust for the client IP; 0 means use the socket address. */
   trustProxyHops?: number;
+  /** Mark the refresh cookie Secure, as production over HTTPS does. */
+  secureCookies?: boolean;
 }
 
 export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): AppDeps {
@@ -33,6 +35,7 @@ export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): Ap
     logLevel: "silent",
     corsOrigins: [ALLOWED_ORIGIN],
     trustProxyHops: options.trustProxyHops ?? 0,
+    secureCookies: options.secureCookies ?? false,
   };
 }
 

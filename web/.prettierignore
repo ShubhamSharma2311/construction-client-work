@@ -1,0 +1,5 @@
+dist/
+coverage/
+test-results/
+playwright-report/
+src/api/schema.gen.ts

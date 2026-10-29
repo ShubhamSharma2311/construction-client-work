@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
+import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import swagger from "@fastify/swagger";
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify";
 import {
   hasZodFastifySchemaValidationErrors,
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
@@ -82,13 +85,24 @@ export function buildApp(deps: AppDeps): App {
     return reply.status(404).send(body);
   });
 
-  const ctx: AppContext = { db: deps.db, clock: deps.clock, jwtSecret: deps.jwtSecret };
+  const ctx: AppContext = {
+    db: deps.db,
+    clock: deps.clock,
+    jwtSecret: deps.jwtSecret,
+    secureCookies: deps.secureCookies,
+  };
 
   app.register(cors, {
     origin: deps.corsOrigins,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["Authorization", "Content-Type", "Idempotency-Key"],
     exposedHeaders: ["x-request-id"],
+  });
+  app.register(cookie);
+  // Collects every route schema below into an OpenAPI description for the frontend's types.
+  app.register(swagger, {
+    openapi: { info: { title: "Sand Trip Ledger API", version: "1.0.0" } },
+    transform: jsonSchemaTransform,
   });
   app.register(healthRoutes, { db: deps.db });
   app.register(authPublicRoutes, ctx);

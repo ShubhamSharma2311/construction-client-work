@@ -1,0 +1,42 @@
+.register {
+  composes: ruled from "./registerMargin.module.css";
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 40px;
+  background: var(--sheet);
+  border-block: 1px solid var(--ruling);
+}
+
+.register > li + li {
+  border-top: 1px solid var(--ruling);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  width: 100%;
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Phones keep :hover after a tap, which would leave the tapped row coloured. */
+@media (hover: hover) {
+  .row:hover {
+    color: var(--pen);
+  }
+}
+
+.text {
+  display: grid;
+}
+
+.detail {
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}

@@ -18,8 +18,6 @@ export const loginBody = z.object({
 });
 export type LoginInput = z.infer<typeof loginBody>;
 
-export const refreshBody = z.object({ refreshToken: z.string().min(1).max(200) });
-
 export const changePasswordBody = z.object({
   currentPassword: z.string().min(1).max(PASSWORD_MAX_LENGTH),
   newPassword: newPasswordSchema,
@@ -33,6 +31,13 @@ export const sessionResponse = z.object({
   refreshTokenExpiresAt: z.iso.datetime(),
 });
 export type Session = z.infer<typeof sessionResponse>;
+
+/** What the browser sees: the refresh token travels only in an HttpOnly cookie. */
+export const browserSessionResponse = sessionResponse.pick({
+  accessToken: true,
+  accessTokenExpiresAt: true,
+});
+export type BrowserSession = z.infer<typeof browserSessionResponse>;
 
 export const meResponse = z.object({ id: z.number().int(), username: z.string() });
 export type Me = z.infer<typeof meResponse>;

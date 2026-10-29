@@ -12,6 +12,7 @@ const app = buildApp({
   logLevel: env.LOG_LEVEL,
   corsOrigins: env.CORS_ORIGINS,
   trustProxyHops: env.TRUST_PROXY_HOPS,
+  secureCookies: env.NODE_ENV === "production",
 });
 
 app.addHook("onClose", async () => {

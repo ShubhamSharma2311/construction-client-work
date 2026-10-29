@@ -1,0 +1,57 @@
+{
+  "name": "sand-trip-ledger-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "api:types": "npm --prefix ../api run --silent openapi > openapi.json && openapi-typescript openapi.json -o src/api/schema.gen.ts && rm openapi.json",
+    "gate": "npm run typecheck && npm run lint && npm run test:coverage && vite build"
+  },
+  "dependencies": {
+    "@fontsource-variable/anek-latin": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@tanstack/react-query": "5.104.2",
+    "openapi-fetch": "0.17.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "8.4.0"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitest/coverage-v8": "5.0.5",
+    "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "30.1.2",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

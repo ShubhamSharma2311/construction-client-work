@@ -1,0 +1,40 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding-block: var(--space-6);
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+}
+
+.column {
+  width: 100%;
+  max-width: 400px;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  font-weight: 750;
+  font-stretch: 118%;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+
+/* A page of the register, with its red margin down the left. */
+.sheet {
+  composes: ruled from "../ui/registerMargin.module.css";
+  --margin-at: 24px;
+  display: grid;
+  gap: var(--space-4);
+  background: var(--sheet);
+  border: 1px solid var(--ruling);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5) var(--space-5) var(--space-5) 44px;
+}
+
+.heading {
+  font-size: var(--text-lg);
+  font-weight: 650;
+}

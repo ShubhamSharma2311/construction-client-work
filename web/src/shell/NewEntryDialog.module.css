@@ -1,0 +1,51 @@
+.dialog {
+  border: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  width: min(440px, 100vw);
+  max-height: 85dvh;
+  border-radius: var(--radius-panel);
+}
+
+.dialog::backdrop {
+  background: var(--scrim);
+}
+
+/* On a phone the menu rises from the bottom, within reach of the thumb. */
+@media (max-width: 767px) {
+  .dialog {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  font-stretch: 108%;
+}
+
+/* Focus lands here only so the sheet opens without outlining Close; it is not a control. */
+.title:focus-visible {
+  outline: none;
+}
+
+.close {
+  min-height: var(--tap);
+  background: none;
+  border: 0;
+  color: var(--pen);
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -1,0 +1,96 @@
+/*
+ * The look comes from the paper register this app replaces: ruled lines, a red margin,
+ * ballpoint-blue ink. Red always means money still owed; blue marks entries and actions.
+ */
+:root {
+  --paper: #f5f6f3;
+  --sheet: #ffffff;
+  --ink: #18233d;
+  --ink-soft: #55607a;
+  --ruling: #dce2ec;
+  --frame: #c9cfdb;
+  --pen: #2647b8;
+  --pen-strong: #1b3590;
+  --pen-wash: #e8edfb;
+  --on-pen: #ffffff;
+  --bahi: #b42318;
+  --bahi-wash: #fbeceb;
+  --got: #1e7a4c;
+  --got-wash: #e6f3ec;
+  --chrome: #18233d;
+  --chrome-fg: #e9edf5;
+  --chrome-hover: rgb(255 255 255 / 0.07);
+  --scrim: rgb(12 18 32 / 0.45);
+
+  --font-display: "Anek Latin Variable", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Type scale, roughly a minor third from a 16px body. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 3rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-field: 8px;
+  --radius-panel: 12px;
+  --radius-pill: 999px;
+
+  --tap: 44px;
+  --side-nav: 220px;
+  --content-max: 1080px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1524;
+    --sheet: #172036;
+    --ink: #e6eaf2;
+    --ink-soft: #9aa5bd;
+    --ruling: #26314a;
+    --frame: #2b3654;
+    --pen: #93abff;
+    --pen-strong: #b3c4ff;
+    --pen-wash: #1d2a4d;
+    --on-pen: #0f1524;
+    --bahi: #ff8a7a;
+    --bahi-wash: #3a1e22;
+    --got: #62cf95;
+    --got-wash: #15302a;
+    --chrome: #0a0f1b;
+    --chrome-fg: #dfe5f1;
+    --scrim: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0f1524;
+  --sheet: #172036;
+  --ink: #e6eaf2;
+  --ink-soft: #9aa5bd;
+  --ruling: #26314a;
+  --frame: #2b3654;
+  --pen: #93abff;
+  --pen-strong: #b3c4ff;
+  --pen-wash: #1d2a4d;
+  --on-pen: #0f1524;
+  --bahi: #ff8a7a;
+  --bahi-wash: #3a1e22;
+  --got: #62cf95;
+  --got-wash: #15302a;
+  --chrome: #0a0f1b;
+  --chrome-fg: #dfe5f1;
+  --scrim: rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}

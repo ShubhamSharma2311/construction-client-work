@@ -11,6 +11,9 @@ TOKEN=""
 STATUS=""
 BODY=""
 FAILURES=0
+# The refresh token lives in an HttpOnly cookie, so every call reads and writes this jar.
+COOKIE_JAR="$(mktemp)"
+trap 'rm -f "$COOKIE_JAR"' EXIT
 
 wait_for_server() {
   curl -s --retry 15 --retry-connrefused --retry-delay 1 -o /dev/null "${BASE_URL}/health"
@@ -19,7 +22,8 @@ wait_for_server() {
 # call METHOD PATH [JSON_BODY] -> sets STATUS and BODY, prints one line per call
 call() {
   local method="$1" path="$2" body="${3:-}"
-  local args=(-sS -X "$method" -w '\n%{http_code}' -H "Idempotency-Key: smoke-$(uuidgen)")
+  local args=(-sS -X "$method" -w '\n%{http_code}' -b "$COOKIE_JAR" -c "$COOKIE_JAR")
+  args+=(-H "Idempotency-Key: smoke-$(uuidgen)")
   [[ -n "$TOKEN" ]] && args+=(-H "Authorization: Bearer ${TOKEN}")
   [[ -n "$body" ]] && args+=(-H "Content-Type: application/json" -d "$body")
   local out

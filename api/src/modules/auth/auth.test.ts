@@ -1,7 +1,9 @@
+import type { LightMyRequestResponse } from "fastify";
 import { describe, expect, it } from "vitest";
 import { errorOf, OWNER, useTestApp } from "../../../test/app.ts";
-import type { Session } from "./auth.schema.ts";
+import type { BrowserSession } from "./auth.schema.ts";
 import { createOwner, LOGIN_FAILURE_LIMIT, resetOwnerPassword } from "./auth.service.ts";
+import { REFRESH_COOKIE } from "./refresh-cookie.ts";
 
 const t = useTestApp();
 
@@ -9,10 +11,30 @@ function login(body: { username: string; password: string }, remoteAddress = "10
   return t.request({ method: "POST", url: "/auth/login", body, auth: false, remoteAddress });
 }
 
-async function loginOk(): Promise<Session> {
+interface LoggedIn {
+  accessToken: string;
+  refreshToken: string;
+}
+
+function refreshCookieOf(response: LightMyRequestResponse) {
+  return response.cookies.find((cookie) => cookie.name === REFRESH_COOKIE);
+}
+
+/** The access token from the body and the refresh token from the cookie. */
+function loggedIn(response: LightMyRequestResponse): LoggedIn {
+  const cookie = refreshCookieOf(response);
+  if (!cookie) throw new Error(`no ${REFRESH_COOKIE} cookie in a ${String(response.statusCode)}`);
+  return { accessToken: response.json<BrowserSession>().accessToken, refreshToken: cookie.value };
+}
+
+async function loginOk(): Promise<LoggedIn> {
   const response = await login(OWNER);
   expect(response.statusCode).toBe(200);
-  return response.json<Session>();
+  return loggedIn(response);
+}
+
+function withCookie(refreshToken: string) {
+  return { cookie: `${REFRESH_COOKIE}=${refreshToken}` };
 }
 
 function me(accessToken: string) {
@@ -25,18 +47,29 @@ function me(accessToken: string) {
 }
 
 function refresh(refreshToken: string) {
-  return t.request({ method: "POST", url: "/auth/refresh", body: { refreshToken }, auth: false });
+  return t.request({
+    method: "POST",
+    url: "/auth/refresh",
+    auth: false,
+    headers: withCookie(refreshToken),
+  });
+}
+
+function logout(headers: Record<string, string> = {}) {
+  return t.request({ method: "POST", url: "/auth/logout", auth: false, headers });
 }
 
 describe("POST /auth/login", () => {
   it("returns a session whose access token opens protected routes", async () => {
-    const session = await loginOk();
+    const response = await login(OWNER);
 
-    expect(session.accessTokenExpiresAt).toBe("2026-10-28T06:45:00.000Z");
-    expect(session.refreshTokenExpiresAt).toBe("2026-11-27T06:30:00.000Z");
-    const response = await me(session.accessToken);
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ id: t.ownerId, username: OWNER.username });
+    expect(response.json()).toEqual({
+      accessToken: expect.any(String) as string,
+      accessTokenExpiresAt: "2026-10-28T06:45:00.000Z",
+    });
+    const whoAmI = await me(loggedIn(response).accessToken);
+    expect(whoAmI.statusCode).toBe(200);
+    expect(whoAmI.json()).toEqual({ id: t.ownerId, username: OWNER.username });
   });
 
   it("ignores case and surrounding spaces in the username", async () => {
@@ -135,6 +168,84 @@ describe("access tokens on protected routes", () => {
   });
 });
 
+describe("refresh token cookie", () => {
+  it("keeps the refresh token out of page scripts and away from other sites", async () => {
+    const response = await login(OWNER);
+
+    expect(refreshCookieOf(response)).toMatchObject({
+      httpOnly: true,
+      sameSite: "Strict",
+      path: "/",
+      expires: new Date("2026-11-27T06:30:00.000Z"),
+    });
+    expect(refreshCookieOf(response)?.secure).toBeUndefined();
+  });
+
+  it("rotates the cookie on every refresh", async () => {
+    const first = await loginOk();
+
+    const response = await refresh(first.refreshToken);
+
+    expect(response.json()).not.toHaveProperty("refreshToken");
+    expect(loggedIn(response).refreshToken).not.toBe(first.refreshToken);
+  });
+
+  it("answers 401 when the cookie is missing", async () => {
+    const response = await t.request({ method: "POST", url: "/auth/refresh", auth: false });
+
+    expect(response.statusCode).toBe(401);
+    expect(errorOf(response).message).toContain("log in again");
+  });
+});
+
+describe("refresh token cookie over HTTPS", () => {
+  const secure = useTestApp({ secureCookies: true });
+
+  const SECURE_NAME = "__Host-refresh_token";
+
+  it("is Secure and __Host- prefixed, so only this exact site over HTTPS can set it", async () => {
+    const response = await secure.request({
+      method: "POST",
+      url: "/auth/login",
+      body: OWNER,
+      auth: false,
+    });
+
+    const cookie = response.cookies.find((candidate) => candidate.name === SECURE_NAME);
+    expect(cookie).toMatchObject({ secure: true, path: "/", httpOnly: true, sameSite: "Strict" });
+    expect(cookie?.domain).toBeUndefined();
+  });
+
+  it("refreshes and signs out with the prefixed cookie", async () => {
+    const login = await secure.request({
+      method: "POST",
+      url: "/auth/login",
+      body: OWNER,
+      auth: false,
+    });
+    const token = login.cookies.find((candidate) => candidate.name === SECURE_NAME)?.value ?? "";
+    const headers = { cookie: `${SECURE_NAME}=${token}` };
+
+    const refreshed = await secure.request({
+      method: "POST",
+      url: "/auth/refresh",
+      auth: false,
+      headers,
+    });
+    const rotated =
+      refreshed.cookies.find((candidate) => candidate.name === SECURE_NAME)?.value ?? "";
+    const loggedOut = await secure.request({
+      method: "POST",
+      url: "/auth/logout",
+      auth: false,
+      headers: { cookie: `${SECURE_NAME}=${rotated}` },
+    });
+
+    expect(refreshed.statusCode).toBe(200);
+    expect(loggedOut.cookies.find((candidate) => candidate.name === SECURE_NAME)?.maxAge).toBe(0);
+  });
+});
+
 describe("POST /auth/refresh", () => {
   it("swaps a refresh token for a new session", async () => {
     const first = await loginOk();
@@ -142,14 +253,14 @@ describe("POST /auth/refresh", () => {
     const response = await refresh(first.refreshToken);
 
     expect(response.statusCode).toBe(200);
-    const second = response.json<Session>();
+    const second = loggedIn(response);
     expect(second.refreshToken).not.toBe(first.refreshToken);
     expect((await me(second.accessToken)).statusCode).toBe(200);
   });
 
   it("treats reuse of a used refresh token as theft and signs that login out", async () => {
     const first = await loginOk();
-    const second = (await refresh(first.refreshToken)).json<Session>();
+    const second = loggedIn(await refresh(first.refreshToken));
 
     expect((await refresh(first.refreshToken)).statusCode).toBe(401);
     expect((await refresh(second.refreshToken)).statusCode).toBe(401);
@@ -186,7 +297,7 @@ describe("POST /auth/refresh", () => {
 
     expect(results.map((response) => response.statusCode).sort()).toEqual([200, 401]);
     const winner = results.find((response) => response.statusCode === 200);
-    const winnerToken = winner?.json<Session>().refreshToken ?? "";
+    const winnerToken = winner ? loggedIn(winner).refreshToken : "";
     expect((await refresh(winnerToken)).statusCode).toBe(401);
   });
 
@@ -201,35 +312,28 @@ describe("POST /auth/refresh", () => {
       }),
     ]);
 
-    const survivor = refreshed.statusCode === 200 ? refreshed.json<Session>().refreshToken : null;
+    const survivor = refreshed.statusCode === 200 ? loggedIn(refreshed).refreshToken : null;
     if (survivor) expect((await refresh(survivor)).statusCode).toBe(401);
     expect(await t.db.refreshToken.count({ where: { revokedAt: null } })).toBe(0);
   });
 });
 
 describe("POST /auth/logout", () => {
-  it("revokes the session so its refresh token stops working", async () => {
+  it("revokes the session and clears the cookie", async () => {
     const session = await loginOk();
 
-    const response = await t.request({
-      method: "POST",
-      url: "/auth/logout",
-      body: { refreshToken: session.refreshToken },
-      auth: false,
-    });
+    const response = await logout(withCookie(session.refreshToken));
 
     expect(response.statusCode).toBe(204);
+    expect(refreshCookieOf(response)).toMatchObject({ value: "", maxAge: 0, path: "/" });
     expect((await refresh(session.refreshToken)).statusCode).toBe(401);
   });
 
-  it("answers 204 for a token that is already unknown", async () => {
-    const response = await t.request({
-      method: "POST",
-      url: "/auth/logout",
-      body: { refreshToken: "never-issued" },
-      auth: false,
-    });
-    expect(response.statusCode).toBe(204);
+  it.each([
+    ["a token that is already unknown", withCookie("never-issued")],
+    ["no cookie at all", {}],
+  ])("answers 204 for %s", async (_label, headers) => {
+    expect((await logout(headers)).statusCode).toBe(204);
   });
 });
 
@@ -240,7 +344,10 @@ describe("POST /auth/change-password", () => {
   it("changes the password and signs out every session", async () => {
     const session = await loginOk();
 
-    expect((await change(OWNER.password, "a-brand-new-password")).statusCode).toBe(204);
+    const changed = await change(OWNER.password, "a-brand-new-password");
+
+    expect(changed.statusCode).toBe(204);
+    expect(refreshCookieOf(changed)).toMatchObject({ value: "", maxAge: 0 });
 
     expect((await refresh(session.refreshToken)).statusCode).toBe(401);
     expect((await login(OWNER)).statusCode).toBe(401);

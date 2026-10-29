@@ -6,4 +6,6 @@ export interface AppContext {
   db: Db;
   clock: Clock;
   jwtSecret: string;
+  /** Mark auth cookies Secure; true whenever the app is served over HTTPS. */
+  secureCookies: boolean;
 }

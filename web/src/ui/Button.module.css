@@ -1,0 +1,51 @@
+.button {
+  min-height: var(--tap);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-field);
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: var(--text-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.primary {
+  background: var(--pen);
+  color: var(--on-pen);
+}
+
+@media (hover: hover) {
+  .primary:hover:not(:disabled) {
+    background: var(--pen-strong);
+  }
+}
+
+.secondary {
+  background: var(--sheet);
+  border-color: var(--frame);
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .secondary:hover:not(:disabled) {
+    border-color: var(--pen);
+  }
+}
+
+.quiet {
+  background: transparent;
+  color: var(--pen);
+  padding: 0 var(--space-2);
+}
+
+.block {
+  width: 100%;
+}

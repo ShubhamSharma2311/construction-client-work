@@ -147,10 +147,11 @@ async function recordLoginAttempt(
  */
 export async function refreshSession(
   db: Db,
-  refreshToken: string,
+  refreshToken: string | undefined,
   jwtSecret: string,
   now: Date,
 ): Promise<Session> {
+  if (refreshToken === undefined) throw invalidSession();
   const tokenHash = hashRefreshToken(refreshToken);
   const known = await db.refreshToken.findUnique({ where: { tokenHash } });
   if (!known) throw invalidSession();
@@ -182,7 +183,8 @@ function invalidSession(): AppError {
 }
 
 /** Signs out the login that owns this refresh token. Unknown tokens are already signed out. */
-export async function logout(db: Db, refreshToken: string, now: Date): Promise<void> {
+export async function logout(db: Db, refreshToken: string | undefined, now: Date): Promise<void> {
+  if (refreshToken === undefined) return;
   const known = await db.refreshToken.findUnique({
     where: { tokenHash: hashRefreshToken(refreshToken) },
   });

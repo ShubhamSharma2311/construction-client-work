@@ -39,9 +39,9 @@ describe("access tokens", () => {
   it("rejects a tampered payload", async () => {
     const { token } = await signAccessToken(42, secret, now);
     const [header, , signature] = token.split(".");
-    const forgedPayload = Buffer.from(JSON.stringify({ sub: "1", iss: "sand-trip-ledger" })).toString(
-      "base64url",
-    );
+    const forgedPayload = Buffer.from(
+      JSON.stringify({ sub: "1", iss: "sand-trip-ledger" }),
+    ).toString("base64url");
 
     await expect(
       verifyAccessToken(`${header ?? ""}.${forgedPayload}.${signature ?? ""}`, secret, now),
