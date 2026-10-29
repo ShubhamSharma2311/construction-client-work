@@ -4,9 +4,9 @@ import { loadEnv } from "./env.ts";
 const valid = {
   NODE_ENV: "development",
   PORT: "3000",
-  DATABASE_URL: "postgresql://bajri:bajri@localhost:5432/bajri_hisab",
+  DATABASE_URL: "postgresql://ledger:ledger@localhost:5432/sand_trip_ledger",
   JWT_SECRET: "x".repeat(32),
-  CORS_ORIGINS: "http://localhost:5173, https://bajri.example.workers.dev",
+  CORS_ORIGINS: "http://localhost:5173, https://ledger.example.workers.dev",
   TRUST_PROXY_HOPS: "0",
 };
 
@@ -16,7 +16,7 @@ describe("loadEnv", () => {
       ...valid,
       PORT: 3000,
       LOG_LEVEL: "info",
-      CORS_ORIGINS: ["http://localhost:5173", "https://bajri.example.workers.dev"],
+      CORS_ORIGINS: ["http://localhost:5173", "https://ledger.example.workers.dev"],
       TRUST_PROXY_HOPS: 0,
     });
   });

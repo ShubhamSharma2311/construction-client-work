@@ -1,12 +1,12 @@
-name: bajri-hisab
+name: sand-trip-ledger
 
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: bajri
-      POSTGRES_PASSWORD: bajri
-      POSTGRES_DB: bajri_hisab
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_DB: sand_trip_ledger
     ports:
       - "5432:5432"
     volumes:
@@ -16,9 +16,9 @@ services:
   db-test:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: bajri
-      POSTGRES_PASSWORD: bajri
-      POSTGRES_DB: bajri_hisab_test
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_DB: sand_trip_ledger_test
     ports:
       - "5433:5432"
     tmpfs:

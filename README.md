@@ -1,4 +1,4 @@
-# Bajri Hisab
+# Sand Trip Ledger
 
 Ledger for a sand (reti/bajri) trip business. It replaces paper registers for trips, customer dues, drivers, diesel, expenses, tractor EMI and the partner account.
 

@@ -128,7 +128,7 @@ describe("GET /health", () => {
   });
 
   it("reports 503 when the database is unreachable", async () => {
-    const deadDb = createPrisma("postgresql://bajri:bajri@127.0.0.1:1/none");
+    const deadDb = createPrisma("postgresql://ledger:ledger@127.0.0.1:1/none");
     const app = buildApp(testDeps(deadDb, () => new Date()));
 
     const response = await app.inject({ method: "GET", url: "/health" });
