@@ -45,6 +45,8 @@ function Tractor({ tractor }: { tractor: TractorDetail }) {
   const running = useLoans({ tractorId: tractor.id, status: "open" });
   // The API keeps one running loan per tractor and none on an inactive one; say so up front.
   const canAddLoan = tractor.isActive && running.data?.length === 0;
+  const openLoan = running.data?.[0];
+  const nextDue = openLoan?.summary.nextDue;
   const close = () => {
     setSheet(null);
   };
@@ -61,7 +63,15 @@ function Tractor({ tractor }: { tractor: TractorDetail }) {
         </Detail>
       </DetailList>
       <div className={actions.actions}>
-        <ButtonLink to={`/new/service?tractor=${String(tractor.id)}`}>Record service</ButtonLink>
+        {openLoan && nextDue ? (
+          <ButtonLink to={`/loans/${String(openLoan.id)}?pay=${nextDue.month}`}>Pay EMI</ButtonLink>
+        ) : null}
+        <ButtonLink
+          variant={openLoan && nextDue ? "secondary" : undefined}
+          to={`/new/service?tractor=${String(tractor.id)}`}
+        >
+          Tractor repair
+        </ButtonLink>
         {canAddLoan ? (
           <Button
             variant="secondary"

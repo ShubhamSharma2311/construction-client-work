@@ -42,7 +42,20 @@ function tractorsApi(
   });
 }
 
-describe("Tractors and EMI", () => {
+describe("Tractors", () => {
+  it("offers paying an EMI and a repair under the name", async () => {
+    await renderApp(tractorsApi(), { path: "/tractors" });
+
+    expect(await screen.findByRole("link", { name: "Pay EMI" })).toHaveAttribute(
+      "href",
+      "/new/emi",
+    );
+    expect(screen.getByRole("link", { name: "Tractor repair" })).toHaveAttribute(
+      "href",
+      "/new/service",
+    );
+  });
+
   it("puts overdue EMIs first, each opening Pay EMI on its month", async () => {
     await renderApp(tractorsApi(), { path: "/tractors" });
 
@@ -97,10 +110,17 @@ describe("A tractor", () => {
     expect(screen.getByRole("list", { name: "Loans" })).toHaveTextContent(
       "1 of 4 EMIs paid, 1 overdue",
     );
-    expect(screen.getByRole("link", { name: "Record service" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Tractor repair" })).toHaveAttribute(
       "href",
       "/new/service?tractor=3",
     );
+  });
+
+  it("puts paying the running loan's next EMI first", async () => {
+    await renderApp(tractorsApi(), { path: "/tractors/3" });
+
+    const pay = await screen.findByRole("link", { name: "Pay EMI" });
+    expect(pay).toHaveAttribute("href", "/loans/5?pay=2026-09");
   });
 
   it("lists a paid-off loan with the running one", async () => {

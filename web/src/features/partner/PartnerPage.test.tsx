@@ -49,6 +49,19 @@ describe("Partner", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers paying the partner and taking money from him under his name", async () => {
+    const { api } = partnerApi();
+    const { user } = await renderApp(api, { path: "/partner" });
+
+    expect(await screen.findByRole("link", { name: "Pay Manish" })).toHaveAttribute(
+      "href",
+      "/new/partner?partner=1&way=paid",
+    );
+    await user.click(screen.getByRole("link", { name: "Money from Manish" }));
+
+    expect(await screen.findByRole("radio", { name: "Received from Manish" })).toBeChecked();
+  });
+
   it("shows a share paid beyond what is due in red", async () => {
     const { api } = partnerApi({
       "GET /partners/1/share": () => json({ ...PARTNER_SHARE, balancePaise: -300000 }),

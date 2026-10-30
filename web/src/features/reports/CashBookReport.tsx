@@ -74,13 +74,13 @@ export function CashBookReport({ range, mode }: { range: DateRange; mode: PayMod
   return (
     <div className={styles.report}>
       <FigureStrip
-        label="Cash book totals"
+        label="Money in & out totals"
         figures={[
-          { label: "At the start", value: <Money paise={data.openingPaise} /> },
+          { label: "Opening balance", value: <Money paise={data.openingPaise} /> },
           { label: "In", value: <Money paise={data.totals.inPaise} tone="received" /> },
           { label: "Out", value: <Money paise={data.totals.outPaise} /> },
           {
-            label: "At the end",
+            label: "Closing balance",
             value: (
               <Money paise={data.closingPaise} tone={data.closingPaise < 0 ? "owed" : "plain"} />
             ),
@@ -88,7 +88,7 @@ export function CashBookReport({ range, mode }: { range: DateRange; mode: PayMod
         ]}
       />
       <EntryTable
-        caption="Cash book"
+        caption="Money in & out"
         rows={data.lines}
         columns={columns}
         rowKey={(line) => `${line.kind}-${String(line.refId)}`}

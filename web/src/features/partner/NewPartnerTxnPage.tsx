@@ -37,16 +37,31 @@ export function NewPartnerTxnPage() {
     readIdParam(params, "partner") || (active.length === 1 ? String(active[0]?.id) : "");
   return (
     <>
-      <PageHeader title="Partner payment" />
-      <TxnForm partners={partners.data} initialPartner={chosen} />
+      <PageHeader title="Money with partner" />
+      <TxnForm
+        partners={partners.data}
+        initialPartner={chosen}
+        // "Money from Manish" on his page opens this way round; anything else starts as paying him.
+        initialDirection={
+          params.get("way") === "received" ? "RECEIVED_FROM_PARTNER" : "PAID_TO_PARTNER"
+        }
+      />
     </>
   );
 }
 
-function TxnForm({ partners, initialPartner }: { partners: Partner[]; initialPartner: string }) {
+function TxnForm({
+  partners,
+  initialPartner,
+  initialDirection,
+}: {
+  partners: Partner[];
+  initialPartner: string;
+  initialDirection: Direction;
+}) {
   const today = todayIso(new Date());
   const [partnerId, setPartnerId] = useState(initialPartner);
-  const [direction, setDirection] = useState<Direction>("PAID_TO_PARTNER");
+  const [direction, setDirection] = useState(initialDirection);
   const [txnDate, setTxnDate] = useState(today);
   const startDate = useSettings().data?.businessStartDate;
   const [amount, setAmount] = useState("");

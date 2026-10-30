@@ -68,7 +68,7 @@ describe("New expense", () => {
     expect(screen.getByLabelText("Kind of expense")).toHaveValue("LABOUR");
   });
 
-  it("points to Khets and labour when no labourer is in use", async () => {
+  it("points to Khets & labourers when no labourer is in use", async () => {
     const api = fakeApi({
       ...signedInRoutes,
       "GET /tractors": () => json(TRACTORS),
@@ -81,7 +81,7 @@ describe("New expense", () => {
 
     expect(
       await screen.findByRole("link", {
-        name: "Add one, or turn one back on, under Khets and labour.",
+        name: "Add one, or turn one back on, under Khets & labourers.",
       }),
     ).toHaveAttribute("href", "/setup");
     expect(screen.getByText(/No labourers in use/)).toBeInTheDocument();

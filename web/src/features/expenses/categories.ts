@@ -18,7 +18,7 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   LABOUR: "Labour",
   ROYALTY: "Royalty",
   POLICE: "Police",
-  TRACTOR_SERVICE: "Tractor service",
+  TRACTOR_SERVICE: "Tractor repair",
   TRACTOR_EMI: "Tractor EMI",
   EMERGENCY: "Emergency",
   OTHER: "Other",

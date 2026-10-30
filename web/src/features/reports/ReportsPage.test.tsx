@@ -52,11 +52,11 @@ describe("Reports", () => {
 
     const total = await screen.findByText("₹1,42,300");
     expect(total.closest("div")).toHaveTextContent("Profit₹1,42,300");
-    const cameIn = screen.getByRole("list", { name: "Earned" });
+    const cameIn = screen.getByRole("list", { name: "Income" });
     expect(cameIn).toHaveTextContent("Trips₹3,15,000");
     expect(cameIn).toHaveTextContent("Less written off");
-    expect(cameIn).toHaveTextContent("Net earned₹3,14,800");
-    const wentOut = screen.getByRole("list", { name: "Costs" });
+    expect(cameIn).toHaveTextContent("Total income₹3,14,800");
+    const wentOut = screen.getByRole("list", { name: "Expenses" });
     expect(wentOut).toHaveTextContent("Diesel₹98,500");
     expect(wentOut).toHaveTextContent("Driver salaries");
     expect(wentOut).toHaveTextContent("Total₹1,72,500");
@@ -81,10 +81,10 @@ describe("Reports", () => {
     const { api, asked } = reportsApi();
     const { user } = await renderApp(api, { path: "/reports?report=cashbook" });
 
-    const totals = await screen.findByLabelText("Cash book totals");
-    expect(totals).toHaveTextContent("At the start₹10,000");
-    expect(totals).toHaveTextContent("At the end−₹3,000");
-    const table = screen.getByRole("table", { name: "Cash book" });
+    const totals = await screen.findByLabelText("Money in & out totals");
+    expect(totals).toHaveTextContent("Opening balance₹10,000");
+    expect(totals).toHaveTextContent("Closing balance−₹3,000");
+    const table = screen.getByRole("table", { name: "Money in & out" });
     expect(
       within(table).getByRole("link", { name: /Payment from Ramesh Bishnoi/ }),
     ).toHaveAttribute("href", "/payments/31");
@@ -108,7 +108,7 @@ describe("Reports", () => {
 
     await renderApp(api, { path: "/reports?report=days" });
 
-    const table = await screen.findByRole("table", { name: "Day by day" });
+    const table = await screen.findByRole("table", { name: "Daily summary" });
     expect(within(table).getByRole("link", { name: "27 Oct" })).toHaveAttribute(
       "href",
       "/?date=2026-10-27",
@@ -136,7 +136,7 @@ describe("Reports", () => {
 
     expect(await screen.findByRole("table", { name: "By khet" })).toHaveTextContent("Ladnun road");
 
-    await user.click(screen.getByRole("button", { name: "Drivers" }));
+    await user.click(screen.getByRole("button", { name: "By driver" }));
 
     const drivers = await screen.findByRole("table", { name: "By driver" });
     expect(within(drivers).getByRole("link", { name: "Suresh" })).toHaveAttribute(
@@ -149,7 +149,7 @@ describe("Reports", () => {
   it("asks all time from the day the business started", async () => {
     const { api, asked } = reportsApi();
     const { user } = await renderApp(api, { path: "/reports" });
-    await screen.findByRole("list", { name: "Earned" });
+    await screen.findByRole("list", { name: "Income" });
 
     await user.click(screen.getByRole("button", { name: "All time" }));
 
@@ -164,7 +164,7 @@ describe("Reports", () => {
 
     await renderApp(api, { path: "/reports?from=2026-03-01&to=2026-04-30" });
 
-    await screen.findByRole("list", { name: "Earned" });
+    await screen.findByRole("list", { name: "Income" });
     expect(asked.at(-1)?.searchParams.get("from")).toBe("2026-04-01");
   });
 
@@ -188,7 +188,7 @@ describe("Reports", () => {
     await renderApp(api, { path: "/reports?report=days&range=all" });
 
     expect(
-      await screen.findByText("Day by day shows at most a year, so it starts on 28 Oct 2025."),
+      await screen.findByText("Daily summary shows at most a year, so it starts on 28 Oct 2025."),
     ).toBeInTheDocument();
     expect(asked.at(-1)?.searchParams.get("from")).toBe("2025-10-28");
     expect(asked.at(-1)?.searchParams.get("to")).toBe("2026-10-28");
@@ -204,11 +204,11 @@ describe("Reports", () => {
           : api.fetch(request),
     };
     const { user } = await renderApp(failing, { path: "/reports" });
-    await screen.findByRole("list", { name: "Earned" });
+    await screen.findByRole("list", { name: "Income" });
 
     await user.click(screen.getByRole("button", { name: "Download" }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Khets" }));
+    await user.click(screen.getByRole("button", { name: "By khet" }));
 
     await screen.findByRole("table", { name: "By khet" });
     expect(screen.queryByRole("alert")).toBeNull();
@@ -247,7 +247,7 @@ describe("Reports", () => {
     const { user } = await renderApp(withExport, {
       path: "/reports?report=cashbook&mode=ONLINE&from=2026-10-26&to=2026-10-28",
     });
-    await screen.findByRole("table", { name: "Cash book" });
+    await screen.findByRole("table", { name: "Money in & out" });
 
     await user.click(screen.getByRole("button", { name: "Download" }));
 

@@ -5,7 +5,7 @@ export function SetupHint({ what }: { what: "khets" | "labourers" }) {
   return (
     <>
       No {what} in use.{" "}
-      <Link to="/setup">Add one, or turn one back on, under Khets and labour.</Link>
+      <Link to="/setup">Add one, or turn one back on, under Khets & labourers.</Link>
     </>
   );
 }

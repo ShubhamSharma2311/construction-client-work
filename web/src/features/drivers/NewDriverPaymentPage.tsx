@@ -137,7 +137,7 @@ export function NewDriverPaymentPage() {
 
   return (
     <>
-      <PageHeader title="Driver payment" />
+      <PageHeader title="Pay driver" />
       <form className={styles.form} onSubmit={submit} noValidate>
         <FormError
           error={saving.error}

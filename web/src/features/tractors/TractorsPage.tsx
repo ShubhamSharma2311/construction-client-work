@@ -4,6 +4,7 @@ import { fieldErrors } from "../../api/errors.ts";
 import { useToast } from "../../app/Toast.tsx";
 import { formatMonth, todayIso } from "../../lib/dates.ts";
 import { Button } from "../../ui/Button.tsx";
+import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
@@ -26,16 +27,22 @@ export function TractorsPage() {
   return (
     <>
       <PageHeader
-        title="Tractors and EMI"
+        title="Tractors"
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setAdding(true);
-            }}
-          >
-            Add tractor
-          </Button>
+          <>
+            <ButtonLink to="/new/emi">Pay EMI</ButtonLink>
+            <ButtonLink variant="secondary" to="/new/service">
+              Tractor repair
+            </ButtonLink>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              Add tractor
+            </Button>
+          </>
         }
       />
       <EmisDue />

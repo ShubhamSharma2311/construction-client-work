@@ -30,6 +30,15 @@ describe("Dues", () => {
     );
   });
 
+  it("offers taking money from a customer under the name", async () => {
+    await renderApp(duesApi(), { path: "/dues" });
+
+    expect(await screen.findByRole("link", { name: "Money from customer" })).toHaveAttribute(
+      "href",
+      "/new/payment",
+    );
+  });
+
   it("lists every customer on the second tab, with what each owes", async () => {
     const { user, router } = await renderApp(duesApi(), { path: "/dues" });
 

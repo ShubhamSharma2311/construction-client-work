@@ -28,7 +28,7 @@ const CATEGORY_WORDS: Record<ExpenseCategory, string> = {
   POLICE: "Police",
   OTHER: "Other",
   EMERGENCY: "Emergency",
-  TRACTOR_SERVICE: "Tractor service",
+  TRACTOR_SERVICE: "Tractor repair",
   TRACTOR_EMI: "Tractor EMI",
 };
 

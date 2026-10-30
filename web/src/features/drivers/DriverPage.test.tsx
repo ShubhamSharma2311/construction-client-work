@@ -52,6 +52,15 @@ describe("Drivers", () => {
     );
   });
 
+  it("offers paying a driver under the name", async () => {
+    await renderApp(driverApi(), { path: "/drivers" });
+
+    expect(await screen.findByRole("link", { name: "Pay driver" })).toHaveAttribute(
+      "href",
+      "/new/driver-payment",
+    );
+  });
+
   it("adds a driver with a salary and opens them", async () => {
     const sent: unknown[] = [];
     const api = driverApi({

@@ -27,7 +27,7 @@ export function SetupPage() {
   };
   return (
     <>
-      <PageHeader title="Khets and labour" />
+      <PageHeader title="Khets & labourers" />
       <Khets
         onAdd={() => {
           setSheet({ kind: "addKhet" });

@@ -63,7 +63,7 @@ function paymentApi(answer = () => json(saved(), 201)) {
   return { api, sent };
 }
 
-describe("Payment received", () => {
+describe("Money from customer", () => {
   it("records money against the oldest dues and opens the customer's account", async () => {
     const { api, sent } = paymentApi();
     const { user, router } = await renderApp(api, { path: "/new/payment?customer=7" });

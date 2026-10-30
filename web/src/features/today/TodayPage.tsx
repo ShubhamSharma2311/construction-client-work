@@ -174,7 +174,7 @@ function DayFigures({ data, today }: { data: Dashboard; today: IsoDate }) {
                   className={styles.alert}
                 >{`${String(data.overdueEmis)} EMI${data.overdueEmis === 1 ? "" : "s"} overdue`}</span>
               }
-              detail="Open Tractors and EMI to pay"
+              detail="Open Tractors to pay"
             />
           </Register>
         ) : null}

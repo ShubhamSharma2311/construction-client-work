@@ -24,7 +24,7 @@ export function SideNav({
       </button>
       <nav aria-label="Main" className={styles.nav}>
         {NAV_GROUPS.map((group) => (
-          <div key={group.label ?? "daily"} className={styles.group}>
+          <div key={group.items[0]?.to} className={styles.group}>
             {group.label ? <span className={styles.groupLabel}>{group.label}</span> : null}
             {group.items.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.to === "/"} className={styles.link}>

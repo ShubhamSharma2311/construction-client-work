@@ -29,7 +29,7 @@ test("diesel entered on the form shows in expenses and the diesel report", async
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Diesel report" }).click();
+  await page.getByRole("button", { name: "Diesel used" }).click();
   await expect(page.getByRole("table", { name: "Diesel by tractor" })).toBeVisible();
   await expectNoSidewaysScroll(page);
   await page.screenshot({

@@ -71,7 +71,7 @@ describe("A customer's account", () => {
   it("opens payment and write-off entries with the customer already chosen", async () => {
     await renderApp(accountApi(), { path: "/dues/7" });
 
-    expect(await screen.findByRole("link", { name: "Payment received" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "Money from Ramesh Bishnoi" })).toHaveAttribute(
       "href",
       "/new/payment?customer=7",
     );

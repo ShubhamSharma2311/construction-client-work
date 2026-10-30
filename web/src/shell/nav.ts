@@ -4,7 +4,7 @@ export interface Destination {
 }
 
 export interface NavGroup {
-  /** Shown above the group in the side menu; the first group needs none. */
+  /** Shown above the group in the side menu; null keeps only the gap between groups. */
   label: string | null;
   items: Destination[];
 }
@@ -15,23 +15,23 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/", label: "Today" },
       { to: "/trips", label: "Trips" },
-      { to: "/dues", label: "Dues and customers" },
+      { to: "/dues", label: "Customers" },
       { to: "/expenses", label: "Expenses" },
     ],
   },
   {
-    label: "Business",
+    label: null,
     items: [
-      { to: "/tractors", label: "Tractors and EMI" },
+      { to: "/tractors", label: "Tractors" },
       { to: "/drivers", label: "Drivers" },
       { to: "/partner", label: "Partner" },
       { to: "/reports", label: "Reports" },
     ],
   },
   {
-    label: "Setup",
+    label: null,
     items: [
-      { to: "/setup", label: "Khets and labour" },
+      { to: "/setup", label: "Khets & labourers" },
       { to: "/settings", label: "Settings" },
     ],
   },
@@ -44,7 +44,7 @@ export const PHONE_TABS: { before: Destination[]; after: Destination[] } = {
     { to: "/trips", label: "Trips" },
   ],
   after: [
-    { to: "/dues", label: "Dues" },
+    { to: "/dues", label: "Customers" },
     { to: "/more", label: "More" },
   ],
 };
@@ -61,20 +61,24 @@ export interface EntryKind extends Destination {
 }
 
 export const NEW_ENTRIES: EntryKind[] = [
-  { to: "/new/trip", label: "Trip", detail: "Sand delivered to a customer" },
+  { to: "/new/trip", label: "New trip", detail: "Sand delivered to a customer" },
   {
     to: "/new/payment",
-    label: "Payment received",
+    label: "Money from customer",
     detail: "Money in from a customer, or a due cleared",
   },
-  { to: "/new/expense", label: "Expense", detail: "Labour, royalty, police, other or emergency" },
+  {
+    to: "/new/expense",
+    label: "Add expense",
+    detail: "Labour, royalty, police, other or emergency",
+  },
   { to: "/new/diesel", label: "Diesel", detail: "Fuel for a tractor" },
-  { to: "/new/driver-payment", label: "Driver payment", detail: "Salary, advance or bonus" },
-  { to: "/new/emi", label: "Tractor EMI", detail: "A loan instalment" },
-  { to: "/new/service", label: "Tractor service", detail: "Repairs and servicing" },
+  { to: "/new/driver-payment", label: "Pay driver", detail: "Salary, advance or bonus" },
+  { to: "/new/emi", label: "Pay EMI", detail: "A loan instalment" },
+  { to: "/new/service", label: "Tractor repair", detail: "Repairs and servicing" },
   {
     to: "/new/partner",
-    label: "Partner payment",
+    label: "Money with partner",
     detail: "Money paid to or received from the partner",
   },
 ];

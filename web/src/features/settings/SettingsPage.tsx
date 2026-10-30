@@ -13,10 +13,10 @@ import styles from "./SettingsPage.module.css";
 import { useSettings } from "./useSettings.ts";
 
 const VIEWS = [
-  { value: "business", label: "Business" },
+  { value: "business", label: "Business details" },
   { value: "password", label: "Password" },
   { value: "deleted", label: "Deleted entries" },
-  { value: "history", label: "History" },
+  { value: "history", label: "Change history" },
 ] as const;
 
 type View = (typeof VIEWS)[number]["value"];

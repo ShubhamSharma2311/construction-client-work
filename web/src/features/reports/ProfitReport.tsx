@@ -23,8 +23,8 @@ export function ProfitReport({ range }: { range: DateRange }) {
       <BigTotal label={profitPaise < 0 ? "Loss" : "Profit"}>
         <Money paise={Math.abs(profitPaise)} tone={profitPaise < 0 ? "owed" : "plain"} />
       </BigTotal>
-      <h2 className={styles.subhead}>Earned</h2>
-      <Register label="Earned">
+      <h2 className={styles.subhead}>Income</h2>
+      <Register label="Income">
         <RegisterRow label="Trips" amount={<Money paise={revenue.tripsPaise} />} />
         {revenue.writeOffsPaise > 0 ? (
           <RegisterRow
@@ -33,10 +33,10 @@ export function ProfitReport({ range }: { range: DateRange }) {
             amount={<Money paise={-revenue.writeOffsPaise} />}
           />
         ) : null}
-        <RegisterRow label="Net earned" amount={<Money paise={revenue.netPaise} />} />
+        <RegisterRow label="Total income" amount={<Money paise={revenue.netPaise} />} />
       </Register>
-      <h2 className={styles.subhead}>Costs</h2>
-      <Register label="Costs">
+      <h2 className={styles.subhead}>Expenses</h2>
+      <Register label="Expenses">
         {spentOn.map((category) => (
           <RegisterRow
             key={category}

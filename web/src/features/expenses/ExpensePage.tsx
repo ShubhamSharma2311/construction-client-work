@@ -87,7 +87,7 @@ function ExpenseDetails({ expense }: { expense: ExpenseItem }) {
       ) : (
         <p className={actions.text}>
           EMIs are paid and undone from the tractor&apos;s loan, which keeps its schedule right.{" "}
-          <Link to="/tractors">Open Tractors and EMI</Link>
+          <Link to="/tractors">Open Tractors</Link>
         </p>
       )}
     </>

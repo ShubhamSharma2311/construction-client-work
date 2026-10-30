@@ -55,14 +55,17 @@ export function PartnersPage() {
       <PageHeader
         title="Partners"
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setAdding(true);
-            }}
-          >
-            Add partner
-          </Button>
+          <>
+            <ButtonLink to="/new/partner">Money with partner</ButtonLink>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              Add partner
+            </Button>
+          </>
         }
       />
       <Register label="Partners">
@@ -141,8 +144,14 @@ function PartnerAccount({
         actions={partner.isActive ? null : <Tag tone="quiet">Inactive</Tag>}
       />
       <div className={actions.actions}>
-        <ButtonLink to={`/new/partner?partner=${String(partner.id)}`}>
-          Money to or from {partner.name}
+        <ButtonLink to={`/new/partner?partner=${String(partner.id)}&way=paid`}>
+          Pay {partner.name}
+        </ButtonLink>
+        <ButtonLink
+          variant="secondary"
+          to={`/new/partner?partner=${String(partner.id)}&way=received`}
+        >
+          Money from {partner.name}
         </ButtonLink>
         <Button
           variant="secondary"

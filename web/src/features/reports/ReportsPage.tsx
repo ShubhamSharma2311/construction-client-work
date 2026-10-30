@@ -20,12 +20,12 @@ import { ProfitReport } from "./ProfitReport.tsx";
 import styles from "./Reports.module.css";
 
 const REPORTS = [
-  { value: "profit", label: "Profit" },
-  { value: "cashbook", label: "Cash book" },
-  { value: "days", label: "Day by day" },
-  { value: "tractors", label: "Tractors" },
-  { value: "khets", label: "Khets" },
-  { value: "drivers", label: "Drivers" },
+  { value: "profit", label: "Profit & loss" },
+  { value: "cashbook", label: "Money in & out" },
+  { value: "days", label: "Daily summary" },
+  { value: "tractors", label: "By tractor" },
+  { value: "khets", label: "By khet" },
+  { value: "drivers", label: "By driver" },
 ] as const;
 
 type Report = (typeof REPORTS)[number]["value"];
@@ -133,7 +133,7 @@ function Reports({ startDate }: { startDate: IsoDate }) {
       </div>
       {dates && inBusiness && dates.from !== inBusiness.from ? (
         <p className={styles.note}>
-          Day by day shows at most a year, so it starts on {formatDate(dates.from, today)}.
+          Daily summary shows at most a year, so it starts on {formatDate(dates.from, today)}.
         </p>
       ) : null}
       {dates ? (

@@ -30,7 +30,7 @@ export function NewPaymentPage() {
   const [params] = useSearchParams();
   const writeOff = params.get("kind") === "writeoff";
   const customerId = parseId(params.get("customer"));
-  const title = writeOff ? "Write off" : "Payment received";
+  const title = writeOff ? "Write off" : "Money from customer";
 
   if (settings.data === null) {
     return (

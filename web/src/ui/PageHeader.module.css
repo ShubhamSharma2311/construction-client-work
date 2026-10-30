@@ -1,8 +1,7 @@
+/* The section's own buttons, such as paying, sit right under its name on every screen size. */
 .header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
+  display: grid;
+  justify-items: start;
   gap: var(--space-3);
 }
 
@@ -15,5 +14,6 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }

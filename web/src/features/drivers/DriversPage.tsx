@@ -5,6 +5,7 @@ import { useToast } from "../../app/Toast.tsx";
 import { todayIso } from "../../lib/dates.ts";
 import { rupeesToPaise } from "../../lib/money.ts";
 import { Button } from "../../ui/Button.tsx";
+import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { DateField } from "../../ui/DateField.tsx";
 import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
@@ -27,14 +28,17 @@ export function DriversPage() {
       <PageHeader
         title="Drivers"
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setAdding(true);
-            }}
-          >
-            Add driver
-          </Button>
+          <>
+            <ButtonLink to="/new/driver-payment">Pay driver</ButtonLink>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              Add driver
+            </Button>
+          </>
         }
       />
       {drivers.isError ? (

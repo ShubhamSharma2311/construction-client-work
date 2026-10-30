@@ -22,7 +22,7 @@ test("dues lead to a customer's account, where a payment is recorded", async ({ 
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Payment received" }).click();
+  await page.getByRole("link", { name: /^Money from / }).click();
   await page.getByLabel("Amount received").fill("100");
   await expectNoSidewaysScroll(page);
   await page.screenshot({

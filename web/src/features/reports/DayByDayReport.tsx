@@ -88,7 +88,7 @@ export function DayByDayReport({ range }: { range: DateRange }) {
         ]}
       />
       <EntryTable
-        caption="Day by day"
+        caption="Daily summary"
         rows={summary.data.days}
         columns={columns}
         rowKey={(day) => day.date}

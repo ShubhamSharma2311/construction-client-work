@@ -18,7 +18,10 @@ test("settings save as they are, history lists changes, deleted entries open", a
   await page.getByRole("button", { name: "Save settings" }).click();
   await expect(page.getByText("Settings saved.")).toBeVisible();
 
-  await page.getByRole("group", { name: "Show" }).getByRole("button", { name: "History" }).click();
+  await page
+    .getByRole("group", { name: "Show" })
+    .getByRole("button", { name: "Change history" })
+    .click();
   const history = page.getByRole("list", { name: "History of trips" });
   await expect(history.getByRole("link").first()).toBeVisible();
   await page.getByLabel("Show changes to").selectOption("Setting");

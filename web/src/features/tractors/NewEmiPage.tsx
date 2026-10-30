@@ -6,14 +6,14 @@ import { Register, RegisterLink, RegisterRow } from "../../ui/Register.tsx";
 import { Link } from "react-router";
 import { useLoans } from "./useLoans.ts";
 
-/** "Tractor EMI" from New entry: pick the loan, then pay on its page. */
+/** "Pay EMI" from New entry: pick the loan, then pay on its page. */
 export function NewEmiPage() {
   const loans = useLoans({ status: "open" });
   const today = todayIso(new Date());
   const running = loans.data ?? [];
   return (
     <>
-      <PageHeader title="Tractor EMI" />
+      <PageHeader title="Pay EMI" />
       {loans.isError ? (
         <LoadError error={loans.error} onRetry={() => void loans.refetch()} />
       ) : null}
@@ -25,8 +25,7 @@ export function NewEmiPage() {
               label="No loan is running."
               detail={
                 <>
-                  Add one from the tractor&apos;s page in{" "}
-                  <Link to="/tractors">Tractors and EMI</Link>.
+                  Add one from the tractor&apos;s page in <Link to="/tractors">Tractors</Link>.
                 </>
               }
             />

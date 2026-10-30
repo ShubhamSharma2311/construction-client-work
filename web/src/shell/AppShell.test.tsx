@@ -49,7 +49,7 @@ describe("app frame", () => {
     );
   });
 
-  it("gives the phone tabs Today, Trips, Dues and More, with New entry between", async () => {
+  it("gives the phone tabs Today, Trips, Customers and More, with New entry between", async () => {
     await renderApp(fakeApi(signedInRoutes));
 
     const tabs = await screen.findByRole("navigation", { name: "Tabs" });
@@ -57,7 +57,7 @@ describe("app frame", () => {
       "Today",
       "Trips",
       "+ New",
-      "Dues",
+      "Customers",
       "More",
     ]);
   });

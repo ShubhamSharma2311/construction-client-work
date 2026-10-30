@@ -37,7 +37,7 @@ import { useExpenseList } from "./useExpenses.ts";
 
 const VIEWS = [
   { value: "list", label: "All expenses" },
-  { value: "diesel", label: "Diesel report" },
+  { value: "diesel", label: "Diesel used" },
 ] as const;
 
 export function ExpensesPage() {
@@ -78,7 +78,7 @@ function Expenses({ startDate }: { startDate: IsoDate }) {
     <>
       <PageHeader
         title="Expenses"
-        actions={<ButtonLink to="/new/expense">New expense</ButtonLink>}
+        actions={<ButtonLink to="/new/expense">Add expense</ButtonLink>}
       />
       <ViewToggle options={VIEWS} value={diesel ? "diesel" : "list"} onChange={showView} />
       <RangeChips

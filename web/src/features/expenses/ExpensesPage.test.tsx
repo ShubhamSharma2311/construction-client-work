@@ -93,7 +93,7 @@ describe("Expenses", () => {
     const { api } = expensesApi();
     const { user } = await renderApp(api, { path: "/expenses" });
 
-    await user.click(await screen.findByRole("button", { name: "Diesel report" }));
+    await user.click(await screen.findByRole("button", { name: "Diesel used" }));
 
     const tractors = await screen.findByRole("table", { name: "Diesel by tractor" });
     expect(within(tractors).getByText("no trips")).toBeInTheDocument();

@@ -40,7 +40,7 @@ const BUCKETS = [
 type Tab = "owing" | "all";
 
 const TABS = [
-  { value: "owing", label: "Who owes" },
+  { value: "owing", label: "Pending money" },
   { value: "all", label: "All customers" },
 ] as const;
 
@@ -53,9 +53,10 @@ export function DuesPage() {
   return (
     <>
       <PageHeader
-        title="Dues and customers"
+        title="Customers"
         actions={
           <>
+            <ButtonLink to="/new/payment">Money from customer</ButtonLink>
             <Button
               variant="secondary"
               onClick={() => {
@@ -64,7 +65,6 @@ export function DuesPage() {
             >
               Add customer
             </Button>
-            <ButtonLink to="/new/payment">Payment received</ButtonLink>
           </>
         }
       />

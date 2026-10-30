@@ -117,7 +117,7 @@ function AccountActions({
 
   return (
     <div className={actions.actions}>
-      <ButtonLink to={`/new/payment?${query}`}>Payment received</ButtonLink>
+      <ButtonLink to={`/new/payment?${query}`}>Money from {customer.name}</ButtonLink>
       <ButtonLink variant="secondary" to={`/new/payment?${query}&kind=writeoff`}>
         Write off
       </ButtonLink>

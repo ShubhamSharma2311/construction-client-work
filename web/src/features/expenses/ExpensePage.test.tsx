@@ -79,7 +79,7 @@ describe("An expense", () => {
     await renderApp(expenseApi(emi), { path: "/expenses/61" });
 
     expect(await screen.findByText("EMI for")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open Tractors and EMI" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Open Tractors" })).toHaveAttribute(
       "href",
       "/tractors",
     );

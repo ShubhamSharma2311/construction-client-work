@@ -72,7 +72,7 @@ export function TractorsReport({ range }: { range: DateRange }) {
     },
     {
       key: "left",
-      header: "Left over",
+      header: "Profit",
       cell: (line) => (
         <Money
           paise={line.contributionPaise}
@@ -86,7 +86,7 @@ export function TractorsReport({ range }: { range: DateRange }) {
   return (
     <div className={styles.report}>
       <p className={styles.note}>
-        Left over is what a tractor earned less its diesel, service, EMI and emergency costs.
+        Profit is what a tractor earned less its diesel, repairs, EMI and emergency costs.
       </p>
       <EntryTable
         caption="By tractor"

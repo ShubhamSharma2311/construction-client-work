@@ -46,7 +46,7 @@ function NewExpense({
   const create = useCreateExpense();
   const toast = useToast();
   const [params] = useSearchParams();
-  // "Record service" on a tractor's page arrives with that tractor chosen.
+  // "Tractor repair" on a tractor's page arrives with that tractor chosen.
   const [next, setNext] = useState<ExpenseValues>(() => ({
     ...emptyExpense(categories[0], today),
     tractorId: readIdParam(params, "tractor"),
@@ -93,7 +93,7 @@ function NewExpense({
 export function NewGeneralExpensePage() {
   return (
     <NewExpensePage
-      title="New expense"
+      title="Add expense"
       categories={["LABOUR", "ROYALTY", "POLICE", "OTHER", "EMERGENCY"]}
     />
   );
@@ -104,5 +104,5 @@ export function NewDieselPage() {
 }
 
 export function NewServicePage() {
-  return <NewExpensePage title="Tractor service" categories={["TRACTOR_SERVICE"]} />;
+  return <NewExpensePage title="Tractor repair" categories={["TRACTOR_SERVICE"]} />;
 }
