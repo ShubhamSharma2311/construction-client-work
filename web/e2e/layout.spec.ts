@@ -26,7 +26,7 @@ test("phones get bottom tabs, larger screens get the side menu", async ({ page }
 
 test("New entry lists every kind of entry and opens the one picked", async ({ page }, info) => {
   const phone = info.project.name.startsWith("phone");
-  await page.getByRole("button", { name: phone ? "+ New" : "+ New entry" }).click();
+  await page.getByRole("button", { name: phone ? "+ New" : "New entry" }).click();
 
   const dialog = page.getByRole("dialog", { name: "New entry" });
   await expect(dialog).toBeVisible();

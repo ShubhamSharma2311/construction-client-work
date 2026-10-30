@@ -13,7 +13,8 @@ describe("signing out", () => {
     [
       "the side menu",
       "/",
-      () => within(screen.getByRole("complementary")).getByRole("button", { name: "Sign out" }),
+      // On Today, the side menu holds the only Sign out button.
+      () => screen.getByRole("button", { name: "Sign out" }),
     ],
   ])("from %s ends the session and shows sign in", async (_label, path, findButton) => {
     const api = fakeApi({

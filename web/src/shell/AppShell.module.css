@@ -1,32 +1,23 @@
-.shell {
-  min-height: 100dvh;
-}
-
-.column {
-  min-width: 0;
-}
-
 .topBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding-top: max(var(--space-4), env(safe-area-inset-top, 0px));
-  padding-bottom: var(--space-3);
-  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
-}
-
-.name {
-  font: 700 var(--text-md) / 1.2 var(--font-display);
-  font-stretch: 110%;
-  min-width: 0;
-  overflow-wrap: anywhere;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--ruling);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .day {
   flex: none;
-  font-size: var(--text-sm);
+  margin-left: auto;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 
@@ -34,48 +25,30 @@
   display: grid;
   /* One column no wider than the screen; wide rows (date chips, tables) scroll inside it. */
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
+  gap: 24px;
   align-content: start;
   width: 100%;
-  max-width: var(--content-max);
-  padding-top: var(--space-2);
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-top: 24px;
   /* Room for the fixed tab bar and the phone's home indicator. */
-  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
-}
-
-.side {
-  display: none;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 768px) {
-  .shell {
-    display: grid;
-    grid-template-columns: var(--side-nav) minmax(0, 1fr);
-  }
-
-  .side {
-    display: block;
-  }
-
-  .topBar,
   .tabs {
     display: none;
   }
 
   .main {
-    padding: var(--space-6) var(--space-6) var(--space-7);
-    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
+    padding: 32px 32px 48px;
   }
 }
 
 @media (min-width: 1200px) {
-  .shell {
-    --side-nav: 240px;
-  }
-
   .main {
-    padding-inline: var(--space-7);
+    padding-inline: 40px;
   }
 }

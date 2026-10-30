@@ -1,38 +1,54 @@
+import {
+  BarChart3,
+  Handshake,
+  LayoutDashboard,
+  type LucideIcon,
+  MapPin,
+  Receipt,
+  Settings,
+  Tractor,
+  Truck,
+  UserRound,
+  Users,
+} from "lucide-react";
+
 export interface Destination {
   to: string;
   label: string;
+  /** Beside the name in the side menu, and the only thing shown when it is folded. */
+  icon?: LucideIcon;
 }
 
 export interface NavGroup {
-  /** Shown above the group in the side menu; null keeps only the gap between groups. */
+  /** Shown above the group in the side menu, as in the approved preview; null shows none. */
   label: string | null;
   items: Destination[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: null,
+    label: "Daily work",
     items: [
-      { to: "/", label: "Today" },
-      { to: "/trips", label: "Trips" },
-      { to: "/dues", label: "Customers" },
-      { to: "/expenses", label: "Expenses" },
+      { to: "/", label: "Today", icon: LayoutDashboard },
+      { to: "/trips", label: "Trips", icon: Truck },
+      { to: "/dues", label: "Customers", icon: Users },
+      { to: "/expenses", label: "Expenses", icon: Receipt },
     ],
   },
   {
-    label: null,
+    label: "Business",
     items: [
-      { to: "/tractors", label: "Tractors" },
-      { to: "/drivers", label: "Drivers" },
-      { to: "/partner", label: "Partner" },
-      { to: "/reports", label: "Reports" },
+      { to: "/tractors", label: "Tractors", icon: Tractor },
+      { to: "/drivers", label: "Drivers", icon: UserRound },
+      { to: "/partner", label: "Partner", icon: Handshake },
+      { to: "/reports", label: "Reports", icon: BarChart3 },
     ],
   },
   {
-    label: null,
+    label: "Setup",
     items: [
-      { to: "/setup", label: "Khets & labourers" },
-      { to: "/settings", label: "Settings" },
+      { to: "/setup", label: "Khets & labourers", icon: MapPin },
+      { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -82,3 +98,18 @@ export const NEW_ENTRIES: EntryKind[] = [
     detail: "Money paid to or received from the partner",
   },
 ];
+
+/** The menu section a screen belongs to, for the top bar; none on Today itself. */
+export function sectionOf(pathname: string): Destination | undefined {
+  if (pathname === "/") return undefined;
+  const all = [
+    ...NAV_GROUPS.flatMap((group) => group.items),
+    ...NEW_ENTRIES,
+    { to: "/more", label: "More" },
+  ];
+  return all
+    .filter(
+      (item) => item.to !== "/" && (pathname === item.to || pathname.startsWith(`${item.to}/`)),
+    )
+    .sort((a, b) => b.to.length - a.to.length)[0];
+}

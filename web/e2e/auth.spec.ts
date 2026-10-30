@@ -20,7 +20,8 @@ test("signs in, stays signed in across a reload, and signs out", async ({ page }
 
   const phone = info.project.name.startsWith("phone");
   if (phone) await page.getByRole("navigation", { name: "Tabs" }).getByText("More").click();
-  const signOutArea = phone ? page.getByRole("main") : page.getByRole("complementary");
+  // Phones sign out from More; larger screens from the side menu, the only Sign out on Today.
+  const signOutArea = phone ? page.getByRole("main") : page;
   await signOutArea.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 

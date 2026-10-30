@@ -35,6 +35,11 @@
     color: var(--pen);
   }
 
+  /* Links in the side menu are menu items, coloured by the menu itself. */
+  [data-slot="sidebar"] a {
+    color: inherit;
+  }
+
   :focus-visible {
     outline: 2px solid var(--pen);
     outline-offset: 2px;

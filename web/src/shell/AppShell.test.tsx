@@ -65,7 +65,7 @@ describe("app frame", () => {
   it("opens New entry with every kind of entry and goes to the one picked", async () => {
     const { user, router } = await renderApp(fakeApi(signedInRoutes));
 
-    await user.click(await screen.findByRole("button", { name: "+ New entry" }));
+    await user.click(await screen.findByRole("button", { name: "New entry" }));
     const dialog = screen.getByRole("dialog", { name: "New entry" });
     expect(within(dialog).getByRole("heading", { name: "New entry" })).toHaveFocus();
     expect(within(dialog).getAllByRole("link")).toHaveLength(NEW_ENTRIES.length);
