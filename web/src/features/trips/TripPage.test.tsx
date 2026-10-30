@@ -9,6 +9,7 @@ import {
   TRACTORS,
   TRIP,
   tripPage,
+  BALANCE_ROUTES,
 } from "../../test/fixtures.ts";
 import { renderApp, signedInRoutes } from "../../test/render.tsx";
 
@@ -30,6 +31,7 @@ function tripApi(
 ) {
   return fakeApi({
     ...signedInRoutes,
+    ...BALANCE_ROUTES,
     "GET /trips/41": () => json(trip),
     "GET /trips": () => json(tripPage([])),
     "GET /drivers": () => json(DRIVERS),

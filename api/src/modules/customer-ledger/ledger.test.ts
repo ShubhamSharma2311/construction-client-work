@@ -7,6 +7,7 @@ import {
   makeTripMasters,
   type TripMasters,
 } from "../../../test/factories.ts";
+import type { CustomerBalance } from "./balance.ts";
 import type { Dues, Ledger } from "./ledger.schema.ts";
 import { ageBucket } from "./ledger.service.ts";
 
@@ -94,6 +95,29 @@ describe("customer ledger", () => {
     expect(csv.body).toContain("2026-10-01,BROUGHT_FORWARD,,Balance brought forward");
     expect(csv.body).toContain("3500.00");
     expect((await t.get("/customers/99999/ledger")).statusCode).toBe(404);
+  });
+});
+
+describe("customer balance", () => {
+  const balanceUrl = () => `/customers/${String(m.customer.id)}/balance`;
+
+  it("shows a customer in credit, whom the dues list leaves out", async () => {
+    // Paid while nothing was due, so it is held as credit; the later trip does not use it.
+    await makePayment(t, m.customer.id, { amount: 3000 });
+    await makeTrip(t, m, { amount: 1000 });
+
+    const balance = (await t.get(balanceUrl())).json<CustomerBalance>();
+
+    expect(balance).toEqual({ balancePaise: -200_000, duePaise: 100_000, creditPaise: 300_000 });
+    expect((await t.get("/dues")).json<Dues>().customers).toEqual([]);
+  });
+
+  it("is zero for a customer with no entries", async () => {
+    expect((await t.get(balanceUrl())).json()).toEqual({ balancePaise: 0, duePaise: 0, creditPaise: 0 });
+  });
+
+  it("answers 404 for an unknown customer", async () => {
+    expect((await t.get("/customers/99999/balance")).statusCode).toBe(404);
   });
 });
 

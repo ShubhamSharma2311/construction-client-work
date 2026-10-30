@@ -1,40 +1,28 @@
 import { useState } from "react";
-import { fieldErrors } from "../../api/errors.ts";
-import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
 import type { Ok } from "../../api/types.ts";
 import { useDownload } from "../../api/useDownload.ts";
-import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
-import { useToast } from "../../app/Toast.tsx";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import type { DateRange } from "../../lib/ranges.ts";
 import actions from "../../ui/Actions.module.css";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
-import { ConfirmDialog } from "../../ui/ConfirmDialog.tsx";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
-import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError, loadErrorMessage } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
-import { MoneyField } from "../../ui/MoneyField.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { RangeChips } from "../../ui/RangeChips.tsx";
-import { Sheet } from "../../ui/Sheet.tsx";
-import sheetStyles from "../../ui/Sheet.module.css";
-import { TextField } from "../../ui/TextField.tsx";
 import { useSettings } from "../settings/useSettings.ts";
-import { balanceText } from "../trips/balanceText.ts";
 import styles from "./CustomerAccountPage.module.css";
-import { CustomerFields, customerChanges, customerFieldsOf } from "./CustomerFields.tsx";
-import { useDues } from "./useDues.ts";
+import { ApplyCredit, EditCustomer, OpeningBalance } from "./CustomerSheets.tsx";
+import { canUseCredit, standingOf } from "./standing.ts";
 import {
   type Customer,
-  useAddOpeningBalance,
-  useApplyCredit,
+  type CustomerBalance,
   useCustomer,
+  useCustomerBalance,
   useCustomerLedger,
-  useUpdateCustomer,
 } from "./useCustomers.ts";
 import { useOpeningBalance } from "./useOpeningBalance.ts";
 
@@ -42,68 +30,61 @@ type LedgerEntry = Ok<"/customers/{id}/ledger", "get">["entries"][number];
 
 export function CustomerAccountPage({ id }: { id: number }) {
   const customer = useCustomer(id);
-  const settings = useSettings();
   if (customer.isError)
     return <LoadError error={customer.error} onRetry={() => void customer.refetch()} />;
-  if (!customer.data || settings.data === undefined) return <Loading what="the account" />;
-  return <Account customer={customer.data} startDate={settings.data?.businessStartDate ?? null} />;
+  if (!customer.data) return <Loading what="the account" />;
+  return <Account customer={customer.data} />;
 }
 
-function Account({ customer, startDate }: { customer: Customer; startDate: IsoDate | null }) {
-  const dues = useDues();
-  const row = dues.data?.customers.find((candidate) => candidate.customer.id === customer.id);
-  const contact = [customer.village, customer.phone].filter(Boolean).join(", ");
+function Account({ customer }: { customer: Customer }) {
+  const balance = useCustomerBalance(customer.id);
+  const settings = useSettings();
 
   return (
     <>
       <PageHeader title={customer.isActive ? customer.name : `${customer.name} (inactive)`} />
-      {contact ? (
+      {customer.village || customer.phone ? (
         <p className={styles.contact}>
           {customer.village}
           {customer.village && customer.phone ? ", " : ""}
           {customer.phone ? <a href={`tel:+91${customer.phone}`}>{customer.phone}</a> : null}
         </p>
       ) : null}
-      {dues.isError ? (
-        <ErrorNotice>
-          Could not load what {customer.name} owes. The account below is still correct.
-        </ErrorNotice>
-      ) : (
-        <Balance
-          owesPaise={row?.balancePaise ?? 0}
-          creditPaise={row?.creditPaise ?? 0}
-          loading={dues.isPending}
-        />
-      )}
-      <AccountActions customer={customer} canApplyCredit={row?.hasUnappliedCredit ?? false} />
-      {startDate ? <Ledger customerId={customer.id} startDate={startDate} /> : null}
+      {balance.isError ? (
+        <LoadError error={balance.error} onRetry={() => void balance.refetch()} />
+      ) : null}
+      {balance.data ? <Balance balance={balance.data} /> : null}
+      {balance.isPending ? <Loading what="the balance" /> : null}
+      <AccountActions
+        customer={customer}
+        canApplyCredit={balance.data ? canUseCredit(balance.data) : false}
+      />
+      {/* Only the ledger's date picker needs the start date; the rest shows without it. */}
+      {settings.isError ? (
+        <LoadError error={settings.error} onRetry={() => void settings.refetch()} />
+      ) : null}
+      {settings.data ? (
+        <Ledger customerId={customer.id} startDate={settings.data.businessStartDate} />
+      ) : null}
     </>
   );
 }
 
-function Balance({
-  owesPaise,
-  creditPaise,
-  loading,
-}: {
-  owesPaise: number;
-  creditPaise: number;
-  loading: boolean;
-}) {
-  if (loading) return <Loading what="the balance" />;
-  if (owesPaise > 0) {
+function Balance({ balance }: { balance: CustomerBalance }) {
+  const standing = standingOf(balance);
+  if (standing.kind === "owes") {
     return (
       <div className={`${styles.balance} ${styles.owes}`}>
         <span>Owes you</span>
-        <Money paise={owesPaise} tone="owed" />
+        <Money paise={standing.paise} tone="owed" />
       </div>
     );
   }
-  if (creditPaise > 0) {
+  if (standing.kind === "credit") {
     return (
       <div className={`${styles.balance} ${styles.credit}`}>
         <span>Has credit</span>
-        <Money paise={creditPaise} tone="received" />
+        <Money paise={standing.paise} tone="received" />
       </div>
     );
   }
@@ -115,6 +96,8 @@ function Balance({
   );
 }
 
+type SheetName = "edit" | "opening" | "credit";
+
 function AccountActions({
   customer,
   canApplyCredit,
@@ -122,12 +105,15 @@ function AccountActions({
   customer: Customer;
   canApplyCredit: boolean;
 }) {
-  const [sheet, setSheet] = useState<"edit" | "opening" | "credit" | null>(null);
+  const [sheet, setSheet] = useState<SheetName | null>(null);
   const opening = useOpeningBalance(customer.id);
   const close = () => {
     setSheet(null);
   };
   const query = `customer=${String(customer.id)}`;
+  const opener = (name: SheetName) => () => {
+    setSheet(name);
+  };
 
   return (
     <div className={actions.actions}>
@@ -136,205 +122,23 @@ function AccountActions({
         Write off
       </ButtonLink>
       {canApplyCredit ? (
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setSheet("credit");
-          }}
-        >
+        <Button variant="secondary" onClick={opener("credit")}>
           Use credit on dues
         </Button>
       ) : null}
-      <Button
-        variant="secondary"
-        onClick={() => {
-          setSheet("edit");
-        }}
-      >
+      <Button variant="secondary" onClick={opener("edit")}>
         Edit details
       </Button>
       {opening.data === null ? (
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setSheet("opening");
-          }}
-        >
+        <Button variant="secondary" onClick={opener("opening")}>
           Old register balance
         </Button>
       ) : null}
-      <EditCustomer customer={customer} open={sheet === "edit"} onClose={close} />
-      <OpeningBalance customer={customer} open={sheet === "opening"} onClose={close} />
-      <ApplyCredit customer={customer} open={sheet === "credit"} onClose={close} />
+      {/* Each sheet exists only while open: closing drops unsaved edits, old errors and its key. */}
+      {sheet === "edit" ? <EditCustomer customer={customer} onClose={close} /> : null}
+      {sheet === "opening" ? <OpeningBalance customer={customer} onClose={close} /> : null}
+      {sheet === "credit" ? <ApplyCredit customer={customer} onClose={close} /> : null}
     </div>
-  );
-}
-
-function EditCustomer({
-  customer,
-  open,
-  onClose,
-}: {
-  customer: Customer;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const before = customerFieldsOf(customer);
-  const [values, setValues] = useState(before);
-  const [active, setActive] = useState(customer.isActive);
-  const update = useUpdateCustomer(customer.id);
-  const toast = useToast();
-
-  const save = () => {
-    const changes = {
-      ...customerChanges(before, values),
-      ...(active === customer.isActive ? {} : { isActive: active }),
-    };
-    if (Object.keys(changes).length === 0) {
-      onClose();
-      return;
-    }
-    update.mutate(changes, {
-      onSuccess: () => {
-        toast("Details saved.");
-        onClose();
-      },
-    });
-  };
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Edit details">
-      <div className={sheetStyles.body}>
-        <FormError error={update.error} shownFields={["name", "phone", "village", "notes"]} />
-        <CustomerFields
-          values={values}
-          errors={fieldErrors(update.error)}
-          onChange={setValues}
-          withNotes
-        />
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={active}
-            onChange={(event) => {
-              setActive(event.target.checked);
-            }}
-          />
-          Active (shown when entering trips)
-        </label>
-        <Button block onClick={save} disabled={update.isPending || values.name.trim() === ""}>
-          {update.isPending ? "Saving…" : "Save details"}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function OpeningBalance({
-  customer,
-  open,
-  onClose,
-}: {
-  customer: Customer;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const [amount, setAmount] = useState("");
-  const [notes, setNotes] = useState("");
-  const { key, renew } = useIdempotencyKey();
-  const add = useAddOpeningBalance(customer.id);
-  const toast = useToast();
-  const errors = fieldErrors(add.error);
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Old register balance">
-      <div className={sheetStyles.body}>
-        <p className={actions.text}>
-          What {customer.name} already owed in the paper register when you started using this app.
-          It is entered once and paid off first.
-        </p>
-        <FormError error={add.error} shownFields={["amount", "notes"]} />
-        <MoneyField
-          label="Amount owed"
-          large
-          value={amount}
-          error={errors["amount"]}
-          onChange={setAmount}
-        />
-        <TextField
-          label="Note"
-          placeholder="e.g. from register page 14"
-          value={notes}
-          error={errors["notes"]}
-          onChange={(event) => {
-            setNotes(event.target.value);
-          }}
-        />
-        <Button
-          block
-          disabled={add.isPending || amount === ""}
-          onClick={() => {
-            add.mutate(
-              { body: { amount, ...(notes.trim() ? { notes: notes.trim() } : {}) }, key },
-              {
-                onSuccess: (saved) => {
-                  toast(`Old balance added. ${balanceText(customer.name, saved.customerBalance)}`);
-                  onClose();
-                },
-                onError: (error) => {
-                  renewAfterMismatch(error, renew);
-                },
-              },
-            );
-          }}
-        >
-          {add.isPending ? "Saving…" : "Add old balance"}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function ApplyCredit({
-  customer,
-  open,
-  onClose,
-}: {
-  customer: Customer;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const { key } = useIdempotencyKey();
-  const apply = useApplyCredit(customer.id);
-  const toast = useToast();
-  return (
-    <ConfirmDialog
-      open={open}
-      title="Use credit on dues?"
-      confirmLabel="Use credit"
-      busy={apply.isPending}
-      error={apply.isError ? saveErrorMessage(apply.error) : null}
-      onClose={() => {
-        apply.reset();
-        onClose();
-      }}
-      onConfirm={() => {
-        apply.mutate(key, {
-          onSuccess: (result) => {
-            const used = result.allocations.reduce((sum, line) => sum + line.amountPaise, 0);
-            toast(
-              `${formatRupees(used)} of credit used. ${balanceText(customer.name, result.customerBalance)}`,
-            );
-            onClose();
-          },
-        });
-      }}
-    >
-      <p className={actions.text}>
-        {customer.name} has money paid earlier that is not yet set against any trip. It will pay the
-        oldest dues first.
-      </p>
-    </ConfirmDialog>
   );
 }
 
@@ -381,9 +185,9 @@ function Ledger({ customerId, startDate }: { customerId: number; startDate: IsoD
       cell: (entry) =>
         entry.debitPaise > 0 ? (
           <span className={styles.owed}>+{formatRupees(entry.debitPaise)}</span>
-        ) : (
+        ) : entry.creditPaise > 0 ? (
           <span className={styles.paid}>−{formatRupees(entry.creditPaise)}</span>
-        ),
+        ) : null,
       phone: "amount",
       numeric: true,
       phoneOnly: true,

@@ -8,6 +8,7 @@ const MONEY_QUERIES = new Set([
   "trip",
   "dues",
   "customer-ledger",
+  "customer-balance",
   "payments",
   "payment",
   "expenses",

@@ -1,12 +1,13 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { fakeApi, json } from "../../test/fake-api.ts";
-import { CUSTOMERS, DUES } from "../../test/fixtures.ts";
+import { BALANCE_ROUTES, CUSTOMERS, DUES } from "../../test/fixtures.ts";
 import { renderApp, signedInRoutes } from "../../test/render.tsx";
 
 function duesApi(extra: Record<string, (request: Request) => Response | Promise<Response>> = {}) {
   return fakeApi({
     ...signedInRoutes,
+    ...BALANCE_ROUTES,
     "GET /dues": () => json(DUES),
     "GET /customers": () => json(CUSTOMERS),
     ...extra,
@@ -32,7 +33,7 @@ describe("Dues", () => {
   it("lists every customer on the second tab, with what each owes", async () => {
     const { user, router } = await renderApp(duesApi(), { path: "/dues" });
 
-    await user.click(await screen.findByRole("tab", { name: "All customers" }));
+    await user.click(await screen.findByRole("button", { name: "All customers" }));
 
     const list = await screen.findByRole("list", { name: "Customers" });
     expect(within(list).getByRole("link", { name: /Ramesh Bishnoi/ })).toHaveTextContent("₹18,500");

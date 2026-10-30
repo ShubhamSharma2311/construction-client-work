@@ -16,8 +16,13 @@ import {
   newCustomerBody,
 } from "./CustomerFields.tsx";
 import styles from "./CustomerPicker.module.css";
-import { customerSearch, useCreateCustomer, useCustomerSearch } from "./useCustomers.ts";
-import { useDues } from "./useDues.ts";
+import {
+  customerSearch,
+  useCreateCustomer,
+  useCustomerBalance,
+  useCustomerSearch,
+} from "./useCustomers.ts";
+import { standingOf } from "./standing.ts";
 
 export interface PickedCustomer {
   id: number;
@@ -83,22 +88,22 @@ export function CustomerPicker({ value, onChange, error }: CustomerPickerProps) 
 }
 
 function BalanceNote({ customerId }: { customerId: number }) {
-  const dues = useDues();
-  if (dues.isError)
+  const balance = useCustomerBalance(customerId);
+  if (balance.isError)
     return <span className={styles.note}>Could not load what this customer owes.</span>;
-  const row = dues.data?.customers.find((candidate) => candidate.customer.id === customerId);
-  if (!row) return null;
-  if (row.balancePaise > 0) {
+  if (!balance.data) return null;
+  const standing = standingOf(balance.data);
+  if (standing.kind === "owes") {
     return (
       <span className={styles.note}>
-        Owes <Money paise={row.balancePaise} tone="owed" />
+        Owes <Money paise={standing.paise} tone="owed" />
       </span>
     );
   }
-  if (row.creditPaise > 0) {
+  if (standing.kind === "credit") {
     return (
       <span className={styles.note}>
-        Has <Money paise={row.creditPaise} tone="received" /> credit
+        Has <Money paise={standing.paise} tone="received" /> credit
       </span>
     );
   }
@@ -150,6 +155,7 @@ function CustomerSearch({
   const [term, setTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [lookupFailed, setLookupFailed] = useState(false);
   const listId = useId();
   const { api } = useServices();
   const queryClient = useQueryClient();
@@ -176,10 +182,16 @@ function CustomerSearch({
   // Enter before the matches for what was typed have arrived: look them up now and take
   // the best one, instead of acting on the list still showing the last search.
   const chooseFresh = async () => {
-    const fresh = await queryClient.query(customerSearch(api, typed));
-    const best = fresh[0];
-    if (best) onPick(best);
-    else if (typed) onAdd(typed);
+    setLookupFailed(false);
+    try {
+      const fresh = await queryClient.query(customerSearch(api, typed));
+      const best = fresh[0];
+      if (best) onPick(best);
+      else if (typed) onAdd(typed);
+    } catch (error) {
+      console.error("Customer lookup failed", error);
+      setLookupFailed(true);
+    }
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -200,7 +212,15 @@ function CustomerSearch({
 
   return (
     <div className={styles.field}>
-      <Field label="Customer" error={error} hint="Type a name, village or phone number">
+      <Field
+        label="Customer"
+        error={
+          lookupFailed
+            ? "Could not look up customers. Check the connection and press Enter again."
+            : error
+        }
+        hint="Type a name, village or phone number"
+      >
         {(control) => (
           <input
             {...control}

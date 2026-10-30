@@ -2,7 +2,15 @@ import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Ok } from "../../api/types.ts";
 import { apiError, fakeApi, json } from "../../test/fake-api.ts";
-import { CUSTOMERS, DRIVERS, KHETS, NO_DUES, TRACTORS, TRIP } from "../../test/fixtures.ts";
+import {
+  CUSTOMERS,
+  DRIVERS,
+  KHETS,
+  NO_DUES,
+  TRACTORS,
+  TRIP,
+  BALANCE_ROUTES,
+} from "../../test/fixtures.ts";
 import { renderApp, signedInRoutes } from "../../test/render.tsx";
 
 beforeEach(() => {
@@ -29,6 +37,7 @@ function newTripApi(answer: () => Response | Promise<Response> = () => json(save
   const sent: Sent[] = [];
   const api = fakeApi({
     ...signedInRoutes,
+    ...BALANCE_ROUTES,
     "GET /drivers": () => json(DRIVERS),
     "GET /tractors": () => json(TRACTORS),
     "GET /khets": () => json(KHETS),

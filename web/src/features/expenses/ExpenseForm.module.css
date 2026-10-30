@@ -1,0 +1,13 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 560px;
+}
+
+/* Top-aligned, so a hint under one field does not stretch the box beside it. */
+.pair {
+  display: grid;
+  align-items: start;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}

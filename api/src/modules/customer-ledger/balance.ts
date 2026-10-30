@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { notFound } from "../../lib/errors.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 
 export const customerBalanceDto = z.object({
@@ -26,4 +27,14 @@ export async function customerBalance(db: Db | Tx, customerId: number): Promise<
     duePaise: Number(row.due),
     creditPaise: Number(row.credit),
   };
+}
+
+/**
+ * One customer's standing for their account screen. The dues list holds only customers who
+ * owe, so a customer in credit can be read only from here.
+ */
+export async function balanceOfCustomer(db: Db, customerId: number): Promise<CustomerBalance> {
+  const customer = await db.customer.findUnique({ where: { id: customerId }, select: { id: true } });
+  if (!customer) throw notFound("Customer", customerId);
+  return customerBalance(db, customerId);
 }

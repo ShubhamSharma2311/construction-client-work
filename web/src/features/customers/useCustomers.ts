@@ -139,3 +139,15 @@ export function useApplyCredit(id: number) {
     onSuccess: () => refreshMoney(),
   });
 }
+
+export type CustomerBalance = Ok<"/customers/{id}/balance", "get">;
+
+/** What one customer owes or holds as credit; the dues list leaves out those in credit. */
+export function useCustomerBalance(id: number): UseQueryResult<CustomerBalance> {
+  const { api } = useServices();
+  return useQuery({
+    queryKey: ["customer-balance", id],
+    queryFn: async () =>
+      unwrap(await api.GET("/customers/{id}/balance", { params: { path: { id } } })),
+  });
+}

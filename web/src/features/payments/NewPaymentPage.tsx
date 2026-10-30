@@ -10,7 +10,7 @@ import { Button } from "../../ui/Button.tsx";
 import { Choice } from "../../ui/Choice.tsx";
 import { DateField } from "../../ui/DateField.tsx";
 import { FormError } from "../../ui/FormError.tsx";
-import { Loading } from "../../ui/LoadState.tsx";
+import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { MoneyField } from "../../ui/MoneyField.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
@@ -36,6 +36,14 @@ export function NewPaymentPage() {
       <>
         <PageHeader title={title} />
         <SetupPrompt />
+      </>
+    );
+  }
+  if (settings.isError) {
+    return (
+      <>
+        <PageHeader title={title} />
+        <LoadError error={settings.error} onRetry={() => void settings.refetch()} />
       </>
     );
   }
@@ -113,12 +121,12 @@ function PaymentForm({
     allocation: "AUTO",
     chosen: [],
   });
+  const unpaid = useUnpaidTrips(values.customer?.id ?? null);
   // Checked live once a save was tried, so each mark clears as soon as it is fixed.
   const [tried, setTried] = useState(false);
-  const problems = tried ? checkPayment(values) : {};
+  const problems = tried ? checkPayment(values, unpaid.data ?? []) : {};
   const { key, renew } = useIdempotencyKey();
   const record = useRecordPayment();
-  const unpaid = useUnpaidTrips(values.customer?.id ?? null);
   const toast = useToast();
   const navigate = useNavigate();
   const serverProblems = fieldErrors(record.error);
@@ -130,7 +138,7 @@ function PaymentForm({
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (Object.keys(checkPayment(values)).length > 0 || !values.customer) return;
+    if (Object.keys(checkPayment(values, unpaid.data ?? [])).length > 0 || !values.customer) return;
     const name = values.customer.name;
     record.mutate(
       { customerId: values.customer.id, body: paymentBody(values, unpaid.data ?? []), key },
@@ -318,7 +326,7 @@ function ChooseTrips({
           </label>
         );
       })}
-      {values.chosen.length > 0 && leftPaise > 0 ? (
+      {values.chosen.length > 0 && leftPaise > 0 && values.kind === "PAYMENT" ? (
         <p className={styles.explain}>
           {formatRupees(leftPaise)} is more than the ticked trips owe and will be kept as credit.
         </p>

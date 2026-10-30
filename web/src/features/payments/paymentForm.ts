@@ -48,7 +48,10 @@ export function shareOver(
   return { shares, leftPaise: left };
 }
 
-export function checkPayment(values: PaymentFormValues): Record<string, string> {
+export function checkPayment(
+  values: PaymentFormValues,
+  unpaid: TripItem[],
+): Record<string, string> {
   const problems: Record<string, string> = {};
   if (!values.customer) problems["customer"] = "Pick the customer";
   if (!values.paidOn) problems["paidOn"] = "Pick the date";
@@ -59,6 +62,11 @@ export function checkPayment(values: PaymentFormValues): Record<string, string> 
   }
   if (values.allocation === "MANUAL" && values.chosen.length === 0) {
     problems["allocation"] = "Tick the trips this pays, or let it pay the oldest dues first";
+  } else if (values.allocation === "MANUAL" && values.kind === "WRITE_OFF" && amount !== null) {
+    // Forgiven money cannot become credit: the ticked trips must owe all of it.
+    if (shareOver(amount, values.chosen, unpaid).leftPaise > 0) {
+      problems["allocation"] = "Tick trips that owe at least the amount written off";
+    }
   }
   if (values.kind === "WRITE_OFF" && values.notes.trim() === "") {
     problems["notes"] = "Say why it is written off, e.g. discount agreed";

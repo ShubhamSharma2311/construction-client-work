@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeApi, json } from "../../test/fake-api.ts";
-import { CUSTOMERS, DUES, LEDGER, tripPage, TRIP } from "../../test/fixtures.ts";
+import { CUSTOMERS, DUES, LEDGER, tripPage, TRIP, BALANCE_ROUTES } from "../../test/fixtures.ts";
 import { renderApp, signedInRoutes } from "../../test/render.tsx";
 
 beforeEach(() => {
@@ -23,6 +23,7 @@ function accountApi(
 ) {
   return fakeApi({
     ...signedInRoutes,
+    ...BALANCE_ROUTES,
     "GET /customers/7": () => json(ramesh),
     "GET /customers/8": () => json(sunil),
     "GET /customers/7/ledger": () => json(LEDGER),
@@ -53,6 +54,18 @@ describe("A customer's account", () => {
       "/trips/41",
     );
     expect(screen.getByText(/Balance at the end/)).toHaveTextContent("₹21,000");
+  });
+
+  it("shows credit held for a customer the dues list leaves out, and offers to use it", async () => {
+    const api = accountApi({
+      "GET /customers/7/balance": () =>
+        json({ balancePaise: -200000, duePaise: 100000, creditPaise: 300000 }),
+    });
+
+    await renderApp(api, { path: "/dues/7" });
+
+    expect((await screen.findByText("Has credit")).parentElement).toHaveTextContent("₹2,000");
+    expect(screen.getByRole("button", { name: "Use credit on dues" })).toBeInTheDocument();
   });
 
   it("opens payment and write-off entries with the customer already chosen", async () => {

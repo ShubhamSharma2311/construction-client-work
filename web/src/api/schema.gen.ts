@@ -4,5856 +4,5801 @@
  */
 
 export interface paths {
-  "/health": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              /** @enum {string} */
-              status: "ok" | "unavailable";
-              /** @enum {string} */
-              database: "ok" | "unreachable";
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-        /** @description Default Response */
-        503: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              /** @enum {string} */
-              status: "ok" | "unavailable";
-              /** @enum {string} */
-              database: "ok" | "unreachable";
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            username: string;
-            password: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accessToken: string;
-              /** Format: date-time */
-              accessTokenExpiresAt: string;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/refresh": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accessToken: string;
-              /** Format: date-time */
-              accessTokenExpiresAt: string;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/logout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": null;
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              username: string;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/change-password": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            currentPassword: string;
-            newPassword: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": null;
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/settings": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              businessName: string;
-              businessStartDate: string;
-              openingCashPaise: number;
-              openingOnlinePaise: number;
-            };
-          };
-        };
-      };
-    };
-    put: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            businessName: string;
-            businessStartDate: string;
-            openingCash: number | string;
-            openingOnline: number | string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              businessName: string;
-              businessStartDate: string;
-              openingCashPaise: number;
-              openingOnlinePaise: number;
-            };
-          };
-        };
-      };
-    };
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/audit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          page?: number;
-          limit?: number;
-          entity: string;
-          entityId?: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: string;
-                entity: string;
-                entityId: string;
-                /** @enum {string} */
-                action: "CREATE" | "UPDATE" | "DELETE" | "RESTORE";
-                before: unknown;
-                after: unknown;
-                at: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                name: string;
-                phone: string | null;
-                village: string | null;
-                notes: string | null;
-                isActive: boolean;
-                createdAt: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            phone?: string | null;
-            village?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              customer: {
-                id: number;
-                name: string;
-                phone: string | null;
-                village: string | null;
-                notes: string | null;
-                isActive: boolean;
-                createdAt: string;
-              };
-              possibleDuplicates: {
-                id: number;
-                name: string;
-                phone: string | null;
-                village: string | null;
-                notes: string | null;
-                isActive: boolean;
-                createdAt: string;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              village: string | null;
-              notes: string | null;
-              isActive: boolean;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name?: string;
-            phone?: string | null;
-            village?: string | null;
-            notes?: string | null;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              village: string | null;
-              notes: string | null;
-              isActive: boolean;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/tractors": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                regNumber: string;
-                label: string;
-                isActive: boolean;
-                defaultDriver: {
-                  id: number;
-                  name: string;
-                } | null;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            regNumber: string;
-            label: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              regNumber: string;
-              label: string;
-              isActive: boolean;
-              defaultDriver: {
-                id: number;
-                name: string;
-              } | null;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tractors/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              regNumber: string;
-              label: string;
-              isActive: boolean;
-              defaultDriver: {
-                id: number;
-                name: string;
-              } | null;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            regNumber?: string;
-            label?: string;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              tractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-                isActive: boolean;
-                defaultDriver: {
-                  id: number;
-                  name: string;
-                } | null;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/drivers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                name: string;
-                phone: string | null;
-                joinedOn: string;
-                leftOn: string | null;
-                isActive: boolean;
-                defaultTractor: {
-                  id: number;
-                  regNumber: string;
-                  label: string;
-                } | null;
-                currentMonthlyPaise: number | null;
-                salaryRates: {
-                  id: number;
-                  effectiveFrom: string;
-                  monthlyPaise: number;
-                }[];
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            phone?: string | null;
-            joinedOn: string;
-            monthlySalary: number | string;
-            defaultTractorId?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              joinedOn: string;
-              leftOn: string | null;
-              isActive: boolean;
-              defaultTractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-              } | null;
-              currentMonthlyPaise: number | null;
-              salaryRates: {
-                id: number;
-                effectiveFrom: string;
-                monthlyPaise: number;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              joinedOn: string;
-              leftOn: string | null;
-              isActive: boolean;
-              defaultTractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-              } | null;
-              currentMonthlyPaise: number | null;
-              salaryRates: {
-                id: number;
-                effectiveFrom: string;
-                monthlyPaise: number;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name?: string;
-            phone?: string | null;
-            joinedOn?: string;
-            leftOn?: string | null;
-            defaultTractorId?: number | null;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              driver: {
-                id: number;
-                name: string;
-                phone: string | null;
-                joinedOn: string;
-                leftOn: string | null;
-                isActive: boolean;
-                defaultTractor: {
-                  id: number;
-                  regNumber: string;
-                  label: string;
-                } | null;
-                currentMonthlyPaise: number | null;
-                salaryRates: {
-                  id: number;
-                  effectiveFrom: string;
-                  monthlyPaise: number;
-                }[];
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/drivers/{id}/salary-rates": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            effectiveFrom: string;
-            monthlySalary: number | string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              joinedOn: string;
-              leftOn: string | null;
-              isActive: boolean;
-              defaultTractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-              } | null;
-              currentMonthlyPaise: number | null;
-              salaryRates: {
-                id: number;
-                effectiveFrom: string;
-                monthlyPaise: number;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/salary-rates/{rateId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-          rateId: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              joinedOn: string;
-              leftOn: string | null;
-              isActive: boolean;
-              defaultTractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-              } | null;
-              currentMonthlyPaise: number | null;
-              salaryRates: {
-                id: number;
-                effectiveFrom: string;
-                monthlyPaise: number;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/khets": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                name: string;
-                location: string | null;
-                isActive: boolean;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            location?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              location: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/khets/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              location: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name?: string;
-            location?: string | null;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              location: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/labourers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                name: string;
-                phone: string | null;
-                notes: string | null;
-                isActive: boolean;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            phone?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/labourers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name?: string;
-            phone?: string | null;
-            notes?: string | null;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              phone: string | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/partners": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          page?: number;
-          limit?: number;
-          search?: string;
-          active?: "true" | "false" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                name: string;
-                sharePercent: number | null;
-                notes: string | null;
-                isActive: boolean;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            sharePercent?: number | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              sharePercent: number | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partners/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              sharePercent: number | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name?: string;
-            sharePercent?: number | null;
-            notes?: string | null;
-            isActive?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              sharePercent: number | null;
-              notes: string | null;
-              isActive: boolean;
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/trips": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          customerId?: number;
-          driverId?: number;
-          tractorId?: number;
-          khetId?: number;
-          status?: "PAID" | "PARTIAL" | "DUE";
-          kind?: "TRIP" | "OPENING_BALANCE";
-          deleted?: "true" | "false";
-          page?: number;
-          limit?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-              totals: {
-                count: number;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-              };
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            tripDate: string;
-            customerId: number;
-            driverId: number;
-            tractorId: number;
-            khetId: number;
-            amount: number | string;
-            quantityNote?: string | null;
-            notes?: string | null;
-            payment:
-              | {
-                  /** @enum {string} */
-                  type: "DUE";
-                }
-              | {
-                  /** @enum {string} */
-                  type: "CASH";
-                }
-              | {
-                  /** @enum {string} */
-                  type: "ONLINE";
-                  reference?: string;
-                }
-              | {
-                  /** @enum {string} */
-                  type: "PARTIAL";
-                  paidAmount: number | string;
-                  /** @enum {string} */
-                  mode: "CASH" | "ONLINE";
-                  reference?: string;
-                };
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              trip: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/trips/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          customerId?: number;
-          driverId?: number;
-          tractorId?: number;
-          khetId?: number;
-          status?: "PAID" | "PARTIAL" | "DUE";
-          kind?: "TRIP" | "OPENING_BALANCE";
-          deleted?: "true" | "false";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/trips/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              /** @enum {string} */
-              kind: "TRIP" | "OPENING_BALANCE";
-              tripDate: string;
-              customer: {
-                id: number;
-                name: string;
-              };
-              driver: {
-                id: number;
-                name: string;
-              } | null;
-              tractor: {
-                id: number;
-                regNumber: string;
-              } | null;
-              khet: {
-                id: number;
-                name: string;
-              } | null;
-              amountPaise: number;
-              receivedPaise: number;
-              duePaise: number;
-              /** @enum {string} */
-              status: "PAID" | "PARTIAL" | "DUE";
-              quantityNote: string | null;
-              notes: string | null;
-              deletedAt: string | null;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: {
-          releasePayments?: "true" | "false";
-        };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              trip: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              releasedPaise: number;
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            tripDate?: string;
-            customerId?: number;
-            driverId?: number;
-            tractorId?: number;
-            khetId?: number;
-            amount?: number | string;
-            quantityNote?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              trip: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/trips/{id}/restore": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              trip: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers/{id}/opening-balance": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            amount: number | string;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              trip: {
-                id: number;
-                /** @enum {string} */
-                kind: "TRIP" | "OPENING_BALANCE";
-                tripDate: string;
-                customer: {
-                  id: number;
-                  name: string;
-                };
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                khet: {
-                  id: number;
-                  name: string;
-                } | null;
-                amountPaise: number;
-                receivedPaise: number;
-                duePaise: number;
-                /** @enum {string} */
-                status: "PAID" | "PARTIAL" | "DUE";
-                quantityNote: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers/{id}/payments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json":
-            | {
-                /** @enum {string} */
-                kind: "PAYMENT";
-                paidOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string;
-                notes?: string | null;
-                allocation?:
-                  | {
-                      /** @enum {string} */
-                      strategy: "AUTO";
-                    }
-                  | {
-                      /** @enum {string} */
-                      strategy: "MANUAL";
-                      items: {
-                        tripId: number;
-                        amount: number | string;
-                      }[];
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
                     };
-              }
-            | {
-                /** @enum {string} */
-                kind: "WRITE_OFF";
-                paidOn: string;
-                amount: number | string;
-                notes?: string | null;
-                allocation?:
-                  | {
-                      /** @enum {string} */
-                      strategy: "AUTO";
-                    }
-                  | {
-                      /** @enum {string} */
-                      strategy: "MANUAL";
-                      items: {
-                        tripId: number;
-                        amount: number | string;
-                      }[];
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            status: "ok" | "unavailable";
+                            /** @enum {string} */
+                            database: "ok" | "unreachable";
+                        };
                     };
-              };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                customer: {
-                  id: number;
-                  name: string;
                 };
-                paidOn: string;
-                /** @enum {string} */
-                kind: "PAYMENT" | "WRITE_OFF";
-                /** @enum {string|null} */
-                mode: "CASH" | "ONLINE" | null;
-                amountPaise: number;
-                allocatedPaise: number;
-                unallocatedPaise: number;
-                reference: string | null;
-                notes: string | null;
-                deliveryTripId: number | null;
-                deletedAt: string | null;
-                createdAt: string;
-                allocations: {
-                  tripId: number;
-                  tripDate: string;
-                  /** @enum {string} */
-                  tripKind: "TRIP" | "OPENING_BALANCE";
-                  amountPaise: number;
-                }[];
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers/{id}/apply-credit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              allocations: {
-                paymentId: number;
-                tripId: number;
-                amountPaise: number;
-              }[];
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/payments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          customerId?: number;
-          kind?: "PAYMENT" | "WRITE_OFF";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-          page?: number;
-          limit?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                customer: {
-                  id: number;
-                  name: string;
+                /** @description Default Response */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            status: "ok" | "unavailable";
+                            /** @enum {string} */
+                            database: "ok" | "unreachable";
+                        };
+                    };
                 };
-                paidOn: string;
-                /** @enum {string} */
-                kind: "PAYMENT" | "WRITE_OFF";
-                /** @enum {string|null} */
-                mode: "CASH" | "ONLINE" | null;
-                amountPaise: number;
-                allocatedPaise: number;
-                unallocatedPaise: number;
-                reference: string | null;
-                notes: string | null;
-                deliveryTripId: number | null;
-                deletedAt: string | null;
-                createdAt: string;
-                allocations: {
-                  tripId: number;
-                  tripDate: string;
-                  /** @enum {string} */
-                  tripKind: "TRIP" | "OPENING_BALANCE";
-                  amountPaise: number;
-                }[];
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-              totals: {
-                cashPaise: number;
-                onlinePaise: number;
-                writeOffPaise: number;
-              };
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/payments/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          customerId?: number;
-          kind?: "PAYMENT" | "WRITE_OFF";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/payments/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              customer: {
-                id: number;
-                name: string;
-              };
-              paidOn: string;
-              /** @enum {string} */
-              kind: "PAYMENT" | "WRITE_OFF";
-              /** @enum {string|null} */
-              mode: "CASH" | "ONLINE" | null;
-              amountPaise: number;
-              allocatedPaise: number;
-              unallocatedPaise: number;
-              reference: string | null;
-              notes: string | null;
-              deliveryTripId: number | null;
-              deletedAt: string | null;
-              createdAt: string;
-              allocations: {
-                tripId: number;
-                tripDate: string;
-                /** @enum {string} */
-                tripKind: "TRIP" | "OPENING_BALANCE";
-                amountPaise: number;
-              }[];
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                customer: {
-                  id: number;
-                  name: string;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        username: string;
+                        password: string;
+                    };
                 };
-                paidOn: string;
-                /** @enum {string} */
-                kind: "PAYMENT" | "WRITE_OFF";
-                /** @enum {string|null} */
-                mode: "CASH" | "ONLINE" | null;
-                amountPaise: number;
-                allocatedPaise: number;
-                unallocatedPaise: number;
-                reference: string | null;
-                notes: string | null;
-                deliveryTripId: number | null;
-                deletedAt: string | null;
-                createdAt: string;
-                allocations: {
-                  tripId: number;
-                  tripDate: string;
-                  /** @enum {string} */
-                  tripKind: "TRIP" | "OPENING_BALANCE";
-                  amountPaise: number;
-                }[];
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
             };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            paidOn?: string;
-            /** @enum {string} */
-            mode?: "CASH" | "ONLINE";
-            reference?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                customer: {
-                  id: number;
-                  name: string;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accessToken: string;
+                            /** Format: date-time */
+                            accessTokenExpiresAt: string;
+                        };
+                    };
                 };
-                paidOn: string;
-                /** @enum {string} */
-                kind: "PAYMENT" | "WRITE_OFF";
-                /** @enum {string|null} */
-                mode: "CASH" | "ONLINE" | null;
-                amountPaise: number;
-                allocatedPaise: number;
-                unallocatedPaise: number;
-                reference: string | null;
-                notes: string | null;
-                deliveryTripId: number | null;
-                deletedAt: string | null;
-                createdAt: string;
-                allocations: {
-                  tripId: number;
-                  tripDate: string;
-                  /** @enum {string} */
-                  tripKind: "TRIP" | "OPENING_BALANCE";
-                  amountPaise: number;
-                }[];
-              };
-              customerBalance: {
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-              };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    trace?: never;
-  };
-  "/customers/{id}/ledger": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              customer: {
-                id: number;
-                name: string;
-                phone: string | null;
-              };
-              from: string | null;
-              to: string | null;
-              openingBalancePaise: number;
-              entries: {
-                date: string;
-                /** @enum {string} */
-                type: "OPENING_BALANCE" | "TRIP" | "PAYMENT" | "WRITE_OFF";
-                refId: number;
-                description: string;
-                debitPaise: number;
-                creditPaise: number;
-                balancePaise: number;
-              }[];
-              totals: {
-                debitPaise: number;
-                creditPaise: number;
-              };
-              closingBalancePaise: number;
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/customers/{id}/ledger/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-        };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/dues": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              asOf: string;
-              customers: {
-                customer: {
-                  id: number;
-                  name: string;
-                  phone: string | null;
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accessToken: string;
+                            /** Format: date-time */
+                            accessTokenExpiresAt: string;
+                        };
+                    };
                 };
-                balancePaise: number;
-                duePaise: number;
-                creditPaise: number;
-                oldestDueDate: string;
-                ageDays: number;
-                /** @enum {string} */
-                bucket: "0-7" | "8-30" | "31-90" | "90+";
-                hasUnappliedCredit: boolean;
-              }[];
-              totals: {
-                balancePaise: number;
-                byBucket: {
-                  [key: string]: number;
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": null;
+                    };
                 };
-              };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/dues/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/expenses": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          category?:
-            | "LABOUR"
-            | "DIESEL"
-            | "ROYALTY"
-            | "POLICE"
-            | "OTHER"
-            | "EMERGENCY"
-            | "TRACTOR_SERVICE"
-            | "TRACTOR_EMI";
-          tractorId?: number;
-          driverId?: number;
-          labourerId?: number;
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-          page?: number;
-          limit?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                /** @enum {string} */
-                category:
-                  | "LABOUR"
-                  | "DIESEL"
-                  | "ROYALTY"
-                  | "POLICE"
-                  | "OTHER"
-                  | "EMERGENCY"
-                  | "TRACTOR_SERVICE"
-                  | "TRACTOR_EMI";
-                spentOn: string;
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                labourer: {
-                  id: number;
-                  name: string;
-                } | null;
-                dieselLitres: number | null;
-                hourMeter: number | null;
-                tractorLoanId: number | null;
-                emiMonth: string | null;
-                lateFeePaise: number | null;
-                periodFrom: string | null;
-                periodTo: string | null;
-                reference: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-              totals: {
-                amountPaise: number;
-                byCategory: {
-                  [key: string]: number;
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            username: string;
+                        };
+                    };
                 };
-              };
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json":
-            | {
-                /** @enum {string} */
-                category: "LABOUR";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes?: string | null;
-                labourerId: number;
-              }
-            | {
-                /** @enum {string} */
-                category: "ROYALTY";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes?: string | null;
-                periodFrom?: string;
-                periodTo?: string;
-              }
-            | {
-                /** @enum {string} */
-                category: "POLICE";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes: string;
-              }
-            | {
-                /** @enum {string} */
-                category: "OTHER";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes: string;
-              }
-            | {
-                /** @enum {string} */
-                category: "TRACTOR_SERVICE";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes: string;
-                tractorId: number;
-                hourMeter?: number;
-              }
-            | {
-                /** @enum {string} */
-                category: "DIESEL";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes?: string | null;
-                tractorId: number;
-                driverId: number;
-                litres: number | string;
-              }
-            | {
-                /** @enum {string} */
-                category: "EMERGENCY";
-                spentOn: string;
-                amount: number | string;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                reference?: string | null;
-                notes: string;
-                tractorId?: number;
-                driverId?: number;
-              };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              expense: {
-                id: number;
-                /** @enum {string} */
-                category:
-                  | "LABOUR"
-                  | "DIESEL"
-                  | "ROYALTY"
-                  | "POLICE"
-                  | "OTHER"
-                  | "EMERGENCY"
-                  | "TRACTOR_SERVICE"
-                  | "TRACTOR_EMI";
-                spentOn: string;
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                labourer: {
-                  id: number;
-                  name: string;
-                } | null;
-                dieselLitres: number | null;
-                hourMeter: number | null;
-                tractorLoanId: number | null;
-                emiMonth: string | null;
-                lateFeePaise: number | null;
-                periodFrom: string | null;
-                periodTo: string | null;
-                reference: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              warnings: string[];
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/expenses/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          category?:
-            | "LABOUR"
-            | "DIESEL"
-            | "ROYALTY"
-            | "POLICE"
-            | "OTHER"
-            | "EMERGENCY"
-            | "TRACTOR_SERVICE"
-            | "TRACTOR_EMI";
-          tractorId?: number;
-          driverId?: number;
-          labourerId?: number;
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/expenses/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              /** @enum {string} */
-              category:
-                | "LABOUR"
-                | "DIESEL"
-                | "ROYALTY"
-                | "POLICE"
-                | "OTHER"
-                | "EMERGENCY"
-                | "TRACTOR_SERVICE"
-                | "TRACTOR_EMI";
-              spentOn: string;
-              amountPaise: number;
-              /** @enum {string} */
-              mode: "CASH" | "ONLINE";
-              driver: {
-                id: number;
-                name: string;
-              } | null;
-              tractor: {
-                id: number;
-                regNumber: string;
-              } | null;
-              labourer: {
-                id: number;
-                name: string;
-              } | null;
-              dieselLitres: number | null;
-              hourMeter: number | null;
-              tractorLoanId: number | null;
-              emiMonth: string | null;
-              lateFeePaise: number | null;
-              periodFrom: string | null;
-              periodTo: string | null;
-              reference: string | null;
-              notes: string | null;
-              deletedAt: string | null;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              /** @enum {string} */
-              category:
-                | "LABOUR"
-                | "DIESEL"
-                | "ROYALTY"
-                | "POLICE"
-                | "OTHER"
-                | "EMERGENCY"
-                | "TRACTOR_SERVICE"
-                | "TRACTOR_EMI";
-              spentOn: string;
-              amountPaise: number;
-              /** @enum {string} */
-              mode: "CASH" | "ONLINE";
-              driver: {
-                id: number;
-                name: string;
-              } | null;
-              tractor: {
-                id: number;
-                regNumber: string;
-              } | null;
-              labourer: {
-                id: number;
-                name: string;
-              } | null;
-              dieselLitres: number | null;
-              hourMeter: number | null;
-              tractorLoanId: number | null;
-              emiMonth: string | null;
-              lateFeePaise: number | null;
-              periodFrom: string | null;
-              periodTo: string | null;
-              reference: string | null;
-              notes: string | null;
-              deletedAt: string | null;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            spentOn?: string;
-            amount?: number | string;
-            /** @enum {string} */
-            mode?: "CASH" | "ONLINE";
-            reference?: string | null;
-            notes?: string | null;
-            labourerId?: number;
-            tractorId?: number | null;
-            driverId?: number | null;
-            periodFrom?: string | null;
-            periodTo?: string | null;
-            litres?: number | string;
-            hourMeter?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              expense: {
-                id: number;
-                /** @enum {string} */
-                category:
-                  | "LABOUR"
-                  | "DIESEL"
-                  | "ROYALTY"
-                  | "POLICE"
-                  | "OTHER"
-                  | "EMERGENCY"
-                  | "TRACTOR_SERVICE"
-                  | "TRACTOR_EMI";
-                spentOn: string;
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                labourer: {
-                  id: number;
-                  name: string;
-                } | null;
-                dieselLitres: number | null;
-                hourMeter: number | null;
-                tractorLoanId: number | null;
-                emiMonth: string | null;
-                lateFeePaise: number | null;
-                periodFrom: string | null;
-                periodTo: string | null;
-                reference: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/expenses/{id}/restore": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              /** @enum {string} */
-              category:
-                | "LABOUR"
-                | "DIESEL"
-                | "ROYALTY"
-                | "POLICE"
-                | "OTHER"
-                | "EMERGENCY"
-                | "TRACTOR_SERVICE"
-                | "TRACTOR_EMI";
-              spentOn: string;
-              amountPaise: number;
-              /** @enum {string} */
-              mode: "CASH" | "ONLINE";
-              driver: {
-                id: number;
-                name: string;
-              } | null;
-              tractor: {
-                id: number;
-                regNumber: string;
-              } | null;
-              labourer: {
-                id: number;
-                name: string;
-              } | null;
-              dieselLitres: number | null;
-              hourMeter: number | null;
-              tractorLoanId: number | null;
-              emiMonth: string | null;
-              lateFeePaise: number | null;
-              periodFrom: string | null;
-              periodTo: string | null;
-              reference: string | null;
-              notes: string | null;
-              deletedAt: string | null;
-              createdAt: string;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/diesel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string | null;
-              to: string | null;
-              tractors: {
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                  label: string;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        currentPassword: string;
+                        newPassword: string;
+                    };
                 };
-                litres: number;
-                amountPaise: number;
-                trips: number;
-                litresPerTrip: number | null;
-              }[];
-              drivers: {
-                driver: {
-                  id: number;
-                  name: string;
+            };
+            responses: {
+                /** @description Default Response */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": null;
+                    };
                 };
-                litres: number;
-                amountPaise: number;
-                trips: number;
-              }[];
-              totals: {
-                litres: number;
-                amountPaise: number;
-                trips: number;
-              };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/diesel/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
+    "/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tractors/{id}/loans": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            lender: string;
-            emiAmount: number | string;
-            emiDay: number;
-            firstEmiMonth: string;
-            totalInstallments: number;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              tractor: {
-                id: number;
-                regNumber: string;
-              };
-              lender: string;
-              emiPaise: number;
-              emiDay: number;
-              firstEmiMonth: string;
-              lastEmiMonth: string;
-              totalInstallments: number;
-              closedOn: string | null;
-              /** @enum {string|null} */
-              closedReason: "PAID_OFF" | "FORECLOSED" | null;
-              notes: string | null;
-              paidPaise: number;
-              summary: {
-                paidCount: number;
-                overdueCount: number;
-                nextDue: {
-                  month: string;
-                  dueDate: string;
-                } | null;
-              };
-              schedule: {
-                number: number;
-                month: string;
-                dueDate: string;
-                /** @enum {string} */
-                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                payment: {
-                  expenseId: number;
-                  paidOn: string;
-                  amountPaise: number;
-                  lateFeePaise: number;
-                } | null;
-              }[];
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/loans": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          tractorId?: number;
-          status?: "open" | "closed" | "all";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              tractor: {
-                id: number;
-                regNumber: string;
-              };
-              lender: string;
-              emiPaise: number;
-              emiDay: number;
-              firstEmiMonth: string;
-              lastEmiMonth: string;
-              totalInstallments: number;
-              closedOn: string | null;
-              /** @enum {string|null} */
-              closedReason: "PAID_OFF" | "FORECLOSED" | null;
-              notes: string | null;
-              paidPaise: number;
-              summary: {
-                paidCount: number;
-                overdueCount: number;
-                nextDue: {
-                  month: string;
-                  dueDate: string;
-                } | null;
-              };
-            }[];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/loans/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              tractor: {
-                id: number;
-                regNumber: string;
-              };
-              lender: string;
-              emiPaise: number;
-              emiDay: number;
-              firstEmiMonth: string;
-              lastEmiMonth: string;
-              totalInstallments: number;
-              closedOn: string | null;
-              /** @enum {string|null} */
-              closedReason: "PAID_OFF" | "FORECLOSED" | null;
-              notes: string | null;
-              paidPaise: number;
-              summary: {
-                paidCount: number;
-                overdueCount: number;
-                nextDue: {
-                  month: string;
-                  dueDate: string;
-                } | null;
-              };
-              schedule: {
-                number: number;
-                month: string;
-                dueDate: string;
-                /** @enum {string} */
-                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                payment: {
-                  expenseId: number;
-                  paidOn: string;
-                  amountPaise: number;
-                  lateFeePaise: number;
-                } | null;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": null;
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            lender?: string;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              tractor: {
-                id: number;
-                regNumber: string;
-              };
-              lender: string;
-              emiPaise: number;
-              emiDay: number;
-              firstEmiMonth: string;
-              lastEmiMonth: string;
-              totalInstallments: number;
-              closedOn: string | null;
-              /** @enum {string|null} */
-              closedReason: "PAID_OFF" | "FORECLOSED" | null;
-              notes: string | null;
-              paidPaise: number;
-              summary: {
-                paidCount: number;
-                overdueCount: number;
-                nextDue: {
-                  month: string;
-                  dueDate: string;
-                } | null;
-              };
-              schedule: {
-                number: number;
-                month: string;
-                dueDate: string;
-                /** @enum {string} */
-                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                payment: {
-                  expenseId: number;
-                  paidOn: string;
-                  amountPaise: number;
-                  lateFeePaise: number;
-                } | null;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/loans/{id}/emi": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            emiMonth: string;
-            paidOn: string;
-            amount: number | string;
-            lateFee?: number | string;
-            /** @enum {string} */
-            mode: "CASH" | "ONLINE";
-            reference?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              loan: {
-                id: number;
-                tractor: {
-                  id: number;
-                  regNumber: string;
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            businessName: string;
+                            businessStartDate: string;
+                            openingCashPaise: number;
+                            openingOnlinePaise: number;
+                        };
+                    };
                 };
-                lender: string;
-                emiPaise: number;
-                emiDay: number;
-                firstEmiMonth: string;
-                lastEmiMonth: string;
-                totalInstallments: number;
-                closedOn: string | null;
-                /** @enum {string|null} */
-                closedReason: "PAID_OFF" | "FORECLOSED" | null;
-                notes: string | null;
-                paidPaise: number;
-                summary: {
-                  paidCount: number;
-                  overdueCount: number;
-                  nextDue: {
-                    month: string;
-                    dueDate: string;
-                  } | null;
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        businessName: string;
+                        businessStartDate: string;
+                        openingCash: number | string;
+                        openingOnline: number | string;
+                    };
                 };
-                schedule: {
-                  number: number;
-                  month: string;
-                  dueDate: string;
-                  /** @enum {string} */
-                  status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                  payment: {
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            businessName: string;
+                            businessStartDate: string;
+                            openingCashPaise: number;
+                            openingOnlinePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    page?: number;
+                    limit?: number;
+                    entity: string;
+                    entityId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: string;
+                                entity: string;
+                                entityId: string;
+                                /** @enum {string} */
+                                action: "CREATE" | "UPDATE" | "DELETE" | "RESTORE";
+                                before: unknown;
+                                after: unknown;
+                                at: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                village: string | null;
+                                notes: string | null;
+                                isActive: boolean;
+                                createdAt: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        phone?: string | null;
+                        village?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            customer: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                village: string | null;
+                                notes: string | null;
+                                isActive: boolean;
+                                createdAt: string;
+                            };
+                            possibleDuplicates: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                village: string | null;
+                                notes: string | null;
+                                isActive: boolean;
+                                createdAt: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            village: string | null;
+                            notes: string | null;
+                            isActive: boolean;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        phone?: string | null;
+                        village?: string | null;
+                        notes?: string | null;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            village: string | null;
+                            notes: string | null;
+                            isActive: boolean;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/tractors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                                isActive: boolean;
+                                defaultDriver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        regNumber: string;
+                        label: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            regNumber: string;
+                            label: string;
+                            isActive: boolean;
+                            defaultDriver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tractors/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            regNumber: string;
+                            label: string;
+                            isActive: boolean;
+                            defaultDriver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        regNumber?: string;
+                        label?: string;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                                isActive: boolean;
+                                defaultDriver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/drivers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                joinedOn: string;
+                                leftOn: string | null;
+                                isActive: boolean;
+                                defaultTractor: {
+                                    id: number;
+                                    regNumber: string;
+                                    label: string;
+                                } | null;
+                                currentMonthlyPaise: number | null;
+                                salaryRates: {
+                                    id: number;
+                                    effectiveFrom: string;
+                                    monthlyPaise: number;
+                                }[];
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        phone?: string | null;
+                        joinedOn: string;
+                        monthlySalary: number | string;
+                        defaultTractorId?: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            joinedOn: string;
+                            leftOn: string | null;
+                            isActive: boolean;
+                            defaultTractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                            } | null;
+                            currentMonthlyPaise: number | null;
+                            salaryRates: {
+                                id: number;
+                                effectiveFrom: string;
+                                monthlyPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/drivers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            joinedOn: string;
+                            leftOn: string | null;
+                            isActive: boolean;
+                            defaultTractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                            } | null;
+                            currentMonthlyPaise: number | null;
+                            salaryRates: {
+                                id: number;
+                                effectiveFrom: string;
+                                monthlyPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        phone?: string | null;
+                        joinedOn?: string;
+                        leftOn?: string | null;
+                        defaultTractorId?: number | null;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            driver: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                joinedOn: string;
+                                leftOn: string | null;
+                                isActive: boolean;
+                                defaultTractor: {
+                                    id: number;
+                                    regNumber: string;
+                                    label: string;
+                                } | null;
+                                currentMonthlyPaise: number | null;
+                                salaryRates: {
+                                    id: number;
+                                    effectiveFrom: string;
+                                    monthlyPaise: number;
+                                }[];
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/drivers/{id}/salary-rates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        effectiveFrom: string;
+                        monthlySalary: number | string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            joinedOn: string;
+                            leftOn: string | null;
+                            isActive: boolean;
+                            defaultTractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                            } | null;
+                            currentMonthlyPaise: number | null;
+                            salaryRates: {
+                                id: number;
+                                effectiveFrom: string;
+                                monthlyPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/drivers/{id}/salary-rates/{rateId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    rateId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            joinedOn: string;
+                            leftOn: string | null;
+                            isActive: boolean;
+                            defaultTractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                            } | null;
+                            currentMonthlyPaise: number | null;
+                            salaryRates: {
+                                id: number;
+                                effectiveFrom: string;
+                                monthlyPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/khets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                location: string | null;
+                                isActive: boolean;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        location?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            location: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/khets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            location: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        location?: string | null;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            location: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/labourers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                                notes: string | null;
+                                isActive: boolean;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        phone?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/labourers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        phone?: string | null;
+                        notes?: string | null;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            phone: string | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/partners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    limit?: number;
+                    search?: string;
+                    active?: "true" | "false" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                sharePercent: number | null;
+                                notes: string | null;
+                                isActive: boolean;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        sharePercent?: number | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            sharePercent: number | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            sharePercent: number | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        sharePercent?: number | null;
+                        notes?: string | null;
+                        isActive?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            sharePercent: number | null;
+                            notes: string | null;
+                            isActive: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    customerId?: number;
+                    driverId?: number;
+                    tractorId?: number;
+                    khetId?: number;
+                    status?: "PAID" | "PARTIAL" | "DUE";
+                    kind?: "TRIP" | "OPENING_BALANCE";
+                    deleted?: "true" | "false";
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                            totals: {
+                                count: number;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        tripDate: string;
+                        customerId: number;
+                        driverId: number;
+                        tractorId: number;
+                        khetId: number;
+                        amount: number | string;
+                        quantityNote?: string | null;
+                        notes?: string | null;
+                        payment: {
+                            /** @enum {string} */
+                            type: "DUE";
+                        } | {
+                            /** @enum {string} */
+                            type: "CASH";
+                        } | {
+                            /** @enum {string} */
+                            type: "ONLINE";
+                            reference?: string;
+                        } | {
+                            /** @enum {string} */
+                            type: "PARTIAL";
+                            paidAmount: number | string;
+                            /** @enum {string} */
+                            mode: "CASH" | "ONLINE";
+                            reference?: string;
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            trip: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    customerId?: number;
+                    driverId?: number;
+                    tractorId?: number;
+                    khetId?: number;
+                    status?: "PAID" | "PARTIAL" | "DUE";
+                    kind?: "TRIP" | "OPENING_BALANCE";
+                    deleted?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            /** @enum {string} */
+                            kind: "TRIP" | "OPENING_BALANCE";
+                            tripDate: string;
+                            customer: {
+                                id: number;
+                                name: string;
+                            };
+                            driver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            } | null;
+                            khet: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            amountPaise: number;
+                            receivedPaise: number;
+                            duePaise: number;
+                            /** @enum {string} */
+                            status: "PAID" | "PARTIAL" | "DUE";
+                            quantityNote: string | null;
+                            notes: string | null;
+                            deletedAt: string | null;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: {
+                    releasePayments?: "true" | "false";
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            trip: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            releasedPaise: number;
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        tripDate?: string;
+                        customerId?: number;
+                        driverId?: number;
+                        tractorId?: number;
+                        khetId?: number;
+                        amount?: number | string;
+                        quantityNote?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            trip: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/trips/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            trip: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/opening-balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        amount: number | string;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            trip: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "TRIP" | "OPENING_BALANCE";
+                                tripDate: string;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                amountPaise: number;
+                                receivedPaise: number;
+                                duePaise: number;
+                                /** @enum {string} */
+                                status: "PAID" | "PARTIAL" | "DUE";
+                                quantityNote: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        kind: "PAYMENT";
+                        paidOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string;
+                        notes?: string | null;
+                        allocation?: {
+                            /** @enum {string} */
+                            strategy: "AUTO";
+                        } | {
+                            /** @enum {string} */
+                            strategy: "MANUAL";
+                            items: {
+                                tripId: number;
+                                amount: number | string;
+                            }[];
+                        };
+                    } | {
+                        /** @enum {string} */
+                        kind: "WRITE_OFF";
+                        paidOn: string;
+                        amount: number | string;
+                        notes?: string | null;
+                        allocation?: {
+                            /** @enum {string} */
+                            strategy: "AUTO";
+                        } | {
+                            /** @enum {string} */
+                            strategy: "MANUAL";
+                            items: {
+                                tripId: number;
+                                amount: number | string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                kind: "PAYMENT" | "WRITE_OFF";
+                                /** @enum {string|null} */
+                                mode: "CASH" | "ONLINE" | null;
+                                amountPaise: number;
+                                allocatedPaise: number;
+                                unallocatedPaise: number;
+                                reference: string | null;
+                                notes: string | null;
+                                deliveryTripId: number | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                                allocations: {
+                                    tripId: number;
+                                    tripDate: string;
+                                    /** @enum {string} */
+                                    tripKind: "TRIP" | "OPENING_BALANCE";
+                                    amountPaise: number;
+                                }[];
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/apply-credit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            allocations: {
+                                paymentId: number;
+                                tripId: number;
+                                amountPaise: number;
+                            }[];
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    customerId?: number;
+                    kind?: "PAYMENT" | "WRITE_OFF";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                kind: "PAYMENT" | "WRITE_OFF";
+                                /** @enum {string|null} */
+                                mode: "CASH" | "ONLINE" | null;
+                                amountPaise: number;
+                                allocatedPaise: number;
+                                unallocatedPaise: number;
+                                reference: string | null;
+                                notes: string | null;
+                                deliveryTripId: number | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                                allocations: {
+                                    tripId: number;
+                                    tripDate: string;
+                                    /** @enum {string} */
+                                    tripKind: "TRIP" | "OPENING_BALANCE";
+                                    amountPaise: number;
+                                }[];
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                            totals: {
+                                cashPaise: number;
+                                onlinePaise: number;
+                                writeOffPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    customerId?: number;
+                    kind?: "PAYMENT" | "WRITE_OFF";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            customer: {
+                                id: number;
+                                name: string;
+                            };
+                            paidOn: string;
+                            /** @enum {string} */
+                            kind: "PAYMENT" | "WRITE_OFF";
+                            /** @enum {string|null} */
+                            mode: "CASH" | "ONLINE" | null;
+                            amountPaise: number;
+                            allocatedPaise: number;
+                            unallocatedPaise: number;
+                            reference: string | null;
+                            notes: string | null;
+                            deliveryTripId: number | null;
+                            deletedAt: string | null;
+                            createdAt: string;
+                            allocations: {
+                                tripId: number;
+                                tripDate: string;
+                                /** @enum {string} */
+                                tripKind: "TRIP" | "OPENING_BALANCE";
+                                amountPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                kind: "PAYMENT" | "WRITE_OFF";
+                                /** @enum {string|null} */
+                                mode: "CASH" | "ONLINE" | null;
+                                amountPaise: number;
+                                allocatedPaise: number;
+                                unallocatedPaise: number;
+                                reference: string | null;
+                                notes: string | null;
+                                deliveryTripId: number | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                                allocations: {
+                                    tripId: number;
+                                    tripDate: string;
+                                    /** @enum {string} */
+                                    tripKind: "TRIP" | "OPENING_BALANCE";
+                                    amountPaise: number;
+                                }[];
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        paidOn?: string;
+                        /** @enum {string} */
+                        mode?: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                kind: "PAYMENT" | "WRITE_OFF";
+                                /** @enum {string|null} */
+                                mode: "CASH" | "ONLINE" | null;
+                                amountPaise: number;
+                                allocatedPaise: number;
+                                unallocatedPaise: number;
+                                reference: string | null;
+                                notes: string | null;
+                                deliveryTripId: number | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                                allocations: {
+                                    tripId: number;
+                                    tripDate: string;
+                                    /** @enum {string} */
+                                    tripKind: "TRIP" | "OPENING_BALANCE";
+                                    amountPaise: number;
+                                }[];
+                            };
+                            customerBalance: {
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/customers/{id}/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            customer: {
+                                id: number;
+                                name: string;
+                                phone: string | null;
+                            };
+                            from: string | null;
+                            to: string | null;
+                            openingBalancePaise: number;
+                            entries: {
+                                date: string;
+                                /** @enum {string} */
+                                type: "OPENING_BALANCE" | "TRIP" | "PAYMENT" | "WRITE_OFF";
+                                refId: number;
+                                description: string;
+                                debitPaise: number;
+                                creditPaise: number;
+                                balancePaise: number;
+                            }[];
+                            totals: {
+                                debitPaise: number;
+                                creditPaise: number;
+                            };
+                            closingBalancePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            balancePaise: number;
+                            duePaise: number;
+                            creditPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/ledger/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            asOf: string;
+                            customers: {
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                    phone: string | null;
+                                };
+                                balancePaise: number;
+                                duePaise: number;
+                                creditPaise: number;
+                                oldestDueDate: string;
+                                ageDays: number;
+                                /** @enum {string} */
+                                bucket: "0-7" | "8-30" | "31-90" | "90+";
+                                hasUnappliedCredit: boolean;
+                            }[];
+                            totals: {
+                                balancePaise: number;
+                                byBucket: {
+                                    [key: string]: number;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dues/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/expenses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    category?: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                    tractorId?: number;
+                    driverId?: number;
+                    labourerId?: number;
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                /** @enum {string} */
+                                category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                                spentOn: string;
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                labourer: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                dieselLitres: number | null;
+                                hourMeter: number | null;
+                                tractorLoanId: number | null;
+                                emiMonth: string | null;
+                                lateFeePaise: number | null;
+                                periodFrom: string | null;
+                                periodTo: string | null;
+                                reference: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                            totals: {
+                                amountPaise: number;
+                                byCategory: {
+                                    [key: string]: number;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        category: "LABOUR";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                        labourerId: number;
+                    } | {
+                        /** @enum {string} */
+                        category: "ROYALTY";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                        periodFrom?: string;
+                        periodTo?: string;
+                    } | {
+                        /** @enum {string} */
+                        category: "POLICE";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes: string;
+                    } | {
+                        /** @enum {string} */
+                        category: "OTHER";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes: string;
+                    } | {
+                        /** @enum {string} */
+                        category: "TRACTOR_SERVICE";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes: string;
+                        tractorId: number;
+                        hourMeter?: number;
+                    } | {
+                        /** @enum {string} */
+                        category: "DIESEL";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                        tractorId: number;
+                        driverId: number;
+                        litres: number | string;
+                    } | {
+                        /** @enum {string} */
+                        category: "EMERGENCY";
+                        spentOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes: string;
+                        tractorId?: number;
+                        driverId?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            expense: {
+                                id: number;
+                                /** @enum {string} */
+                                category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                                spentOn: string;
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                labourer: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                dieselLitres: number | null;
+                                hourMeter: number | null;
+                                tractorLoanId: number | null;
+                                emiMonth: string | null;
+                                lateFeePaise: number | null;
+                                periodFrom: string | null;
+                                periodTo: string | null;
+                                reference: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/expenses/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    category?: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                    tractorId?: number;
+                    driverId?: number;
+                    labourerId?: number;
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/expenses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            /** @enum {string} */
+                            category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                            spentOn: string;
+                            amountPaise: number;
+                            /** @enum {string} */
+                            mode: "CASH" | "ONLINE";
+                            driver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            } | null;
+                            labourer: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            dieselLitres: number | null;
+                            hourMeter: number | null;
+                            tractorLoanId: number | null;
+                            emiMonth: string | null;
+                            lateFeePaise: number | null;
+                            periodFrom: string | null;
+                            periodTo: string | null;
+                            reference: string | null;
+                            notes: string | null;
+                            deletedAt: string | null;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            /** @enum {string} */
+                            category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                            spentOn: string;
+                            amountPaise: number;
+                            /** @enum {string} */
+                            mode: "CASH" | "ONLINE";
+                            driver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            } | null;
+                            labourer: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            dieselLitres: number | null;
+                            hourMeter: number | null;
+                            tractorLoanId: number | null;
+                            emiMonth: string | null;
+                            lateFeePaise: number | null;
+                            periodFrom: string | null;
+                            periodTo: string | null;
+                            reference: string | null;
+                            notes: string | null;
+                            deletedAt: string | null;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        spentOn?: string;
+                        amount?: number | string;
+                        /** @enum {string} */
+                        mode?: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                        labourerId?: number;
+                        tractorId?: number | null;
+                        driverId?: number | null;
+                        periodFrom?: string | null;
+                        periodTo?: string | null;
+                        litres?: number | string;
+                        hourMeter?: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            expense: {
+                                id: number;
+                                /** @enum {string} */
+                                category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                                spentOn: string;
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                labourer: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                dieselLitres: number | null;
+                                hourMeter: number | null;
+                                tractorLoanId: number | null;
+                                emiMonth: string | null;
+                                lateFeePaise: number | null;
+                                periodFrom: string | null;
+                                periodTo: string | null;
+                                reference: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/expenses/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            /** @enum {string} */
+                            category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                            spentOn: string;
+                            amountPaise: number;
+                            /** @enum {string} */
+                            mode: "CASH" | "ONLINE";
+                            driver: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            } | null;
+                            labourer: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            dieselLitres: number | null;
+                            hourMeter: number | null;
+                            tractorLoanId: number | null;
+                            emiMonth: string | null;
+                            lateFeePaise: number | null;
+                            periodFrom: string | null;
+                            periodTo: string | null;
+                            reference: string | null;
+                            notes: string | null;
+                            deletedAt: string | null;
+                            createdAt: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/diesel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string | null;
+                            to: string | null;
+                            tractors: {
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                    label: string;
+                                };
+                                litres: number;
+                                amountPaise: number;
+                                trips: number;
+                                litresPerTrip: number | null;
+                            }[];
+                            drivers: {
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                litres: number;
+                                amountPaise: number;
+                                trips: number;
+                            }[];
+                            totals: {
+                                litres: number;
+                                amountPaise: number;
+                                trips: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/diesel/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tractors/{id}/loans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        lender: string;
+                        emiAmount: number | string;
+                        emiDay: number;
+                        firstEmiMonth: string;
+                        totalInstallments: number;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            };
+                            lender: string;
+                            emiPaise: number;
+                            emiDay: number;
+                            firstEmiMonth: string;
+                            lastEmiMonth: string;
+                            totalInstallments: number;
+                            closedOn: string | null;
+                            /** @enum {string|null} */
+                            closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                            notes: string | null;
+                            paidPaise: number;
+                            summary: {
+                                paidCount: number;
+                                overdueCount: number;
+                                nextDue: {
+                                    month: string;
+                                    dueDate: string;
+                                } | null;
+                            };
+                            schedule: {
+                                number: number;
+                                month: string;
+                                dueDate: string;
+                                /** @enum {string} */
+                                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                payment: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                    lateFeePaise: number;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/loans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    tractorId?: number;
+                    status?: "open" | "closed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            };
+                            lender: string;
+                            emiPaise: number;
+                            emiDay: number;
+                            firstEmiMonth: string;
+                            lastEmiMonth: string;
+                            totalInstallments: number;
+                            closedOn: string | null;
+                            /** @enum {string|null} */
+                            closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                            notes: string | null;
+                            paidPaise: number;
+                            summary: {
+                                paidCount: number;
+                                overdueCount: number;
+                                nextDue: {
+                                    month: string;
+                                    dueDate: string;
+                                } | null;
+                            };
+                        }[];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/loans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            };
+                            lender: string;
+                            emiPaise: number;
+                            emiDay: number;
+                            firstEmiMonth: string;
+                            lastEmiMonth: string;
+                            totalInstallments: number;
+                            closedOn: string | null;
+                            /** @enum {string|null} */
+                            closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                            notes: string | null;
+                            paidPaise: number;
+                            summary: {
+                                paidCount: number;
+                                overdueCount: number;
+                                nextDue: {
+                                    month: string;
+                                    dueDate: string;
+                                } | null;
+                            };
+                            schedule: {
+                                number: number;
+                                month: string;
+                                dueDate: string;
+                                /** @enum {string} */
+                                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                payment: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                    lateFeePaise: number;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": null;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        lender?: string;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            };
+                            lender: string;
+                            emiPaise: number;
+                            emiDay: number;
+                            firstEmiMonth: string;
+                            lastEmiMonth: string;
+                            totalInstallments: number;
+                            closedOn: string | null;
+                            /** @enum {string|null} */
+                            closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                            notes: string | null;
+                            paidPaise: number;
+                            summary: {
+                                paidCount: number;
+                                overdueCount: number;
+                                nextDue: {
+                                    month: string;
+                                    dueDate: string;
+                                } | null;
+                            };
+                            schedule: {
+                                number: number;
+                                month: string;
+                                dueDate: string;
+                                /** @enum {string} */
+                                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                payment: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                    lateFeePaise: number;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/loans/{id}/emi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        emiMonth: string;
+                        paidOn: string;
+                        amount: number | string;
+                        lateFee?: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            loan: {
+                                id: number;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                };
+                                lender: string;
+                                emiPaise: number;
+                                emiDay: number;
+                                firstEmiMonth: string;
+                                lastEmiMonth: string;
+                                totalInstallments: number;
+                                closedOn: string | null;
+                                /** @enum {string|null} */
+                                closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                                notes: string | null;
+                                paidPaise: number;
+                                summary: {
+                                    paidCount: number;
+                                    overdueCount: number;
+                                    nextDue: {
+                                        month: string;
+                                        dueDate: string;
+                                    } | null;
+                                };
+                                schedule: {
+                                    number: number;
+                                    month: string;
+                                    dueDate: string;
+                                    /** @enum {string} */
+                                    status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                    payment: {
+                                        expenseId: number;
+                                        paidOn: string;
+                                        amountPaise: number;
+                                        lateFeePaise: number;
+                                    } | null;
+                                }[];
+                            };
+                            expenseId: number;
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/loans/{id}/foreclose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        closedOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        reference?: string | null;
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            loan: {
+                                id: number;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                };
+                                lender: string;
+                                emiPaise: number;
+                                emiDay: number;
+                                firstEmiMonth: string;
+                                lastEmiMonth: string;
+                                totalInstallments: number;
+                                closedOn: string | null;
+                                /** @enum {string|null} */
+                                closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                                notes: string | null;
+                                paidPaise: number;
+                                summary: {
+                                    paidCount: number;
+                                    overdueCount: number;
+                                    nextDue: {
+                                        month: string;
+                                        dueDate: string;
+                                    } | null;
+                                };
+                                schedule: {
+                                    number: number;
+                                    month: string;
+                                    dueDate: string;
+                                    /** @enum {string} */
+                                    status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                    payment: {
+                                        expenseId: number;
+                                        paidOn: string;
+                                        amountPaise: number;
+                                        lateFeePaise: number;
+                                    } | null;
+                                }[];
+                            };
+                            expenseId: number;
+                            warnings: string[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/loans/{id}/payments/{expenseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
                     expenseId: number;
-                    paidOn: string;
-                    amountPaise: number;
-                    lateFeePaise: number;
-                  } | null;
-                }[];
-              };
-              expenseId: number;
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/loans/{id}/foreclose": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            closedOn: string;
-            amount: number | string;
-            /** @enum {string} */
-            mode: "CASH" | "ONLINE";
-            reference?: string | null;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              loan: {
-                id: number;
-                tractor: {
-                  id: number;
-                  regNumber: string;
                 };
-                lender: string;
-                emiPaise: number;
-                emiDay: number;
-                firstEmiMonth: string;
-                lastEmiMonth: string;
-                totalInstallments: number;
-                closedOn: string | null;
-                /** @enum {string|null} */
-                closedReason: "PAID_OFF" | "FORECLOSED" | null;
-                notes: string | null;
-                paidPaise: number;
-                summary: {
-                  paidCount: number;
-                  overdueCount: number;
-                  nextDue: {
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                            };
+                            lender: string;
+                            emiPaise: number;
+                            emiDay: number;
+                            firstEmiMonth: string;
+                            lastEmiMonth: string;
+                            totalInstallments: number;
+                            closedOn: string | null;
+                            /** @enum {string|null} */
+                            closedReason: "PAID_OFF" | "FORECLOSED" | null;
+                            notes: string | null;
+                            paidPaise: number;
+                            summary: {
+                                paidCount: number;
+                                overdueCount: number;
+                                nextDue: {
+                                    month: string;
+                                    dueDate: string;
+                                } | null;
+                            };
+                            schedule: {
+                                number: number;
+                                month: string;
+                                dueDate: string;
+                                /** @enum {string} */
+                                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                payment: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                    lateFeePaise: number;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emi/due": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    days?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            asOf: string;
+                            items: {
+                                loan: {
+                                    id: number;
+                                    lender: string;
+                                };
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                };
+                                month: string;
+                                dueDate: string;
+                                /** @enum {string} */
+                                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
+                                emiPaise: number;
+                                daysLate: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tractors/{id}/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            tractor: {
+                                id: number;
+                                regNumber: string;
+                                label: string;
+                            };
+                            lastService: {
+                                date: string;
+                                hourMeter: number | null;
+                                notes: string | null;
+                            } | null;
+                            services: {
+                                id: number;
+                                /** @enum {string} */
+                                category: "LABOUR" | "DIESEL" | "ROYALTY" | "POLICE" | "OTHER" | "EMERGENCY" | "TRACTOR_SERVICE" | "TRACTOR_EMI";
+                                spentOn: string;
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                } | null;
+                                labourer: {
+                                    id: number;
+                                    name: string;
+                                } | null;
+                                dieselLitres: number | null;
+                                hourMeter: number | null;
+                                tractorLoanId: number | null;
+                                emiMonth: string | null;
+                                lateFeePaise: number | null;
+                                periodFrom: string | null;
+                                periodTo: string | null;
+                                reference: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/drivers/{id}/salary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
                     month: string;
-                    dueDate: string;
-                  } | null;
                 };
-                schedule: {
-                  number: number;
-                  month: string;
-                  dueDate: string;
-                  /** @enum {string} */
-                  status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                  payment: {
-                    expenseId: number;
-                    paidOn: string;
-                    amountPaise: number;
-                    lateFeePaise: number;
-                  } | null;
-                }[];
-              };
-              expenseId: number;
-              warnings: string[];
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/loans/{id}/payments/{expenseId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-          expenseId: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              id: number;
-              tractor: {
-                id: number;
-                regNumber: string;
-              };
-              lender: string;
-              emiPaise: number;
-              emiDay: number;
-              firstEmiMonth: string;
-              lastEmiMonth: string;
-              totalInstallments: number;
-              closedOn: string | null;
-              /** @enum {string|null} */
-              closedReason: "PAID_OFF" | "FORECLOSED" | null;
-              notes: string | null;
-              paidPaise: number;
-              summary: {
-                paidCount: number;
-                overdueCount: number;
-                nextDue: {
-                  month: string;
-                  dueDate: string;
-                } | null;
-              };
-              schedule: {
-                number: number;
-                month: string;
-                dueDate: string;
-                /** @enum {string} */
-                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                payment: {
-                  expenseId: number;
-                  paidOn: string;
-                  amountPaise: number;
-                  lateFeePaise: number;
-                } | null;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/emi/due": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          days?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              asOf: string;
-              items: {
-                loan: {
-                  id: number;
-                  lender: string;
+                header?: never;
+                path: {
+                    id: number;
                 };
-                tractor: {
-                  id: number;
-                  regNumber: string;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            month: string;
+                            monthlyPaise: number | null;
+                            daysInMonth: number;
+                            daysWorked: number;
+                            suggestedPaise: number | null;
+                            closed: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
+                                month: string | null;
+                                accruedOn: string;
+                                amountPaise: number;
+                                note: string | null;
+                            } | null;
+                        };
+                    };
                 };
-                month: string;
-                dueDate: string;
-                /** @enum {string} */
-                status: "PAID" | "OVERDUE" | "DUE_TODAY" | "UPCOMING" | "CLOSED";
-                emiPaise: number;
-                daysLate: number;
-              }[];
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tractors/{id}/services": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
+    "/drivers/{id}/close-month": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              tractor: {
-                id: number;
-                regNumber: string;
-                label: string;
-              };
-              lastService: {
-                date: string;
-                hourMeter: number | null;
-                notes: string | null;
-              } | null;
-              services: {
-                id: number;
-                /** @enum {string} */
-                category:
-                  | "LABOUR"
-                  | "DIESEL"
-                  | "ROYALTY"
-                  | "POLICE"
-                  | "OTHER"
-                  | "EMERGENCY"
-                  | "TRACTOR_SERVICE"
-                  | "TRACTOR_EMI";
-                spentOn: string;
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                driver: {
-                  id: number;
-                  name: string;
-                } | null;
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                } | null;
-                labourer: {
-                  id: number;
-                  name: string;
-                } | null;
-                dieselLitres: number | null;
-                hourMeter: number | null;
-                tractorLoanId: number | null;
-                emiMonth: string | null;
-                lateFeePaise: number | null;
-                periodFrom: string | null;
-                periodTo: string | null;
-                reference: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              }[];
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/salary": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          month: string;
-        };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              month: string;
-              monthlyPaise: number | null;
-              daysInMonth: number;
-              daysWorked: number;
-              suggestedPaise: number | null;
-              closed: {
-                id: number;
-                /** @enum {string} */
-                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
-                month: string | null;
-                accruedOn: string;
-                amountPaise: number;
-                note: string | null;
-              } | null;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/close-month": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            month: string;
-            amount?: number | string;
-            note?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accrual: {
-                id: number;
-                /** @enum {string} */
-                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
-                month: string | null;
-                accruedOn: string;
-                amountPaise: number;
-                note: string | null;
-              };
-              balancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/close-month/{month}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-          month: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accrual: {
-                id: number;
-                /** @enum {string} */
-                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
-                month: string | null;
-                accruedOn: string;
-                amountPaise: number;
-                note: string | null;
-              };
-              balancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/opening-balance": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            amount: number | string;
-            note?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accrual: {
-                id: number;
-                /** @enum {string} */
-                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
-                month: string | null;
-                accruedOn: string;
-                amountPaise: number;
-                note: string | null;
-              };
-              balancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              accrual: {
-                id: number;
-                /** @enum {string} */
-                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
-                month: string | null;
-                accruedOn: string;
-                amountPaise: number;
-                note: string | null;
-              };
-              balancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/payments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            /** @enum {string} */
-            type: "ADVANCE" | "SALARY";
-            paidOn: string;
-            amount: number | string;
-            /** @enum {string} */
-            mode: "CASH" | "ONLINE";
-            forMonth?: string;
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                driver: {
-                  id: number;
-                  name: string;
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
                 };
-                paidOn: string;
-                /** @enum {string} */
-                type: "ADVANCE" | "SALARY" | "BONUS";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                forMonth: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              balancePaise: number;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/bonus": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            paidOn: string;
-            amount: number | string;
-            /** @enum {string} */
-            mode: "CASH" | "ONLINE";
-            note: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                driver: {
-                  id: number;
-                  name: string;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        month: string;
+                        amount?: number | string;
+                        note?: string | null;
+                    };
                 };
-                paidOn: string;
-                /** @enum {string} */
-                type: "ADVANCE" | "SALARY" | "BONUS";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                forMonth: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              balancePaise: number;
             };
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/drivers/{id}/ledger": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-        };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              driver: {
-                id: number;
-                name: string;
-              };
-              from: string | null;
-              to: string | null;
-              openingBalancePaise: number;
-              entries: {
-                date: string;
-                /** @enum {string} */
-                type:
-                  | "OPENING_BALANCE"
-                  | "EARNED_SALARY"
-                  | "EARNED_BONUS"
-                  | "PAID_ADVANCE"
-                  | "PAID_SALARY"
-                  | "PAID_BONUS";
-                refId: number;
-                description: string;
-                earnedPaise: number;
-                paidPaise: number;
-                balancePaise: number;
-              }[];
-              months: {
-                month: string;
-                earnedPaise: number;
-                paidPaise: number;
-                closingBalancePaise: number;
-              }[];
-              closingBalancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/driver-payments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          driverId?: number;
-          type?: "ADVANCE" | "SALARY" | "BONUS";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-          page?: number;
-          limit?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                driver: {
-                  id: number;
-                  name: string;
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accrual: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
+                                month: string | null;
+                                accruedOn: string;
+                                amountPaise: number;
+                                note: string | null;
+                            };
+                            balancePaise: number;
+                        };
+                    };
                 };
-                paidOn: string;
-                /** @enum {string} */
-                type: "ADVANCE" | "SALARY" | "BONUS";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                forMonth: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-              totals: {
-                advancePaise: number;
-                salaryPaise: number;
-                bonusPaise: number;
-              };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/driver-payments/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          driverId?: number;
-          type?: "ADVANCE" | "SALARY" | "BONUS";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
+    "/drivers/{id}/close-month/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/driver-payments/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              payment: {
-                id: number;
-                driver: {
-                  id: number;
-                  name: string;
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    month: string;
                 };
-                paidOn: string;
-                /** @enum {string} */
-                type: "ADVANCE" | "SALARY" | "BONUS";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                forMonth: string | null;
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              balancePaise: number;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partners/{id}/txns": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            /** @enum {string} */
-            direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-            txnDate: string;
-            amount: number | string;
-            /** @enum {string} */
-            mode: "CASH" | "ONLINE";
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              txn: {
-                id: number;
-                partner: {
-                  id: number;
-                  name: string;
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accrual: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
+                                month: string | null;
+                                accruedOn: string;
+                                amountPaise: number;
+                                note: string | null;
+                            };
+                            balancePaise: number;
+                        };
+                    };
                 };
-                txnDate: string;
-                /** @enum {string} */
-                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              netPaidPaise: number;
             };
-          };
         };
-      };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partners/{id}/ledger": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
+    "/drivers/{id}/opening-balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              partner: {
-                id: number;
-                name: string;
-              };
-              from: string | null;
-              to: string | null;
-              openingNetPaidPaise: number;
-              entries: {
-                date: string;
-                /** @enum {string} */
-                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-                refId: number;
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                notes: string | null;
-                netPaidPaise: number;
-              }[];
-              totals: {
-                paidToPartnerPaise: number;
-                receivedFromPartnerPaise: number;
-                netPaidPaise: number;
-              };
-              closingNetPaidPaise: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partner-txns": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          partnerId?: number;
-          direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-          page?: number;
-          limit?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              items: {
-                id: number;
-                partner: {
-                  id: number;
-                  name: string;
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
                 };
-                txnDate: string;
-                /** @enum {string} */
-                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              }[];
-              total: number;
-              page: number;
-              limit: number;
-              totals: {
-                paidToPartnerPaise: number;
-                receivedFromPartnerPaise: number;
-                netPaidPaise: number;
-              };
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partner-txns/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          from?: string;
-          to?: string;
-          partnerId?: number;
-          direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-          mode?: "CASH" | "ONLINE";
-          deleted?: "true" | "false";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/partner-txns/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              txn: {
-                id: number;
-                partner: {
-                  id: number;
-                  name: string;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        amount: number | string;
+                        note?: string | null;
+                    };
                 };
-                txnDate: string;
-                /** @enum {string} */
-                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              netPaidPaise: number;
             };
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            /** @enum {string} */
-            direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-            txnDate?: string;
-            amount?: number | string;
-            /** @enum {string} */
-            mode?: "CASH" | "ONLINE";
-            notes?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              txn: {
-                id: number;
-                partner: {
-                  id: number;
-                  name: string;
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accrual: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
+                                month: string | null;
+                                accruedOn: string;
+                                amountPaise: number;
+                                note: string | null;
+                            };
+                            balancePaise: number;
+                        };
+                    };
                 };
-                txnDate: string;
-                /** @enum {string} */
-                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
-                amountPaise: number;
-                /** @enum {string} */
-                mode: "CASH" | "ONLINE";
-                notes: string | null;
-                deletedAt: string | null;
-                createdAt: string;
-              };
-              netPaidPaise: number;
             };
-          };
         };
-      };
-    };
-    trace?: never;
-  };
-  "/partners/{id}/share": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path: {
-          id: number;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              partner: {
-                id: number;
-                name: string;
-                sharePercent: number;
-              };
-              from: string;
-              to: string;
-              profitPaise: number;
-              shareDuePaise: number;
-              netPaidPaise: number;
-              balancePaise: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/pnl": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string;
-              to: string;
-              revenue: {
-                tripsPaise: number;
-                writeOffsPaise: number;
-                netPaise: number;
-              };
-              expenses: {
-                byCategory: {
-                  [key: string]: number;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
                 };
-                totalPaise: number;
-              };
-              driverSalaryPaise: number;
-              profitPaise: number;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/pnl/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/cashbook": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from?: string;
-          to?: string;
-          mode: "CASH" | "ONLINE";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              /** @enum {string} */
-              mode: "CASH" | "ONLINE";
-              from: string | null;
-              to: string | null;
-              openingPaise: number;
-              lines: {
-                date: string;
-                /** @enum {string} */
-                kind:
-                  "CUSTOMER_PAYMENT" | "FROM_PARTNER" | "EXPENSE" | "DRIVER_PAYMENT" | "TO_PARTNER";
-                refId: number;
-                description: string;
-                inPaise: number;
-                outPaise: number;
-                balancePaise: number;
-              }[];
-              totals: {
-                inPaise: number;
-                outPaise: number;
-              };
-              closingPaise: number;
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/cashbook/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from?: string;
-          to?: string;
-          mode: "CASH" | "ONLINE";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/summary": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string;
-              to: string;
-              days: {
-                date: string;
-                trips: number;
-                revenuePaise: number;
-                cashInPaise: number;
-                onlineInPaise: number;
-                newDuesPaise: number;
-                duesRecoveredPaise: number;
-                expensesPaise: number;
-                driverPaymentsPaise: number;
-                partnerNetPaidPaise: number;
-              }[];
-              totals: {
-                trips: number;
-                revenuePaise: number;
-                cashInPaise: number;
-                onlineInPaise: number;
-                newDuesPaise: number;
-                duesRecoveredPaise: number;
-                expensesPaise: number;
-                driverPaymentsPaise: number;
-                partnerNetPaidPaise: number;
-              };
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/summary/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/tractors": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string;
-              to: string;
-              tractors: {
-                tractor: {
-                  id: number;
-                  regNumber: string;
-                  label: string;
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            accrual: {
+                                id: number;
+                                /** @enum {string} */
+                                kind: "MONTH_SALARY" | "BONUS" | "OPENING_BALANCE";
+                                month: string | null;
+                                accruedOn: string;
+                                amountPaise: number;
+                                note: string | null;
+                            };
+                            balancePaise: number;
+                        };
+                    };
                 };
-                trips: number;
-                revenuePaise: number;
-                dieselPaise: number;
-                servicePaise: number;
-                emiPaise: number;
-                otherPaise: number;
-                contributionPaise: number;
-              }[];
             };
-          };
         };
-      };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/tractors/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
+    "/drivers/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/khets": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string;
-              to: string;
-              khets: {
-                khet: {
-                  id: number;
-                  name: string;
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
                 };
-                trips: number;
-                revenuePaise: number;
-              }[];
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/khets/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/drivers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              from: string;
-              to: string;
-              drivers: {
-                driver: {
-                  id: number;
-                  name: string;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        type: "ADVANCE" | "SALARY";
+                        paidOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        forMonth?: string;
+                        notes?: string | null;
+                    };
                 };
-                trips: number;
-                revenuePaise: number;
-                dieselLitres: number;
-                dieselPaise: number;
-                salaryEarnedPaise: number;
-                advancesPaise: number;
-                salaryPaidPaise: number;
-              }[];
             };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reports/drivers/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query: {
-          from: string;
-          to: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/dashboard": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: {
-      parameters: {
-        query?: {
-          date?: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": {
-              date: string;
-              day: {
-                trips: number;
-                revenuePaise: number;
-                cashInPaise: number;
-                onlineInPaise: number;
-                newDuesPaise: number;
-                duesRecoveredPaise: number;
-                expensesPaise: number;
-                driverPaymentsPaise: number;
-                partnerNetPaidPaise: number;
-              };
-              expensesByCategory: {
-                [key: string]: number;
-              };
-              cashInHandPaise: number;
-              onlineBalancePaise: number;
-              totalDuesPaise: number;
-              overdueEmis: number;
-              topDues: {
-                customer: {
-                  id: number;
-                  name: string;
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                type: "ADVANCE" | "SALARY" | "BONUS";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                forMonth: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            balancePaise: number;
+                        };
+                    };
                 };
-                balancePaise: number;
-                oldestDueDate: string;
-              }[];
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/drivers/{id}/bonus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        paidOn: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        note: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                type: "ADVANCE" | "SALARY" | "BONUS";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                forMonth: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            balancePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/drivers/{id}/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            driver: {
+                                id: number;
+                                name: string;
+                            };
+                            from: string | null;
+                            to: string | null;
+                            openingBalancePaise: number;
+                            entries: {
+                                date: string;
+                                /** @enum {string} */
+                                type: "OPENING_BALANCE" | "EARNED_SALARY" | "EARNED_BONUS" | "PAID_ADVANCE" | "PAID_SALARY" | "PAID_BONUS";
+                                refId: number;
+                                description: string;
+                                earnedPaise: number;
+                                paidPaise: number;
+                                balancePaise: number;
+                            }[];
+                            months: {
+                                month: string;
+                                earnedPaise: number;
+                                paidPaise: number;
+                                closingBalancePaise: number;
+                            }[];
+                            closingBalancePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/driver-payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    driverId?: number;
+                    type?: "ADVANCE" | "SALARY" | "BONUS";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                type: "ADVANCE" | "SALARY" | "BONUS";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                forMonth: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                            totals: {
+                                advancePaise: number;
+                                salaryPaise: number;
+                                bonusPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/driver-payments/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    driverId?: number;
+                    type?: "ADVANCE" | "SALARY" | "BONUS";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/driver-payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            payment: {
+                                id: number;
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                paidOn: string;
+                                /** @enum {string} */
+                                type: "ADVANCE" | "SALARY" | "BONUS";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                forMonth: string | null;
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            balancePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partners/{id}/txns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                        txnDate: string;
+                        amount: number | string;
+                        /** @enum {string} */
+                        mode: "CASH" | "ONLINE";
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            txn: {
+                                id: number;
+                                partner: {
+                                    id: number;
+                                    name: string;
+                                };
+                                txnDate: string;
+                                /** @enum {string} */
+                                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            netPaidPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partners/{id}/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            partner: {
+                                id: number;
+                                name: string;
+                            };
+                            from: string | null;
+                            to: string | null;
+                            openingNetPaidPaise: number;
+                            entries: {
+                                date: string;
+                                /** @enum {string} */
+                                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                                refId: number;
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                notes: string | null;
+                                netPaidPaise: number;
+                            }[];
+                            totals: {
+                                paidToPartnerPaise: number;
+                                receivedFromPartnerPaise: number;
+                                netPaidPaise: number;
+                            };
+                            closingNetPaidPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partner-txns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    partnerId?: number;
+                    direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                partner: {
+                                    id: number;
+                                    name: string;
+                                };
+                                txnDate: string;
+                                /** @enum {string} */
+                                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            }[];
+                            total: number;
+                            page: number;
+                            limit: number;
+                            totals: {
+                                paidToPartnerPaise: number;
+                                receivedFromPartnerPaise: number;
+                                netPaidPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partner-txns/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    partnerId?: number;
+                    direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                    mode?: "CASH" | "ONLINE";
+                    deleted?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/partner-txns/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            txn: {
+                                id: number;
+                                partner: {
+                                    id: number;
+                                    name: string;
+                                };
+                                txnDate: string;
+                                /** @enum {string} */
+                                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            netPaidPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        direction?: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                        txnDate?: string;
+                        amount?: number | string;
+                        /** @enum {string} */
+                        mode?: "CASH" | "ONLINE";
+                        notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            txn: {
+                                id: number;
+                                partner: {
+                                    id: number;
+                                    name: string;
+                                };
+                                txnDate: string;
+                                /** @enum {string} */
+                                direction: "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+                                amountPaise: number;
+                                /** @enum {string} */
+                                mode: "CASH" | "ONLINE";
+                                notes: string | null;
+                                deletedAt: string | null;
+                                createdAt: string;
+                            };
+                            netPaidPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/partners/{id}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            partner: {
+                                id: number;
+                                name: string;
+                                sharePercent: number;
+                            };
+                            from: string;
+                            to: string;
+                            profitPaise: number;
+                            shareDuePaise: number;
+                            netPaidPaise: number;
+                            balancePaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/pnl": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string;
+                            to: string;
+                            revenue: {
+                                tripsPaise: number;
+                                writeOffsPaise: number;
+                                netPaise: number;
+                            };
+                            expenses: {
+                                byCategory: {
+                                    [key: string]: number;
+                                };
+                                totalPaise: number;
+                            };
+                            driverSalaryPaise: number;
+                            profitPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/pnl/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/cashbook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from?: string;
+                    to?: string;
+                    mode: "CASH" | "ONLINE";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            mode: "CASH" | "ONLINE";
+                            from: string | null;
+                            to: string | null;
+                            openingPaise: number;
+                            lines: {
+                                date: string;
+                                /** @enum {string} */
+                                kind: "CUSTOMER_PAYMENT" | "FROM_PARTNER" | "EXPENSE" | "DRIVER_PAYMENT" | "TO_PARTNER";
+                                refId: number;
+                                description: string;
+                                inPaise: number;
+                                outPaise: number;
+                                balancePaise: number;
+                            }[];
+                            totals: {
+                                inPaise: number;
+                                outPaise: number;
+                            };
+                            closingPaise: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/cashbook/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from?: string;
+                    to?: string;
+                    mode: "CASH" | "ONLINE";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string;
+                            to: string;
+                            days: {
+                                date: string;
+                                trips: number;
+                                revenuePaise: number;
+                                cashInPaise: number;
+                                onlineInPaise: number;
+                                newDuesPaise: number;
+                                duesRecoveredPaise: number;
+                                expensesPaise: number;
+                                driverPaymentsPaise: number;
+                                partnerNetPaidPaise: number;
+                            }[];
+                            totals: {
+                                trips: number;
+                                revenuePaise: number;
+                                cashInPaise: number;
+                                onlineInPaise: number;
+                                newDuesPaise: number;
+                                duesRecoveredPaise: number;
+                                expensesPaise: number;
+                                driverPaymentsPaise: number;
+                                partnerNetPaidPaise: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/summary/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/tractors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string;
+                            to: string;
+                            tractors: {
+                                tractor: {
+                                    id: number;
+                                    regNumber: string;
+                                    label: string;
+                                };
+                                trips: number;
+                                revenuePaise: number;
+                                dieselPaise: number;
+                                servicePaise: number;
+                                emiPaise: number;
+                                otherPaise: number;
+                                contributionPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/tractors/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/khets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string;
+                            to: string;
+                            khets: {
+                                khet: {
+                                    id: number;
+                                    name: string;
+                                };
+                                trips: number;
+                                revenuePaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/khets/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/drivers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string;
+                            to: string;
+                            drivers: {
+                                driver: {
+                                    id: number;
+                                    name: string;
+                                };
+                                trips: number;
+                                revenuePaise: number;
+                                dieselLitres: number;
+                                dieselPaise: number;
+                                salaryEarnedPaise: number;
+                                advancesPaise: number;
+                                salaryPaidPaise: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/drivers/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    date?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            date: string;
+                            day: {
+                                trips: number;
+                                revenuePaise: number;
+                                cashInPaise: number;
+                                onlineInPaise: number;
+                                newDuesPaise: number;
+                                duesRecoveredPaise: number;
+                                expensesPaise: number;
+                                driverPaymentsPaise: number;
+                                partnerNetPaidPaise: number;
+                            };
+                            expensesByCategory: {
+                                [key: string]: number;
+                            };
+                            cashInHandPaise: number;
+                            onlineBalancePaise: number;
+                            totalDuesPaise: number;
+                            overdueEmis: number;
+                            topDues: {
+                                customer: {
+                                    id: number;
+                                    name: string;
+                                };
+                                balancePaise: number;
+                                oldestDueDate: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: never;
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    schemas: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

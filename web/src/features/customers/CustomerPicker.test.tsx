@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { fakeApi, json } from "../../test/fake-api.ts";
-import { CUSTOMERS, NO_DUES } from "../../test/fixtures.ts";
+import { BALANCE_ROUTES, CUSTOMERS } from "../../test/fixtures.ts";
 import { renderPart, signedInRoutes } from "../../test/render.tsx";
 import { CustomerPicker, type PickedCustomer } from "./CustomerPicker.tsx";
 
@@ -13,7 +13,7 @@ function searchApi() {
   const seen: string[] = [];
   const api = fakeApi({
     ...signedInRoutes,
-    "GET /dues": () => json(NO_DUES),
+    ...BALANCE_ROUTES,
     "GET /customers": (request) => {
       const term = new URL(request.url).searchParams.get("search") ?? "";
       seen.push(term);
@@ -97,6 +97,19 @@ describe("CustomerPicker", () => {
 
     expect(screen.queryByRole("option", { name: /Add “Ram”/ })).not.toBeInTheDocument();
     expect(await screen.findByRole("option", { name: /Add “Ram”/ })).toBeInTheDocument();
+  });
+
+  it("says so when the lookup on Enter fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const api = fakeApi({
+      ...signedInRoutes,
+      "GET /customers": () => Promise.reject(new TypeError("Failed to fetch")),
+    });
+    const { user } = await renderPart(<Picker />, api);
+
+    await user.type(screen.getByRole("combobox", { name: "Customer" }), "Sunil{Enter}");
+
+    expect(await screen.findByText(/Could not look up customers/)).toBeInTheDocument();
   });
 
   it("closes the list when the person moves on", async () => {

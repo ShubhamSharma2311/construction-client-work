@@ -60,7 +60,7 @@ export function DuesPage() {
           </>
         }
       />
-      <div className={styles.tabs} role="tablist" aria-label="Show">
+      <div className={styles.tabs} role="group" aria-label="Show">
         {(
           [
             ["owing", "Who owes"],
@@ -70,8 +70,7 @@ export function DuesPage() {
           <button
             key={value}
             type="button"
-            role="tab"
-            aria-selected={tab === value}
+            aria-pressed={tab === value}
             className={styles.tab}
             onClick={() => {
               setParams(value === "all" ? { tab: "all" } : {}, { replace: true });

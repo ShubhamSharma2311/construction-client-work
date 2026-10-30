@@ -41,13 +41,31 @@ describe("sharing a payment over ticked trips", () => {
 
 describe("checking a payment", () => {
   it("needs the customer, the amount, and trips when choosing them", () => {
-    const problems = checkPayment({ ...values, customer: null, amount: "", allocation: "MANUAL" });
+    const problems = checkPayment(
+      { ...values, customer: null, amount: "", allocation: "MANUAL" },
+      unpaid,
+    );
 
     expect(Object.keys(problems)).toEqual(["customer", "amount", "allocation"]);
   });
 
+  it("needs chosen trips to owe all of a write-off, since forgiven money is not credit", () => {
+    const writeOff = {
+      ...values,
+      kind: "WRITE_OFF" as const,
+      notes: "Discount",
+      amount: "2000",
+      allocation: "MANUAL" as const,
+    };
+
+    expect(checkPayment({ ...writeOff, chosen: [1] }, unpaid)["allocation"]).toContain(
+      "at least the amount written off",
+    );
+    expect(checkPayment({ ...writeOff, chosen: [1, 2] }, unpaid)).toEqual({});
+  });
+
   it("needs a reason for a write-off", () => {
-    expect(checkPayment({ ...values, kind: "WRITE_OFF" })["notes"]).toContain("why");
+    expect(checkPayment({ ...values, kind: "WRITE_OFF" }, unpaid)["notes"]).toContain("why");
   });
 });
 

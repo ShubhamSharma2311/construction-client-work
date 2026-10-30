@@ -69,13 +69,14 @@ export function useUnpaidTrips(customerId: number | null): UseQueryResult<TripIt
     queryKey: ["trips", "unpaid", customerId],
     enabled: customerId !== null,
     queryFn: async () => {
+      if (customerId === null) throw new Error("useUnpaidTrips ran without a customer");
       // Asked by status, not read from all trips, so a long history cannot push old dues
       // past the page limit.
       const pages = await Promise.all(
         (["DUE", "PARTIAL"] as const).map(async (status) =>
           unwrap(
             await api.GET("/trips", {
-              params: { query: { customerId: customerId ?? 0, status, limit: 200 } },
+              params: { query: { customerId, status, limit: 200 } },
             }),
           ),
         ),

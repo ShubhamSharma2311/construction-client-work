@@ -1,4 +1,5 @@
 import type { Ok } from "../api/types.ts";
+import { json } from "./fake-api.ts";
 
 type Drivers = Ok<"/drivers", "get">;
 type Tractors = Ok<"/tractors", "get">;
@@ -216,4 +217,50 @@ export const PAYMENT: Ok<"/payments/{id}", "get"> = {
   allocations: [
     { tripId: 30, tripDate: "2026-04-01", tripKind: "OPENING_BALANCE", amountPaise: 600000 },
   ],
+};
+
+export const EXPENSE: Ok<"/expenses/{id}", "get"> = {
+  id: 61,
+  category: "DIESEL",
+  spentOn: "2026-10-28",
+  amountPaise: 450000,
+  mode: "CASH",
+  driver: { id: 2, name: "Suresh" },
+  tractor: { id: 3, regNumber: "RJ 21 RA 4412" },
+  labourer: null,
+  dieselLitres: 47.5,
+  hourMeter: null,
+  tractorLoanId: null,
+  emiMonth: null,
+  lateFeePaise: null,
+  periodFrom: null,
+  periodTo: null,
+  reference: null,
+  notes: null,
+  deletedAt: null,
+  createdAt: "2026-10-28T06:00:00.000Z",
+};
+
+export const LABOURERS: Ok<"/labourers", "get"> = {
+  items: [{ id: 11, name: "Mangilal", phone: null, notes: null, isActive: true }],
+  total: 1,
+  page: 1,
+  limit: 200,
+};
+
+const balance = (
+  balancePaise: number,
+  duePaise: number,
+  creditPaise: number,
+): Ok<"/customers/{id}/balance", "get"> => ({
+  balancePaise,
+  duePaise,
+  creditPaise,
+});
+
+/** What each fixture customer owes or holds: Ramesh owes, Sunil holds some credit against a due. */
+export const BALANCE_ROUTES = {
+  "GET /customers/7/balance": () => json(balance(1850000, 1850000, 0)),
+  "GET /customers/8/balance": () => json(balance(700000, 900000, 200000)),
+  "GET /customers/9/balance": () => json(balance(0, 0, 0)),
 };

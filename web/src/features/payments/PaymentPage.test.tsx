@@ -86,6 +86,25 @@ describe("A payment", () => {
     expect(sent).toEqual([{ mode: "ONLINE", reference: "UTR9" }]);
   });
 
+  it("removes the reference when online money is changed to cash", async () => {
+    const sent: unknown[] = [];
+    const online = { ...PAYMENT, mode: "ONLINE" as const, reference: "UTR9" };
+    const api = paymentApi(online, {
+      "PATCH /payments/51": async (request) => {
+        sent.push(await request.json());
+        return json({ payment: PAYMENT, customerBalance: balance });
+      },
+    });
+    const { user } = await renderApp(api, { path: "/payments/51" });
+
+    await user.click(await screen.findByRole("button", { name: "Edit details" }));
+    await user.click(within(screen.getByRole("dialog")).getByText("Cash"));
+    await user.click(screen.getByRole("button", { name: "Save details" }));
+
+    await screen.findByText("Details saved.");
+    expect(sent).toEqual([{ mode: "CASH", reference: null }]);
+  });
+
   it("keeps the date of money taken at delivery", async () => {
     const { user } = await renderApp(paymentApi({ ...PAYMENT, deliveryTripId: 41 }), {
       path: "/payments/51",

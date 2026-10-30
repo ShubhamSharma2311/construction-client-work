@@ -114,13 +114,15 @@ function PaymentActions({ payment }: { payment: Payment }) {
       >
         Delete
       </Button>
-      <EditPayment
-        payment={payment}
-        open={editing}
-        onClose={() => {
-          setEditing(false);
-        }}
-      />
+      {/* Mounted only while open, so a reopened sheet starts from what is saved. */}
+      {editing ? (
+        <EditPayment
+          payment={payment}
+          onClose={() => {
+            setEditing(false);
+          }}
+        />
+      ) : null}
       <ConfirmDialog
         open={deleting}
         title="Delete this entry?"
@@ -156,15 +158,7 @@ const MODES = [
 ];
 
 /** Date, mode, reference and note can change; a different amount is a new entry. */
-function EditPayment({
-  payment,
-  open,
-  onClose,
-}: {
-  payment: Payment;
-  open: boolean;
-  onClose: () => void;
-}) {
+function EditPayment({ payment, onClose }: { payment: Payment; onClose: () => void }) {
   const [paidOn, setPaidOn] = useState(payment.paidOn);
   const [mode, setMode] = useState(payment.mode ?? "CASH");
   const [reference, setReference] = useState(payment.reference ?? "");
@@ -181,7 +175,9 @@ function EditPayment({
     const changes: PaymentChanges = {};
     if (paidOn !== payment.paidOn) changes.paidOn = paidOn;
     if (!writeOff && mode !== payment.mode) changes.mode = mode;
-    if (reference.trim() !== (payment.reference ?? "")) changes.reference = reference.trim();
+    // Cash has no reference, and an emptied one is removed; the API takes null for both.
+    const nextReference = mode === "ONLINE" && reference.trim() !== "" ? reference.trim() : null;
+    if (!writeOff && nextReference !== payment.reference) changes.reference = nextReference;
     if (notes.trim() !== (payment.notes ?? "")) changes.notes = notes.trim();
     if (Object.keys(changes).length === 0) {
       onClose();
@@ -196,7 +192,7 @@ function EditPayment({
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title="Edit details">
+    <Sheet open onClose={onClose} title="Edit details">
       <div className={sheetStyles.body}>
         <FormError error={update.error} shownFields={["paidOn", "reference", "notes"]} />
         {atDelivery ? (
@@ -217,6 +213,7 @@ function EditPayment({
         {writeOff || mode !== "ONLINE" ? null : (
           <TextField
             label="UPI or bank reference"
+            maxLength={100}
             value={reference}
             error={errors["reference"]}
             onChange={(event) => {
@@ -226,6 +223,7 @@ function EditPayment({
         )}
         <TextField
           label={writeOff ? "Reason" : "Note"}
+          maxLength={500}
           value={notes}
           error={errors["notes"]}
           onChange={(event) => {
