@@ -1,12 +1,7 @@
 import type { FetchFn } from "../api/client.ts";
-import type { paths } from "../api/schema.gen.ts";
+import type { Ok } from "../api/types.ts";
 
-/** The 200 body of a route, so fake answers break the build when the API changes. */
-export type Ok<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends {
-  responses: { 200: { content: { "application/json": infer Body } } };
-}
-  ? Body
-  : never;
+export type { Ok };
 
 export const BASE_URL = "http://ledger.test/api";
 

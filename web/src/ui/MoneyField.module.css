@@ -1,0 +1,28 @@
+.wrap {
+  position: relative;
+}
+
+.symbol {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.input {
+  padding-left: calc(var(--space-3) + 1.1em);
+  font-variant-numeric: tabular-nums;
+}
+
+.large .input {
+  min-height: 56px;
+  font: 600 var(--text-xl) / 1.2 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  padding-left: calc(var(--space-3) + 1em);
+}
+
+.large .symbol {
+  font-size: var(--text-xl);
+}

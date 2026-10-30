@@ -12,31 +12,44 @@
 }
 
 .row {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3);
   min-height: 52px;
   width: 100%;
-  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
   background: none;
   border: 0;
   text-align: left;
   color: var(--ink);
   text-decoration: none;
+}
+
+.action {
   cursor: pointer;
 }
 
 /* Phones keep :hover after a tap, which would leave the tapped row coloured. */
 @media (hover: hover) {
-  .row:hover {
+  .action:hover {
     color: var(--pen);
   }
 }
 
 .text {
   display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .detail {
   color: var(--ink-soft);
   font-size: var(--text-xs);
+}
+
+.amount {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }

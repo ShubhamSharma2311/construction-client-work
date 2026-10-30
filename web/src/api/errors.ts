@@ -1,20 +1,34 @@
+export interface Issue {
+  path: string;
+  message: string;
+}
+
 /** A failed API call, carrying the backend's error code so screens can word it for people. */
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
   readonly requestId: string | undefined;
+  /** Field-level problems from a 400, e.g. { path: "body/amount", message: "..." }. */
+  readonly issues: Issue[];
 
-  constructor(status: number, code: string, message: string, requestId?: string) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    requestId?: string,
+    issues: Issue[] = [],
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.requestId = requestId;
+    this.issues = issues;
   }
 }
 
 interface ErrorBody {
-  error: { code: string; message: string; requestId?: string };
+  error: { code: string; message: string; requestId?: string; details?: unknown };
 }
 
 function isErrorBody(body: unknown): body is ErrorBody {
@@ -30,10 +44,41 @@ function isErrorBody(body: unknown): body is ErrorBody {
   );
 }
 
+function isIssue(value: unknown): value is Issue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "path" in value &&
+    typeof value.path === "string" &&
+    "message" in value &&
+    typeof value.message === "string"
+  );
+}
+
+function issuesOf(details: unknown): Issue[] {
+  if (typeof details !== "object" || details === null || !("issues" in details)) return [];
+  return Array.isArray(details.issues) ? details.issues.filter(isIssue) : [];
+}
+
 /** Builds an ApiError from whatever a failed response carried, keeping the backend's words. */
 export function toApiError(response: Response, body: unknown): ApiError {
   if (isErrorBody(body)) {
-    return new ApiError(response.status, body.error.code, body.error.message, body.error.requestId);
+    const { code, message, requestId, details } = body.error;
+    return new ApiError(response.status, code, message, requestId, issuesOf(details));
   }
   return new ApiError(response.status, "UNEXPECTED", `Server answered ${String(response.status)}`);
+}
+
+/**
+ * The first problem for each body field, keyed the way forms name them: "body/amount" is
+ * "amount" and "body/payment/paidAmount" is "payment.paidAmount".
+ */
+export function fieldErrors(error: unknown): Record<string, string> {
+  if (!(error instanceof ApiError)) return {};
+  const byField: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const field = issue.path.replace(/^body\/?/, "").replaceAll("/", ".");
+    byField[field] ??= issue.message;
+  }
+  return byField;
 }

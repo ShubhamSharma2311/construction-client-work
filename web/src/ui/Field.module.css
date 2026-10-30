@@ -1,6 +1,7 @@
 .field {
   display: grid;
   gap: var(--space-1);
+  min-width: 0;
 }
 
 .label {
@@ -9,7 +10,19 @@
   color: var(--ink-soft);
 }
 
-.input {
+.error {
+  font-size: var(--text-sm);
+  color: var(--bahi);
+}
+
+.hint {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+/* Shared by every text-like control so they line up in a form. */
+.control {
+  width: 100%;
   min-height: var(--tap);
   padding: var(--space-2) var(--space-3);
   background: var(--sheet);
@@ -18,17 +31,17 @@
   font-size: var(--text-md);
 }
 
-.input:focus-visible {
+.control:focus-visible {
   outline: none;
   border-color: var(--pen);
   box-shadow: 0 0 0 3px var(--pen-wash);
 }
 
-.input[aria-invalid="true"] {
+.control[aria-invalid="true"] {
   border-color: var(--bahi);
 }
 
-.error {
-  font-size: var(--text-sm);
-  color: var(--bahi);
+.control:disabled {
+  background: var(--paper);
+  color: var(--ink-soft);
 }

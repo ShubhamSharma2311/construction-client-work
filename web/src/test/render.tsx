@@ -31,8 +31,36 @@ export const SETTINGS: Ok<"/settings", "get"> = {
   openingOnlinePaise: 0,
 };
 
-/** Handlers a signed-in app always needs: a good refresh cookie and saved settings. */
+export const DASHBOARD: Ok<"/dashboard", "get"> = {
+  date: "2026-10-28",
+  day: {
+    trips: 9,
+    revenuePaise: 3150000,
+    cashInPaise: 1400000,
+    onlineInPaise: 950000,
+    newDuesPaise: 800000,
+    duesRecoveredPaise: 600000,
+    expensesPaise: 1185000,
+    driverPaymentsPaise: 200000,
+    partnerNetPaidPaise: 0,
+  },
+  expensesByCategory: { DIESEL: 985000, LABOUR: 200000 },
+  cashInHandPaise: 4825000,
+  onlineBalancePaise: 11240000,
+  totalDuesPaise: 8670000,
+  overdueEmis: 0,
+  topDues: [
+    {
+      customer: { id: 7, name: "Ramesh Bishnoi" },
+      balancePaise: 1850000,
+      oldestDueDate: "2026-09-24",
+    },
+  ],
+};
+
+/** Handlers a signed-in app always needs: a good refresh cookie, settings, the Today screen. */
 export const signedInRoutes = {
   "POST /auth/refresh": () => json(SESSION),
   "GET /settings": () => json(SETTINGS),
+  "GET /dashboard": () => json(DASHBOARD),
 };

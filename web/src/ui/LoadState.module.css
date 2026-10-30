@@ -1,0 +1,10 @@
+.loading {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.error {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}

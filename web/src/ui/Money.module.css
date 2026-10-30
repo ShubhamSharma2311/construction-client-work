@@ -1,0 +1,16 @@
+.money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.plain {
+  color: inherit;
+}
+
+.owed {
+  color: var(--bahi);
+}
+
+.received {
+  color: var(--got);
+}

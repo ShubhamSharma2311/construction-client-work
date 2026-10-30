@@ -1,32 +1,24 @@
-import { type InputHTMLAttributes, useId } from "react";
-import styles from "./TextField.module.css";
+import type { InputHTMLAttributes, ReactNode } from "react";
+import { Field } from "./Field.tsx";
+import fieldStyles from "./Field.module.css";
 
-export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "id"> {
   label: string;
   error?: string | undefined;
+  hint?: ReactNode;
+  id?: string | undefined;
 }
 
-export function TextField({ label, error, id, ...rest }: TextFieldProps) {
-  const generatedId = useId();
-  const inputId = id ?? generatedId;
-  const errorId = `${inputId}-error`;
+export function TextField({ label, error, hint, id, className, ...rest }: TextFieldProps) {
   return (
-    <div className={styles.field}>
-      <label htmlFor={inputId} className={styles.label}>
-        {label}
-      </label>
-      <input
-        id={inputId}
-        className={styles.input}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        {...rest}
-      />
-      {error ? (
-        <span id={errorId} className={styles.error}>
-          {error}
-        </span>
-      ) : null}
-    </div>
+    <Field label={label} error={error} hint={hint} id={id}>
+      {(control) => (
+        <input
+          {...control}
+          className={`${fieldStyles.control} ${className ?? ""}`.trim()}
+          {...rest}
+        />
+      )}
+    </Field>
   );
 }

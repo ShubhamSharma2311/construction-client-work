@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { unwrap } from "./client.ts";
-import { toApiError } from "./errors.ts";
+import { fieldErrors, toApiError } from "./errors.ts";
 
 describe("API errors", () => {
   it("keeps the backend's code, message and request id", () => {
@@ -32,5 +32,35 @@ describe("API errors", () => {
     expect(() => unwrap({ response: new Response(null, { status: 200 }) })).toThrow(
       "Empty response",
     );
+  });
+});
+
+describe("field errors", () => {
+  it("keys each field's first problem by its name in the form", () => {
+    const error = toApiError(new Response(null, { status: 400 }), {
+      error: {
+        code: "VALIDATION",
+        message: "Request is not valid",
+        details: {
+          issues: [
+            { path: "body/amount", message: "Amount must be more than zero" },
+            { path: "body/amount", message: "second problem" },
+            { path: "body/payment/paidAmount", message: "Too much" },
+            { path: "query/from", message: "Bad date" },
+            { nonsense: true },
+          ],
+        },
+      },
+    });
+
+    expect(fieldErrors(error)).toEqual({
+      amount: "Amount must be more than zero",
+      "payment.paidAmount": "Too much",
+      "query.from": "Bad date",
+    });
+  });
+
+  it("has none for errors that are not from the API", () => {
+    expect(fieldErrors(new TypeError("Failed to fetch"))).toEqual({});
   });
 });
