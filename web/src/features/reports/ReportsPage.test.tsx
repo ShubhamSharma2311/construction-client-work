@@ -52,11 +52,11 @@ describe("Reports", () => {
 
     const total = await screen.findByText("₹1,42,300");
     expect(total.closest("div")).toHaveTextContent("Profit₹1,42,300");
-    const cameIn = screen.getByRole("list", { name: "Came in" });
+    const cameIn = screen.getByRole("list", { name: "Earned" });
     expect(cameIn).toHaveTextContent("Trips₹3,15,000");
     expect(cameIn).toHaveTextContent("Less written off");
-    expect(cameIn).toHaveTextContent("Earned₹3,14,800");
-    const wentOut = screen.getByRole("list", { name: "Went out" });
+    expect(cameIn).toHaveTextContent("Net earned₹3,14,800");
+    const wentOut = screen.getByRole("list", { name: "Costs" });
     expect(wentOut).toHaveTextContent("Diesel₹98,500");
     expect(wentOut).toHaveTextContent("Driver salaries");
     expect(wentOut).toHaveTextContent("Total₹1,72,500");
@@ -149,7 +149,7 @@ describe("Reports", () => {
   it("asks all time from the day the business started", async () => {
     const { api, asked } = reportsApi();
     const { user } = await renderApp(api, { path: "/reports" });
-    await screen.findByRole("list", { name: "Came in" });
+    await screen.findByRole("list", { name: "Earned" });
 
     await user.click(screen.getByRole("button", { name: "All time" }));
 
@@ -164,7 +164,7 @@ describe("Reports", () => {
 
     await renderApp(api, { path: "/reports?from=2026-03-01&to=2026-04-30" });
 
-    await screen.findByRole("list", { name: "Came in" });
+    await screen.findByRole("list", { name: "Earned" });
     expect(asked.at(-1)?.searchParams.get("from")).toBe("2026-04-01");
   });
 
@@ -178,6 +178,40 @@ describe("Reports", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Download" })).toBeDisabled();
     expect(asked).toHaveLength(0);
+  });
+
+  it("shows at most the last 366 days day by day, and says so", async () => {
+    const { api, asked } = reportsApi({
+      "GET /settings": () => json({ ...SETTINGS, businessStartDate: "2025-01-01" }),
+    });
+
+    await renderApp(api, { path: "/reports?report=days&range=all" });
+
+    expect(
+      await screen.findByText("Day by day shows at most a year, so it starts on 28 Oct 2025."),
+    ).toBeInTheDocument();
+    expect(asked.at(-1)?.searchParams.get("from")).toBe("2025-10-28");
+    expect(asked.at(-1)?.searchParams.get("to")).toBe("2026-10-28");
+  });
+
+  it("drops an old download error when the report changes", async () => {
+    const { api } = reportsApi();
+    const failing = {
+      ...api,
+      fetch: (request: Request) =>
+        new URL(request.url).pathname.endsWith("/export")
+          ? Promise.resolve(apiError(500, "INTERNAL", "Export broke"))
+          : api.fetch(request),
+    };
+    const { user } = await renderApp(failing, { path: "/reports" });
+    await screen.findByRole("list", { name: "Earned" });
+
+    await user.click(screen.getByRole("button", { name: "Download" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Khets" }));
+
+    await screen.findByRole("table", { name: "By khet" });
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("says why a report did not load", async () => {

@@ -4,7 +4,7 @@ import { expectNoSidewaysScroll, signIn } from "./owner.ts";
 type Page = import("@playwright/test").Page;
 
 const REPORTS = [
-  { button: "Profit", shows: (page: Page) => page.getByRole("list", { name: "Came in" }) },
+  { button: "Profit", shows: (page: Page) => page.getByRole("list", { name: "Earned" }) },
   { button: "Cash book", shows: (page: Page) => page.getByRole("table", { name: "Cash book" }) },
   { button: "Day by day", shows: (page: Page) => page.getByRole("table", { name: "Day by day" }) },
   { button: "Tractors", shows: (page: Page) => page.getByRole("table", { name: "By tractor" }) },

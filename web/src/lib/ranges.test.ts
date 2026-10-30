@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { businessDates, matchPreset, presetRange } from "./ranges.ts";
+import { businessDates, lastDays, matchPreset, presetRange } from "./ranges.ts";
 
 describe("date range presets", () => {
   it.each([
@@ -43,7 +43,29 @@ describe("business dates", () => {
       { from: "2026-03-01", to: "2026-03-31" },
       null,
     ],
+    [
+      "a range running past today stops today",
+      { from: "2026-10-01", to: "2026-12-31" },
+      { from: "2026-10-01", to: "2026-10-28" },
+    ],
+    ["a range wholly after today has no dates", { from: "2026-11-01", to: "2026-11-30" }, null],
   ] as const)("%s", (_, range, expected) => {
     expect(businessDates(range, "2026-04-01", "2026-10-28")).toEqual(expected);
+  });
+});
+
+describe("last days of a range", () => {
+  it("keeps a short range whole", () => {
+    expect(lastDays({ from: "2026-10-01", to: "2026-10-28" }, 366)).toEqual({
+      from: "2026-10-01",
+      to: "2026-10-28",
+    });
+  });
+
+  it("keeps only the last days of a long one, counting both ends", () => {
+    expect(lastDays({ from: "2025-01-01", to: "2026-10-28" }, 366)).toEqual({
+      from: "2025-10-28",
+      to: "2026-10-28",
+    });
   });
 });

@@ -3,7 +3,7 @@ import { useDownload } from "../../api/useDownload.ts";
 import { readChoice, readRange, writeRange } from "../../lib/addressFilters.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { PAY_MODE_OPTIONS, PAY_MODES, type PayMode } from "../../lib/payModes.ts";
-import { businessDates, type DateRange, presetRange } from "../../lib/ranges.ts";
+import { businessDates, type DateRange, lastDays, presetRange } from "../../lib/ranges.ts";
 import { Button } from "../../ui/Button.tsx";
 import { Choice } from "../../ui/Choice.tsx";
 import { LoadError, loadErrorMessage } from "../../ui/LoadState.tsx";
@@ -20,16 +20,28 @@ import { ProfitReport } from "./ProfitReport.tsx";
 import styles from "./Reports.module.css";
 
 const REPORTS = [
-  { value: "profit", label: "Profit", path: "/reports/pnl/export" },
-  { value: "cashbook", label: "Cash book", path: "/reports/cashbook/export" },
-  { value: "days", label: "Day by day", path: "/reports/summary/export" },
-  { value: "tractors", label: "Tractors", path: "/reports/tractors/export" },
-  { value: "khets", label: "Khets", path: "/reports/khets/export" },
-  { value: "drivers", label: "Drivers", path: "/reports/drivers/export" },
+  { value: "profit", label: "Profit" },
+  { value: "cashbook", label: "Cash book" },
+  { value: "days", label: "Day by day" },
+  { value: "tractors", label: "Tractors" },
+  { value: "khets", label: "Khets" },
+  { value: "drivers", label: "Drivers" },
 ] as const;
 
 type Report = (typeof REPORTS)[number]["value"];
 const REPORT_NAMES = REPORTS.map((report) => report.value);
+
+const EXPORT_PATHS: Record<Report, string> = {
+  profit: "/reports/pnl/export",
+  cashbook: "/reports/cashbook/export",
+  days: "/reports/summary/export",
+  tractors: "/reports/tractors/export",
+  khets: "/reports/khets/export",
+  drivers: "/reports/drivers/export",
+};
+
+// The API refuses a longer day-by-day report (its MAX_DAYWISE_DAYS); one row a day stays readable.
+const DAYWISE_MAX_DAYS = 366;
 
 export function ReportsPage() {
   const settings = useSettings();
@@ -53,10 +65,14 @@ function Reports({ startDate }: { startDate: IsoDate }) {
   const report: Report = readChoice(params, "report", REPORT_NAMES) || "profit";
   const mode = readChoice(params, "mode", PAY_MODES) || "CASH";
   const range = readRange(params, presetRange("month", today));
-  const dates = businessDates(range, startDate, today);
+  const inBusiness = businessDates(range, startDate, today);
+  const dates =
+    inBusiness && report === "days" ? lastDays(inBusiness, DAYWISE_MAX_DAYS) : inBusiness;
   const download = useDownload();
   const update = (patch: { report?: Report; mode?: PayMode; range?: DateRange | null }) => {
     const next = { report, mode, range, ...patch };
+    // An export that failed was for the old view; its error would mislead under the new one.
+    download.reset();
     setParams(
       {
         report: next.report,
@@ -66,7 +82,6 @@ function Reports({ startDate }: { startDate: IsoDate }) {
       { replace: true },
     );
   };
-  const path = REPORTS.find((candidate) => candidate.value === report)?.path ?? REPORTS[0].path;
 
   return (
     <>
@@ -79,7 +94,7 @@ function Reports({ startDate }: { startDate: IsoDate }) {
             onClick={() => {
               if (!dates) return;
               download.mutate({
-                path,
+                path: EXPORT_PATHS[report],
                 query: { ...dates, ...(report === "cashbook" ? { mode } : {}) },
               });
             }}
@@ -116,6 +131,11 @@ function Reports({ startDate }: { startDate: IsoDate }) {
           />
         ) : null}
       </div>
+      {dates && inBusiness && dates.from !== inBusiness.from ? (
+        <p className={styles.note}>
+          Day by day shows at most a year, so it starts on {formatDate(dates.from, today)}.
+        </p>
+      ) : null}
       {dates ? (
         <ReportBody report={report} dates={dates} mode={mode} />
       ) : (

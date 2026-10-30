@@ -7,7 +7,7 @@ import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABELS } from "../expenses/categor
 import styles from "./Reports.module.css";
 import { useProfit } from "./useReports.ts";
 
-/** Profit for the dates, set out the way the register would: what came in, what went out. */
+/** Profit for the dates: what trips earned, due or paid, less what the business cost to run. */
 export function ProfitReport({ range }: { range: DateRange }) {
   const report = useProfit(range);
   if (report.isError)
@@ -23,8 +23,8 @@ export function ProfitReport({ range }: { range: DateRange }) {
       <BigTotal label={profitPaise < 0 ? "Loss" : "Profit"}>
         <Money paise={Math.abs(profitPaise)} tone={profitPaise < 0 ? "owed" : "plain"} />
       </BigTotal>
-      <h2 className={styles.subhead}>Came in</h2>
-      <Register label="Came in">
+      <h2 className={styles.subhead}>Earned</h2>
+      <Register label="Earned">
         <RegisterRow label="Trips" amount={<Money paise={revenue.tripsPaise} />} />
         {revenue.writeOffsPaise > 0 ? (
           <RegisterRow
@@ -33,10 +33,10 @@ export function ProfitReport({ range }: { range: DateRange }) {
             amount={<Money paise={-revenue.writeOffsPaise} />}
           />
         ) : null}
-        <RegisterRow label="Earned" amount={<Money paise={revenue.netPaise} />} />
+        <RegisterRow label="Net earned" amount={<Money paise={revenue.netPaise} />} />
       </Register>
-      <h2 className={styles.subhead}>Went out</h2>
-      <Register label="Went out">
+      <h2 className={styles.subhead}>Costs</h2>
+      <Register label="Costs">
         {spentOn.map((category) => (
           <RegisterRow
             key={category}
@@ -46,7 +46,7 @@ export function ProfitReport({ range }: { range: DateRange }) {
         ))}
         <RegisterRow
           label="Driver salaries"
-          detail="Salary earned in closed months, whether paid yet or not"
+          detail="Salary for closed months and bonuses, whether paid yet or not"
           amount={<Money paise={driverSalaryPaise} />}
         />
         <RegisterRow

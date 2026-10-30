@@ -176,6 +176,26 @@ describe("cash book", () => {
     expect(book.closingPaise).toBe(1_490_000);
   });
 
+  it("words each line the way the owner would, not in code names", async () => {
+    const cash = (await t.get(`/reports/cashbook?mode=CASH&${october}`)).json<Cashbook>();
+    const online = (await t.get(`/reports/cashbook?mode=ONLINE&${october}`)).json<Cashbook>();
+    const { customer, tractor, driver } = m;
+
+    expect(cash.lines.map((line) => line.description)).toEqual([
+      `Payment from ${customer.name}`,
+      `Payment from ${customer.name}`,
+      `Diesel, ${tractor.regNumber}, ${driver.name}`,
+      expect.stringMatching(/^Labour, /),
+      `Advance to ${driver.name}`,
+      "Received from partner Manish",
+    ]);
+    expect(online.lines.map((line) => line.description)).toEqual([
+      `Payment from ${other.name}`,
+      "Royalty",
+      "Paid to partner Manish",
+    ]);
+  });
+
   it("keeps the online book separately, write-offs moving no money", async () => {
     const book = (await t.get(`/reports/cashbook?mode=ONLINE&${october}`)).json<Cashbook>();
 

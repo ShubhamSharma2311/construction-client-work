@@ -1,4 +1,5 @@
 import { addDays, dayFilter, fromDbDate, toDbDate, type IsoDate } from "../../lib/dates.ts";
+import type { DriverPaymentType, ExpenseCategory } from "../../generated/prisma/enums.ts";
 import type { Tx } from "../../lib/prisma.ts";
 import type { PayMode } from "../trips/trips.schema.ts";
 import type { CashLine } from "./reports.schema.ts";
@@ -17,6 +18,24 @@ const KIND_ORDER: Record<CashFlow["kind"], number> = {
   EXPENSE: 2,
   DRIVER_PAYMENT: 3,
   TO_PARTNER: 4,
+};
+
+// Lines are read by the owner on screen and in the export, so they use words, not code names.
+const CATEGORY_WORDS: Record<ExpenseCategory, string> = {
+  LABOUR: "Labour",
+  DIESEL: "Diesel",
+  ROYALTY: "Royalty",
+  POLICE: "Police",
+  OTHER: "Other",
+  EMERGENCY: "Emergency",
+  TRACTOR_SERVICE: "Tractor service",
+  TRACTOR_EMI: "Tractor EMI",
+};
+
+const DRIVER_PAYMENT_WORDS: Record<DriverPaymentType, string> = {
+  ADVANCE: "Advance",
+  SALARY: "Salary",
+  BONUS: "Bonus",
 };
 
 /**
@@ -54,7 +73,7 @@ export async function cashFlows(tx: Tx, mode: PayMode, range: Range): Promise<Ca
       date: fromDbDate(row.paidOn),
       kind: "CUSTOMER_PAYMENT" as const,
       refId: row.id,
-      description: `From ${row.customer.name}${row.reference ? ` (${row.reference})` : ""}`,
+      description: `Payment from ${row.customer.name}${row.reference ? ` (${row.reference})` : ""}`,
       inPaise: row.amountPaise,
       outPaise: 0,
     })),
@@ -64,7 +83,7 @@ export async function cashFlows(tx: Tx, mode: PayMode, range: Range): Promise<Ca
         date: fromDbDate(row.txnDate),
         kind: incoming ? ("FROM_PARTNER" as const) : ("TO_PARTNER" as const),
         refId: row.id,
-        description: `${incoming ? "From" : "To"} partner ${row.partner.name}`,
+        description: `${incoming ? "Received from" : "Paid to"} partner ${row.partner.name}`,
         inPaise: incoming ? row.amountPaise : 0,
         outPaise: incoming ? 0 : row.amountPaise,
       };
@@ -74,14 +93,14 @@ export async function cashFlows(tx: Tx, mode: PayMode, range: Range): Promise<Ca
       kind: "EXPENSE" as const,
       refId: row.id,
       description: [
-        row.category,
+        CATEGORY_WORDS[row.category],
         row.labourer?.name,
         row.tractor?.regNumber,
         row.driver?.name,
         row.notes,
       ]
         .filter(Boolean)
-        .join(" - "),
+        .join(", "),
       inPaise: 0,
       outPaise: row.amountPaise,
     })),
@@ -89,7 +108,7 @@ export async function cashFlows(tx: Tx, mode: PayMode, range: Range): Promise<Ca
       date: fromDbDate(row.paidOn),
       kind: "DRIVER_PAYMENT" as const,
       refId: row.id,
-      description: `${row.type} to ${row.driver.name}`,
+      description: `${DRIVER_PAYMENT_WORDS[row.type]} to ${row.driver.name}`,
       inPaise: 0,
       outPaise: row.amountPaise,
     })),
