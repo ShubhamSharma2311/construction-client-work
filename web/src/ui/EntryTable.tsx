@@ -18,6 +18,8 @@ export interface Column<T> {
   numeric?: boolean;
   /** The first column carries the register's red margin, as dates do in a paper register. */
   margin?: boolean;
+  /** Only on phones, where it sums up columns the table shows separately. */
+  phoneOnly?: boolean;
 }
 
 export interface EntryTableProps<T> {
@@ -73,7 +75,9 @@ export function EntryTable<T>({
               <th
                 key={column.key}
                 scope="col"
-                className={`${column.numeric ? styles.numeric : ""} ${column.margin ? styles.margin : ""}`}
+                className={`${column.numeric ? styles.numeric : ""} ${column.margin ? styles.margin : ""} ${
+                  column.phoneOnly ? styles.phoneOnly : ""
+                }`}
               >
                 {column.header}
               </th>
@@ -96,7 +100,7 @@ export function EntryTable<T>({
                   key={column.key}
                   className={`${styles[column.phone]} ${column.numeric ? styles.numeric : ""} ${
                     column.margin ? styles.margin : ""
-                  }`}
+                  } ${column.phoneOnly ? styles.phoneOnly : ""}`}
                 >
                   {column.phone === "title" ? (
                     <Link to={rowLink(row)} className={styles.link} aria-label={rowLabel(row)}>

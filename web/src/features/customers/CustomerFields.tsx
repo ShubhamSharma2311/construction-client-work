@@ -86,3 +86,28 @@ export function newCustomerBody(values: CustomerFieldValues) {
     ...(text(values.notes) ? { notes: text(values.notes) } : {}),
   };
 }
+
+export function customerFieldsOf(customer: {
+  name: string;
+  phone: string | null;
+  village: string | null;
+  notes: string | null;
+}): CustomerFieldValues {
+  return {
+    name: customer.name,
+    phone: customer.phone ?? "",
+    village: customer.village ?? "",
+    notes: customer.notes ?? "",
+  };
+}
+
+/** Only what changed, as PATCH /customers/:id takes it; a cleared phone is sent as null. */
+export function customerChanges(before: CustomerFieldValues, after: CustomerFieldValues) {
+  const changes: { name?: string; phone?: string | null; village?: string; notes?: string } = {};
+  if (after.name.trim() !== before.name) changes.name = after.name.trim();
+  if (after.phone.trim() !== before.phone)
+    changes.phone = after.phone.trim() === "" ? null : after.phone.trim();
+  if (after.village.trim() !== before.village) changes.village = after.village.trim();
+  if (after.notes.trim() !== before.notes) changes.notes = after.notes.trim();
+  return changes;
+}

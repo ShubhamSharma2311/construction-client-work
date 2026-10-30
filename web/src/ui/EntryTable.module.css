@@ -72,7 +72,8 @@
 }
 
 /* Only phones show the summary line; larger screens have the columns themselves. */
-.table td.phoneMeta {
+.table td.phoneMeta,
+.table .phoneOnly {
   display: none;
 }
 
@@ -155,6 +156,10 @@
 
   .hidden {
     display: none;
+  }
+
+  .table td.phoneOnly {
+    display: block;
   }
 
   .margin {

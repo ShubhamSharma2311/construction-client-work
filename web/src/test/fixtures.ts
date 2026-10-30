@@ -133,3 +133,87 @@ export const NO_DUES: Ok<"/dues", "get"> = {
   customers: [],
   totals: { balancePaise: 0, byBucket: {} },
 };
+
+export const DUES: Ok<"/dues", "get"> = {
+  asOf: "2026-10-28",
+  customers: [
+    {
+      customer: { id: 7, name: "Ramesh Bishnoi", phone: "9829041733" },
+      balancePaise: 1850000,
+      duePaise: 1850000,
+      creditPaise: 0,
+      oldestDueDate: "2026-09-24",
+      ageDays: 34,
+      bucket: "31-90",
+      hasUnappliedCredit: false,
+    },
+    {
+      customer: { id: 8, name: "Sunil Jat", phone: null },
+      balancePaise: 700000,
+      duePaise: 900000,
+      creditPaise: 200000,
+      oldestDueDate: "2026-10-27",
+      ageDays: 1,
+      bucket: "0-7",
+      hasUnappliedCredit: true,
+    },
+  ],
+  totals: { balancePaise: 2550000, byBucket: { "0-7": 700000, "31-90": 1850000 } },
+};
+
+export const LEDGER: Ok<"/customers/{id}/ledger", "get"> = {
+  customer: { id: 7, name: "Ramesh Bishnoi", phone: "9829041733" },
+  from: "2026-04-01",
+  to: "2026-10-28",
+  openingBalancePaise: 0,
+  entries: [
+    {
+      date: "2026-04-01",
+      type: "OPENING_BALANCE",
+      refId: 30,
+      description: "Old register balance",
+      debitPaise: 2350000,
+      creditPaise: 0,
+      balancePaise: 2350000,
+    },
+    {
+      date: "2026-10-10",
+      type: "PAYMENT",
+      refId: 51,
+      description: "Paid in cash",
+      debitPaise: 0,
+      creditPaise: 600000,
+      balancePaise: 1750000,
+    },
+    {
+      date: "2026-10-26",
+      type: "TRIP",
+      refId: 41,
+      description: "Trip, Ladnun road",
+      debitPaise: 350000,
+      creditPaise: 0,
+      balancePaise: 2100000,
+    },
+  ],
+  totals: { debitPaise: 2700000, creditPaise: 600000 },
+  closingBalancePaise: 2100000,
+};
+
+export const PAYMENT: Ok<"/payments/{id}", "get"> = {
+  id: 51,
+  customer: { id: 7, name: "Ramesh Bishnoi" },
+  paidOn: "2026-10-10",
+  kind: "PAYMENT",
+  mode: "CASH",
+  amountPaise: 600000,
+  allocatedPaise: 600000,
+  unallocatedPaise: 0,
+  reference: null,
+  notes: null,
+  deliveryTripId: null,
+  deletedAt: null,
+  createdAt: "2026-10-10T06:00:00.000Z",
+  allocations: [
+    { tripId: 30, tripDate: "2026-04-01", tripKind: "OPENING_BALANCE", amountPaise: 600000 },
+  ],
+};

@@ -113,7 +113,11 @@ describe("New trip", () => {
     const { api, sent } = newTripApi(() => {
       if (!first) return json(saved, 201);
       first = false;
-      return apiError(422, "IDEMPOTENCY_MISMATCH", "This Idempotency-Key was already used for a different request");
+      return apiError(
+        422,
+        "IDEMPOTENCY_MISMATCH",
+        "This Idempotency-Key was already used for a different request",
+      );
     });
     const { user } = await renderApp(api, { path: "/new/trip" });
     await fillTrip(user);

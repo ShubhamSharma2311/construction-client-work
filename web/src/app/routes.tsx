@@ -1,6 +1,11 @@
+import type { ReactNode } from "react";
 import type { RouteObject } from "react-router";
 import { LoginPage } from "../auth/LoginPage.tsx";
 import { RequireAuth } from "../auth/RequireAuth.tsx";
+import { CustomerAccountPage } from "../features/customers/CustomerAccountPage.tsx";
+import { DuesPage } from "../features/dues/DuesPage.tsx";
+import { NewPaymentPage } from "../features/payments/NewPaymentPage.tsx";
+import { PaymentPage } from "../features/payments/PaymentPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
 import { EditTripPage } from "../features/trips/EditTripPage.tsx";
 import { NewTripPage } from "../features/trips/NewTripPage.tsx";
@@ -18,15 +23,21 @@ const BUILT: Record<string, RouteObject> = {
   "/": { index: true, element: <TodayPage /> },
   "/trips": { path: "/trips", element: <TripsPage /> },
   "/new/trip": { path: "/new/trip", element: <NewTripPage /> },
+  "/dues": { path: "/dues", element: <DuesPage /> },
+  "/new/payment": { path: "/new/payment", element: <NewPaymentPage /> },
 };
+
+/** A screen for one entry; the key starts it afresh when the address moves to another. */
+function detail(path: string, render: (id: number) => ReactNode): RouteObject {
+  return { path, element: <WithId render={render} /> };
+}
 
 // Screens reached from a list rather than the menu.
 const DETAILS: RouteObject[] = [
-  { path: "/trips/:id", element: <WithId render={(id) => <TripPage key={id} id={id} />} /> },
-  {
-    path: "/trips/:id/edit",
-    element: <WithId render={(id) => <EditTripPage key={id} id={id} />} />,
-  },
+  detail("/trips/:id", (id) => <TripPage key={id} id={id} />),
+  detail("/trips/:id/edit", (id) => <EditTripPage key={id} id={id} />),
+  detail("/dues/:id", (id) => <CustomerAccountPage key={id} id={id} />),
+  detail("/payments/:id", (id) => <PaymentPage key={id} id={id} />),
 ];
 
 function screenFor({ to, label }: Destination): RouteObject {
