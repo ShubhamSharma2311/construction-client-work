@@ -1,0 +1,17 @@
+.section {
+  display: grid;
+  gap: var(--space-3);
+  margin-block-end: var(--space-6);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.subhead {
+  font-size: var(--text-md);
+  font-weight: 650;
+}
