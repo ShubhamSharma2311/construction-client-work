@@ -37,7 +37,8 @@ export function SelectField({
       {(control) => (
         <NativeSelect
           {...control}
-          className="w-full [&>select]:h-10"
+          // 16px on phones: iOS zooms into any control smaller than that.
+          className="w-full [&>select]:h-10 [&>select]:text-base md:[&>select]:text-sm"
           value={value}
           required={required}
           disabled={disabled}

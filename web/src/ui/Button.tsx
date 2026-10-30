@@ -11,8 +11,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 /** The app's three kinds of button, mapped onto shadcn's. */
 export const BUTTON_VARIANT = { primary: "default", secondary: "outline", quiet: "ghost" } as const;
 
-// Comfortable to tap on a phone; shadcn's default is sized for a mouse.
-export const BUTTON_SIZE = "h-10 px-4";
+// Comfortable to tap on a phone, and free to wrap a long name ("Pay Ramniwas Choudhary")
+// onto two lines rather than widen the page; shadcn's default is sized for a mouse.
+export const BUTTON_SIZE = "h-auto min-h-10 px-4 py-2 whitespace-normal text-center";
 
 export function Button({
   variant = "primary",

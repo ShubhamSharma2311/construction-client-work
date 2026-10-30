@@ -42,7 +42,7 @@ export function Choice<T extends string>({
           <label
             key={option.value}
             className={cn(
-              "flex h-10 cursor-pointer items-center justify-center rounded-lg border border-input bg-background px-2 text-center text-sm font-medium transition-colors hover:bg-muted",
+              "flex min-h-10 cursor-pointer items-center py-1.5 justify-center rounded-lg border border-input bg-background px-2 text-center text-sm font-medium transition-colors hover:bg-muted",
               "has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary",
               "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
               error && "border-destructive",

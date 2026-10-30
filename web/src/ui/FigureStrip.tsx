@@ -7,18 +7,26 @@ export interface Figure {
 
 /** A row of small totals over a list; two to a line on a narrow phone so amounts fit. */
 export function FigureStrip({ figures, label }: { figures: Figure[]; label: string }) {
+  // Cells draw their own rules and the frame hides the outer ones (see DetailList).
   return (
-    <dl
-      className="m-0 grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border shadow-xs md:grid-flow-col md:grid-cols-none md:auto-cols-fr"
-      aria-label={label}
-    >
-      {figures.map((figure) => (
-        <div key={figure.label} className="flex min-w-0 flex-col gap-1 bg-card px-4 py-3">
-          <dt className="text-sm text-muted-foreground">{figure.label}</dt>
-          <dd className="m-0 text-xl font-semibold tracking-tight tabular-nums">{figure.value}</dd>
-        </div>
-      ))}
-    </dl>
+    <div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+      <dl
+        className="-mr-px -mb-px grid grid-cols-2 md:auto-cols-fr md:grid-flow-col md:grid-cols-none"
+        aria-label={label}
+      >
+        {figures.map((figure) => (
+          <div
+            key={figure.label}
+            className="flex min-w-0 flex-col gap-1 border-r border-b px-4 py-3"
+          >
+            <dt className="text-sm text-muted-foreground">{figure.label}</dt>
+            <dd className="m-0 text-xl font-semibold tracking-tight tabular-nums">
+              {figure.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 

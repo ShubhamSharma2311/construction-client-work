@@ -1,13 +1,8 @@
-.field {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
+/* Matches shadcn's FieldLabel, for the custom controls that draw their own label. */
 .label {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .error {

@@ -25,7 +25,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
       <DialogContent
         showCloseButton={false}
         aria-describedby={undefined}
-        className="max-h-[90dvh] overflow-y-auto sm:max-w-lg max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-b-none"
+        className="max-h-[90dvh] overflow-y-auto md:max-w-lg max-md:top-auto max-md:bottom-0 max-md:max-w-none max-md:translate-y-0 max-md:rounded-b-none max-md:pb-[max(1rem,env(safe-area-inset-bottom))]"
         onOpenAutoFocus={(event) => {
           // Radix would focus the first field, which on a phone opens the keyboard at once.
           // The title reads the same to a screen reader and draws no box.

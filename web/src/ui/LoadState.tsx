@@ -4,7 +4,7 @@ import { ErrorNotice } from "./Notice.tsx";
 
 export function Loading({ what }: { what: string }) {
   return (
-    <p className="animate-pulse py-6 text-sm text-muted-foreground" aria-busy="true">
+    <p className="py-6 motion-safe:animate-pulse text-sm text-muted-foreground" aria-busy="true">
       Loading {what}…
     </p>
   );

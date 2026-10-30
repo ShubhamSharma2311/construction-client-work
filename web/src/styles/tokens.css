@@ -1,6 +1,7 @@
 /*
- * Names kept from the first look, now pointing at the shadcn theme in tailwind.css: slate
- * neutrals, blue actions, a navy menu. Red always means money owed, green money received.
+ * The app's own CSS modules use these names. They repeat the shadcn theme in tailwind.css
+ * (slate neutrals, blue actions) as hex values, so a colour changed there must change here.
+ * Red always means money owed, green money received. Light only, for now.
  */
 :root {
   --paper: #f8fafc;
@@ -10,17 +11,12 @@
   --ruling: #e2e8f0;
   --frame: #cbd5e1;
   --pen: #2563eb;
-  --pen-strong: #1d4ed8;
   --pen-wash: #eff6ff;
   --on-pen: #ffffff;
   --bahi: #b91c1c;
   --bahi-wash: #fef2f2;
   --got: #15803d;
   --got-wash: #f0fdf4;
-  --chrome: #0b1f3a;
-  --chrome-fg: #e2e8f0;
-  --chrome-hover: rgb(255 255 255 / 0.08);
-  --scrim: rgb(15 23 42 / 0.5);
 
   --font-display: "Inter Variable", system-ui, sans-serif;
   --font-body: "Inter Variable", system-ui, sans-serif;
@@ -40,13 +36,9 @@
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
-  --space-7: 48px;
 
   --radius-field: 8px;
   --radius-panel: 12px;
-  --radius-pill: 999px;
 
   --tap: 44px;
-  --side-nav: 220px;
-  --content-max: 1080px;
 }
