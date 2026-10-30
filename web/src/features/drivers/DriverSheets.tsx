@@ -23,6 +23,7 @@ import { Sheet } from "../../ui/Sheet.tsx";
 import sheetStyles from "../../ui/Sheet.module.css";
 import { TextField } from "../../ui/TextField.tsx";
 import { pickerOptions, useTractors } from "../masters/useMasters.ts";
+import { useSettings } from "../settings/useSettings.ts";
 import { driverStanding } from "./driverText.ts";
 import {
   type DriverDetail,
@@ -43,7 +44,11 @@ import { PAY_MODE_OPTIONS } from "../../lib/payModes.ts";
 export function CloseMonth({ driver, onClose }: { driver: DriverDetail; onClose: () => void }) {
   const today = todayIso(new Date());
   const [month, setMonth] = useState(previousMonth(today));
-  const salary = useMonthSalary(driver.id, month);
+  const startMonth = useSettings().data?.businessStartDate.slice(0, 7) ?? "";
+  // The API closes only a month that is over and inside the business; say so before asking it.
+  const notOver = month >= today.slice(0, 7);
+  const beforeStart = month < startMonth;
+  const salary = useMonthSalary(driver.id, month, !notOver && !beforeStart);
   return (
     <Sheet open onClose={onClose} title="Close a month">
       <div className={sheetStyles.body}>
@@ -62,10 +67,13 @@ export function CloseMonth({ driver, onClose }: { driver: DriverDetail; onClose:
           <LoadError error={salary.error} onRetry={() => void salary.refetch()} />
         ) : null}
         {salary.isPending && salary.fetchStatus !== "idle" ? <Loading what="the month" /> : null}
-        {/* The API closes only a month that is over; say so before the person fills anything. */}
-        {month >= today.slice(0, 7) ? (
+        {notOver ? (
           <p className={actions.text}>
             {formatMonth(month)} is not over yet, so it cannot be closed.
+          </p>
+        ) : beforeStart ? (
+          <p className={actions.text}>
+            {formatMonth(month)} is before the business started, so it cannot be closed.
           </p>
         ) : salary.data ? (
           salary.data.closed ? (

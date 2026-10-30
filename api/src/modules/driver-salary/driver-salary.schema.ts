@@ -130,7 +130,7 @@ export const driverLedgerResponse = z.object({
       month: z.string().nullable(),
       note: z.string().nullable(),
       /** How a payment was made; earnings have none. */
-      mode: z.enum(["CASH", "ONLINE"]).nullable(),
+      mode: payModeSchema.nullable(),
       earnedPaise: z.number().int(),
       paidPaise: z.number().int(),
       balancePaise,

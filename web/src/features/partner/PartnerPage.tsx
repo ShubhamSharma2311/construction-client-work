@@ -1,43 +1,40 @@
 import { useState } from "react";
-import { fieldErrors } from "../../api/errors.ts";
 import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
 import { useToast } from "../../app/Toast.tsx";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import { PAY_MODE_LABELS } from "../../lib/payModes.ts";
-import { presetRange } from "../../lib/ranges.ts";
+import { businessDates, type DateRange, presetRange } from "../../lib/ranges.ts";
 import actions from "../../ui/Actions.module.css";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { ConfirmDialog } from "../../ui/ConfirmDialog.tsx";
 import { FigureStrip } from "../../ui/FigureStrip.tsx";
-import { FilterCheckbox } from "../../ui/FilterPanel.tsx";
-import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { RangeChips } from "../../ui/RangeChips.tsx";
 import { Register, RegisterLink, RegisterRow } from "../../ui/Register.tsx";
-import { Sheet } from "../../ui/Sheet.tsx";
-import sheetStyles from "../../ui/Sheet.module.css";
 import { Tag } from "../../ui/Tag.tsx";
+import { SetupPrompt } from "../settings/SetupPrompt.tsx";
 import { useSettings } from "../settings/useSettings.ts";
-import { checkPartner, PartnerFields, type PartnerValues, shareOf } from "./PartnerFields.tsx";
+import { AddPartner, EditPartner } from "./PartnerSheets.tsx";
 import styles from "./PartnerPage.module.css";
 import { netPaidText, shareStanding } from "./partnerText.ts";
 import {
   type Partner,
   type PartnerEntry,
-  useCreatePartner,
   useDeletePartnerTxn,
   usePartnerLedger,
   usePartners,
   usePartnerShare,
-  useUpdatePartner,
 } from "./usePartner.ts";
 
-/** "Partner" in the menu: most businesses have one (Manish), so his account opens at once. */
+/**
+ * "Partner" in the menu: most businesses have one (Manish), so his account opens at once. With
+ * anyone else on the books, even a partner who has left, the list comes first.
+ */
 export function PartnersPage() {
   const partners = usePartners();
   const settings = useSettings();
@@ -47,10 +44,11 @@ export function PartnersPage() {
   if (settings.isError)
     return <LoadError error={settings.error} onRetry={() => void settings.refetch()} />;
   if (!partners.data || settings.data === undefined) return <Loading what="partners" />;
-  const active = partners.data.filter((partner) => partner.isActive);
-  const only = active.length === 1 ? active[0] : undefined;
-  if (only && settings.data)
-    return <PartnerAccount partner={only} startDate={settings.data.businessStartDate} />;
+  const [only, ...others] = partners.data;
+  if (only?.isActive && others.length === 0 && settings.data)
+    return (
+      <PartnerAccount partner={only} startDate={settings.data.businessStartDate} canAddPartner />
+    );
 
   return (
     <>
@@ -101,18 +99,40 @@ export function PartnerByIdPage({ id }: { id: number }) {
   const settings = useSettings();
   if (partners.isError)
     return <LoadError error={partners.error} onRetry={() => void partners.refetch()} />;
+  if (settings.isError)
+    return <LoadError error={settings.error} onRetry={() => void settings.refetch()} />;
+  if (settings.data === null) {
+    return (
+      <>
+        <PageHeader title="Partner" />
+        <SetupPrompt />
+      </>
+    );
+  }
   if (!partners.data || !settings.data) return <Loading what="the partner" />;
   const partner = partners.data.find((candidate) => candidate.id === id);
   if (!partner) return <ErrorNotice>There is no partner number {id}.</ErrorNotice>;
   return <PartnerAccount partner={partner} startDate={settings.data.businessStartDate} />;
 }
 
-function PartnerAccount({ partner, startDate }: { partner: Partner; startDate: IsoDate }) {
+function PartnerAccount({
+  partner,
+  startDate,
+  canAddPartner = false,
+}: {
+  partner: Partner;
+  startDate: IsoDate;
+  /** Reached straight from the menu, this screen stands in for the list, so it adds partners. */
+  canAddPartner?: boolean;
+}) {
   const today = todayIso(new Date());
   // A share is settled over a stretch of time; this month is where the owner usually looks.
   const [range, setRange] = useState(presetRange("month", today));
-  const [editing, setEditing] = useState(false);
-  const shareRange = range ?? { from: startDate, to: today };
+  const [sheet, setSheet] = useState<"edit" | "add" | null>(null);
+  const shareDates = businessDates(range, startDate, today);
+  const close = () => {
+    setSheet(null);
+  };
 
   return (
     <>
@@ -127,28 +147,38 @@ function PartnerAccount({ partner, startDate }: { partner: Partner; startDate: I
         <Button
           variant="secondary"
           onClick={() => {
-            setEditing(true);
+            setSheet("edit");
           }}
         >
           Edit details
         </Button>
+        {canAddPartner ? (
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSheet("add");
+            }}
+          >
+            Add partner
+          </Button>
+        ) : null}
       </div>
       <RangeChips value={range} onChange={setRange} today={today} startDate={startDate} />
-      <Share partner={partner} range={shareRange} />
+      {shareDates ? (
+        <Share partner={partner} range={shareDates} />
+      ) : (
+        <p className={actions.text}>
+          The business started on {formatDate(startDate, today)}, so there is no share before that.
+        </p>
+      )}
       <Payments partner={partner} range={range} today={today} />
-      {editing ? (
-        <EditPartner
-          partner={partner}
-          onClose={() => {
-            setEditing(false);
-          }}
-        />
-      ) : null}
+      {sheet === "edit" ? <EditPartner partner={partner} onClose={close} /> : null}
+      {sheet === "add" ? <AddPartner onClose={close} /> : null}
     </>
   );
 }
 
-function Share({ partner, range }: { partner: Partner; range: { from: IsoDate; to: IsoDate } }) {
+function Share({ partner, range }: { partner: Partner; range: DateRange }) {
   const share = usePartnerShare(partner.id, range, partner.sharePercent !== null);
   if (partner.sharePercent === null) {
     return (
@@ -160,6 +190,7 @@ function Share({ partner, range }: { partner: Partner; range: { from: IsoDate; t
   if (share.isError) return <LoadError error={share.error} onRetry={() => void share.refetch()} />;
   if (!share.data) return <Loading what="the share" />;
   const { data } = share;
+  const loss = data.profitPaise < 0;
   return (
     <section className={styles.section} aria-label="Share of profit">
       <p className={`${styles.standing} ${data.balancePaise < 0 ? styles.over : ""}`}>
@@ -169,14 +200,12 @@ function Share({ partner, range }: { partner: Partner; range: { from: IsoDate; t
         label="How the share is worked out"
         figures={[
           {
-            label: "Profit",
-            value: (
-              <Money paise={data.profitPaise} tone={data.profitPaise < 0 ? "owed" : "plain"} />
-            ),
+            label: loss ? "Loss" : "Profit",
+            value: <Money paise={Math.abs(data.profitPaise)} tone={loss ? "owed" : "plain"} />,
           },
           {
-            label: `${String(data.partner.sharePercent)}% share`,
-            value: <Money paise={data.shareDuePaise} />,
+            label: `${String(data.partner.sharePercent)}% ${loss ? "of the loss" : "share"}`,
+            value: <Money paise={Math.abs(data.shareDuePaise)} />,
           },
           { label: "Paid, net", value: <Money paise={data.netPaidPaise} /> },
         ]}
@@ -191,7 +220,7 @@ function Payments({
   today,
 }: {
   partner: Partner;
-  range: { from: IsoDate; to: IsoDate } | null;
+  range: DateRange | null;
   today: IsoDate;
 }) {
   const ledger = usePartnerLedger(partner.id, range);
@@ -232,7 +261,7 @@ function Payments({
               action={
                 <Button
                   variant="quiet"
-                  aria-label={`Undo ${formatRupees(entry.amountPaise)} on ${formatDate(entry.date, today)}`}
+                  aria-label={`Undo ${entry.direction === "PAID_TO_PARTNER" ? "paid" : "received"} ${formatRupees(entry.amountPaise)} on ${formatDate(entry.date, today)}`}
                   onClick={() => {
                     setUndoing(entry);
                   }}
@@ -279,7 +308,9 @@ function UndoTxn({
       onConfirm={() => {
         remove.mutate(entry.refId, {
           onSuccess: (result) => {
-            toast(`Entry undone. ${netPaidText(partner.name, result.netPaidPaise)}.`);
+            toast(
+              `Entry undone. ${netPaidText(partner.name, result.netPaidPaise, { inAll: true })}.`,
+            );
             onClose();
           },
         });
@@ -290,97 +321,5 @@ function UndoTxn({
         account.
       </p>
     </ConfirmDialog>
-  );
-}
-
-function AddPartner({ onClose }: { onClose: () => void }) {
-  const [values, setValues] = useState<PartnerValues>({ name: "", sharePercent: "", notes: "" });
-  const [tried, setTried] = useState(false);
-  const create = useCreatePartner();
-  const toast = useToast();
-  const problems = tried ? checkPartner(values) : {};
-  const server = fieldErrors(create.error);
-  return (
-    <Sheet open onClose={onClose} title="Add partner">
-      <div className={sheetStyles.body}>
-        <FormError error={create.error} shownFields={["name", "sharePercent", "notes"]} />
-        <PartnerFields values={values} errors={{ ...server, ...problems }} onChange={setValues} />
-        <Button
-          block
-          disabled={create.isPending}
-          onClick={() => {
-            setTried(true);
-            if (Object.keys(checkPartner(values)).length > 0) return;
-            const share = shareOf(values.sharePercent);
-            create.mutate(
-              {
-                name: values.name.trim(),
-                ...(share === null ? {} : { sharePercent: share }),
-                ...(values.notes.trim() ? { notes: values.notes.trim() } : {}),
-              },
-              {
-                onSuccess: (partner) => {
-                  toast(`${partner.name} added.`);
-                  onClose();
-                },
-              },
-            );
-          }}
-        >
-          {create.isPending ? "Adding…" : "Add partner"}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function EditPartner({ partner, onClose }: { partner: Partner; onClose: () => void }) {
-  const before: PartnerValues = {
-    name: partner.name,
-    sharePercent: partner.sharePercent === null ? "" : String(partner.sharePercent),
-    notes: partner.notes ?? "",
-  };
-  const [values, setValues] = useState(before);
-  const [active, setActive] = useState(partner.isActive);
-  const [tried, setTried] = useState(false);
-  const update = useUpdatePartner(partner.id);
-  const toast = useToast();
-  const problems = tried ? checkPartner(values) : {};
-  const server = fieldErrors(update.error);
-
-  const save = () => {
-    setTried(true);
-    if (Object.keys(checkPartner(values)).length > 0) return;
-    const changes = {
-      ...(values.name.trim() === before.name ? {} : { name: values.name.trim() }),
-      ...(values.sharePercent === before.sharePercent
-        ? {}
-        : { sharePercent: shareOf(values.sharePercent) }),
-      ...(values.notes.trim() === before.notes ? {} : { notes: values.notes.trim() }),
-      ...(active === partner.isActive ? {} : { isActive: active }),
-    };
-    if (Object.keys(changes).length === 0) {
-      onClose();
-      return;
-    }
-    update.mutate(changes, {
-      onSuccess: () => {
-        toast("Details saved.");
-        onClose();
-      },
-    });
-  };
-
-  return (
-    <Sheet open onClose={onClose} title="Edit details">
-      <div className={sheetStyles.body}>
-        <FormError error={update.error} shownFields={["name", "sharePercent", "notes"]} />
-        <PartnerFields values={values} errors={{ ...server, ...problems }} onChange={setValues} />
-        <FilterCheckbox label="Active" checked={active} onChange={setActive} />
-        <Button block onClick={save} disabled={update.isPending}>
-          {update.isPending ? "Saving…" : "Save details"}
-        </Button>
-      </div>
-    </Sheet>
   );
 }

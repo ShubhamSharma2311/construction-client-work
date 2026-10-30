@@ -80,6 +80,8 @@ export function NewDriverPaymentPage() {
   const pay = usePayDriver();
   const bonus = usePayBonus();
   const saving = values.kind === "BONUS" ? bonus : pay;
+  // Switching the kind mid-save must not free the button while the other save is on its way.
+  const busy = pay.isPending || bonus.isPending;
   const toast = useToast();
   const navigate = useNavigate();
   const name =
@@ -164,6 +166,7 @@ export function NewDriverPaymentPage() {
         <DateField
           label="Paid on"
           value={values.paidOn}
+          min={settings.data?.businessStartDate}
           max={today}
           error={problemOf("paidOn")}
           onChange={(paidOn) => {
@@ -208,8 +211,8 @@ export function NewDriverPaymentPage() {
             set({ notes: event.target.value });
           }}
         />
-        <Button type="submit" block disabled={saving.isPending}>
-          {saving.isPending ? "Saving…" : "Save payment"}
+        <Button type="submit" block disabled={busy}>
+          {busy ? "Saving…" : "Save payment"}
         </Button>
       </form>
     </>

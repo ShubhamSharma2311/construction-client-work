@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeApi, json } from "../../test/fake-api.ts";
 import { PARTNER_LEDGER, PARTNER_SHARE, PARTNERS } from "../../test/fixtures.ts";
-import { renderApp, signedInRoutes } from "../../test/render.tsx";
+import { renderApp, SETTINGS, signedInRoutes } from "../../test/render.tsx";
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
@@ -56,8 +56,90 @@ describe("Partner", () => {
 
     await renderApp(api, { path: "/partner" });
 
-    const line = await screen.findByText("Manish has been paid ₹3,000 more than the share");
+    const line = await screen.findByText("Manish owes ₹3,000 back to the business");
     expect(line.className).toMatch(/over/);
+  });
+
+  it("words a loss as the partner's part of it, not as an overpayment", async () => {
+    const { api } = partnerApi({
+      "GET /partners/1/share": () =>
+        json({
+          ...PARTNER_SHARE,
+          profitPaise: -4000000,
+          shareDuePaise: -2000000,
+          netPaidPaise: 0,
+          balancePaise: -2000000,
+        }),
+    });
+
+    await renderApp(api, { path: "/partner" });
+
+    expect(await screen.findByText("Manish owes ₹20,000 back to the business")).toBeInTheDocument();
+    const parts = screen.getByLabelText("How the share is worked out");
+    expect(parts).toHaveTextContent("Loss₹40,000");
+    expect(parts).toHaveTextContent("50% of the loss₹20,000");
+    expect(parts).toHaveTextContent("Paid, net₹0");
+  });
+
+  it("asks the share only from the day the business started", async () => {
+    const { api, shareAsked } = partnerApi({
+      "GET /settings": () => json({ ...SETTINGS, businessStartDate: "2026-10-15" }),
+    });
+    const { user } = await renderApp(api, { path: "/partner" });
+
+    await screen.findByText("₹12,000 of Manish's share is still to pay");
+    expect(shareAsked[0]?.searchParams.get("from")).toBe("2026-10-15");
+
+    await user.click(screen.getByRole("button", { name: "Last month" }));
+
+    expect(
+      await screen.findByText("The business started on 15 Oct, so there is no share before that."),
+    ).toBeInTheDocument();
+    expect(shareAsked).toHaveLength(1);
+  });
+
+  it("asks for the business settings before opening a partner", async () => {
+    const { api } = partnerApi({ "GET /settings": () => json(null) });
+
+    await renderApp(api, { path: "/partner/1" });
+
+    expect(await screen.findByRole("link", { name: "Set up the business" })).toBeInTheDocument();
+  });
+
+  it("lists partners when one has left, so he can still be settled with", async () => {
+    const { api } = partnerApi({
+      "GET /partners": () =>
+        json({
+          ...PARTNERS,
+          items: [
+            ...PARTNERS.items,
+            { id: 2, name: "Ravi", sharePercent: 20, notes: null, isActive: false },
+          ],
+        }),
+    });
+
+    await renderApp(api, { path: "/partner" });
+
+    const list = await screen.findByRole("list", { name: "Partners" });
+    expect(within(list).getByRole("link", { name: /Ravi \(inactive\)/ })).toHaveAttribute(
+      "href",
+      "/partner/2",
+    );
+  });
+
+  it("adds a second partner from the only partner's account", async () => {
+    const { api } = partnerApi({
+      "POST /partners": () =>
+        json({ id: 3, name: "Kailash", sharePercent: null, notes: null, isActive: true }, 201),
+    });
+    const { user } = await renderApp(api, { path: "/partner" });
+
+    await user.click(await screen.findByRole("button", { name: "Add partner" }));
+    const sheet = screen.getByRole("dialog", { name: "Add partner" });
+    await user.type(within(sheet).getByLabelText("Name"), "Kailash");
+    await user.click(within(sheet).getByRole("button", { name: "Add partner" }));
+
+    expect(await screen.findByText("Kailash added.")).toBeInTheDocument();
   });
 
   it("explains when no share is set, without asking for one", async () => {
@@ -82,12 +164,14 @@ describe("Partner", () => {
     });
     const { user } = await renderApp(api, { path: "/partner" });
 
-    await user.click(await screen.findByRole("button", { name: "Undo ₹20,000 on 12 Oct" }));
+    await user.click(await screen.findByRole("button", { name: "Undo paid ₹20,000 on 12 Oct" }));
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "Undo entry" }),
     );
 
-    expect(await screen.findByText("Entry undone. Paid to Manish, net: ₹0.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Entry undone. In all, paid to Manish, net: ₹0."),
+    ).toBeInTheDocument();
     expect(undone).toBe(true);
   });
 
@@ -176,7 +260,7 @@ describe("Partner payment", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(
-      await screen.findByText("₹5,000 received from Manish. Paid to Manish, net: ₹25,000."),
+      await screen.findByText("₹5,000 received from Manish. In all, paid to Manish, net: ₹25,000."),
     ).toBeInTheDocument();
     expect(sent[0]?.body).toEqual({
       direction: "RECEIVED_FROM_PARTNER",

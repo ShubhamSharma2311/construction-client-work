@@ -30,7 +30,7 @@ test("money paid to the partner shows in the account and the share, and can be u
 
   // Leave the dev data as it was.
   await payments
-    .getByRole("button", { name: /^Undo ₹100 on / })
+    .getByRole("button", { name: /^Undo paid ₹100 on / })
     .first()
     .click();
   await page.getByRole("dialog").getByRole("button", { name: "Undo entry" }).click();

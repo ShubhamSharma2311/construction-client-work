@@ -1,6 +1,7 @@
 import { formatMonth } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
-import { PAY_MODE_LABELS, type PayMode } from "../../lib/payModes.ts";
+import { PAY_MODE_LABELS } from "../../lib/payModes.ts";
+import type { DriverLedger } from "./useDriver.ts";
 
 /**
  * A driver's account in plain words. The balance is earned minus paid: above zero the
@@ -18,18 +19,7 @@ export function driverStanding(
   return { text: `${name}'s account is settled`, owesDriver: null };
 }
 
-interface LedgerLine {
-  type:
-    | "OPENING_BALANCE"
-    | "EARNED_SALARY"
-    | "EARNED_BONUS"
-    | "PAID_ADVANCE"
-    | "PAID_SALARY"
-    | "PAID_BONUS";
-  month: string | null;
-  note: string | null;
-  mode: PayMode | null;
-}
+type LedgerLine = Pick<DriverLedger["entries"][number], "type" | "month" | "note" | "mode">;
 
 /** One line of a driver's account in words: "Salary for Sept 2026", "Advance, cash: tyre". */
 export function entryText(line: LedgerLine): string {

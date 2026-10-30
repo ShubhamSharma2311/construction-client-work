@@ -1,6 +1,7 @@
 import { type SubmitEvent, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { fieldErrors } from "../../api/errors.ts";
+import type { BodyOf } from "../../api/types.ts";
 import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
 import { useToast } from "../../app/Toast.tsx";
 import { readIdParam } from "../../lib/addressFilters.ts";
@@ -17,11 +18,12 @@ import { PageHeader } from "../../ui/PageHeader.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
 import { TextField } from "../../ui/TextField.tsx";
 import { pickerOptions } from "../masters/useMasters.ts";
+import { useSettings } from "../settings/useSettings.ts";
 import styles from "./NewPartnerTxnPage.module.css";
 import { netPaidText } from "./partnerText.ts";
 import { type Partner, usePartners, useRecordPartnerTxn } from "./usePartner.ts";
 
-type Direction = "PAID_TO_PARTNER" | "RECEIVED_FROM_PARTNER";
+type Direction = BodyOf<"/partners/{id}/txns", "post">["direction"];
 
 export function NewPartnerTxnPage() {
   const partners = usePartners();
@@ -46,6 +48,7 @@ function TxnForm({ partners, initialPartner }: { partners: Partner[]; initialPar
   const [partnerId, setPartnerId] = useState(initialPartner);
   const [direction, setDirection] = useState<Direction>("PAID_TO_PARTNER");
   const [txnDate, setTxnDate] = useState(today);
+  const startDate = useSettings().data?.businessStartDate;
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<PayMode>("CASH");
   const [notes, setNotes] = useState("");
@@ -78,7 +81,7 @@ function TxnForm({ partners, initialPartner }: { partners: Partner[]; initialPar
           const what =
             direction === "PAID_TO_PARTNER" ? `paid to ${name}` : `received from ${name}`;
           toast(
-            `${formatRupees(result.txn.amountPaise)} ${what}. ${netPaidText(name, result.netPaidPaise)}.`,
+            `${formatRupees(result.txn.amountPaise)} ${what}. ${netPaidText(name, result.netPaidPaise, { inAll: true })}.`,
           );
           // Straight to this partner's account, even when there are several partners.
           void navigate(`/partner/${partnerId}`);
@@ -117,6 +120,7 @@ function TxnForm({ partners, initialPartner }: { partners: Partner[]; initialPar
       <DateField
         label="Date"
         value={txnDate}
+        min={startDate}
         max={today}
         error={server["txnDate"]}
         onChange={setTxnDate}

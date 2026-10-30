@@ -87,11 +87,16 @@ export function useRemoveSalaryRate(id: number) {
   });
 }
 
-export function useMonthSalary(id: number, month: string): UseQueryResult<MonthSalary> {
+/** A month's salary preview; only asked for a whole month the API would close. */
+export function useMonthSalary(
+  id: number,
+  month: string,
+  closable: boolean,
+): UseQueryResult<MonthSalary> {
   const { api } = useServices();
   return useQuery({
     queryKey: ["driver-ledger", id, "salary", month],
-    enabled: /^\d{4}-\d{2}$/.test(month),
+    enabled: closable && /^\d{4}-\d{2}$/.test(month),
     queryFn: async () =>
       unwrap(await api.GET("/drivers/{id}/salary", { params: { path: { id }, query: { month } } })),
   });

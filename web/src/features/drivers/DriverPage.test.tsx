@@ -111,6 +111,30 @@ describe("A driver", () => {
     expect(within(sheet).queryByRole("button", { name: /^Close / })).not.toBeInTheDocument();
   });
 
+  it("will not close a month before the business started, nor ask its salary", async () => {
+    const asked: string[] = [];
+    const api = driverApi({
+      "GET /drivers/2": () => json({ ...DRIVER, joinedOn: "2025-11-01" }),
+      "GET /drivers/2/salary": (request) => {
+        asked.push(new URL(request.url).searchParams.get("month") ?? "");
+        return json(MONTH_SALARY);
+      },
+    });
+    const { user } = await renderApp(api, { path: "/drivers/2" });
+
+    await user.click(await screen.findByRole("button", { name: "Close a month" }));
+    const sheet = screen.getByRole("dialog", { name: "Close a month" });
+    await user.selectOptions(within(sheet).getByLabelText("Month: month"), "03");
+
+    expect(
+      within(sheet).getByText("Mar 2026 is before the business started, so it cannot be closed."),
+    ).toBeInTheDocument();
+    await user.selectOptions(within(sheet).getByLabelText("Month: month"), "10");
+    expect(within(sheet).getByText(/Oct 2026 is not over yet/)).toBeInTheDocument();
+    expect(asked).not.toContain("2026-03");
+    expect(asked).not.toContain("2026-10");
+  });
+
   it("closes a month at the salary worked out, sending no amount of its own", async () => {
     const sent: unknown[] = [];
     const api = driverApi({
