@@ -12,8 +12,6 @@ export interface DateFieldProps {
   error?: string | undefined;
   hint?: ReactNode;
   required?: boolean;
-  /** "month" picks a whole month, sent as "2026-10". */
-  type?: "date" | "month";
 }
 
 /** The phone's own date picker: quicker to use than anything drawn on the page. */
@@ -26,14 +24,13 @@ export function DateField({
   error,
   hint,
   required,
-  type = "date",
 }: DateFieldProps) {
   return (
     <Field label={label} error={error} hint={hint}>
       {(control) => (
         <input
           {...control}
-          type={type}
+          type="date"
           className={fieldStyles.control}
           value={value}
           min={min}

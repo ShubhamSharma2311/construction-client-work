@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { fieldErrors } from "../../api/errors.ts";
 import { useToast } from "../../app/Toast.tsx";
 import { formatDate, formatMonth, todayIso } from "../../lib/dates.ts";
 import actions from "../../ui/Actions.module.css";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
-import { DateField } from "../../ui/DateField.tsx";
 import { Detail, DetailList } from "../../ui/DetailList.tsx";
 import { FilterCheckbox } from "../../ui/FilterPanel.tsx";
 import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
 import { MoneyField } from "../../ui/MoneyField.tsx";
+import { MonthField } from "../../ui/MonthField.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { Register, RegisterLink, RegisterRow } from "../../ui/Register.tsx";
 import { Sheet } from "../../ui/Sheet.tsx";
@@ -42,6 +42,9 @@ type SheetName = "edit" | "loan";
 
 function Tractor({ tractor }: { tractor: TractorDetail }) {
   const [sheet, setSheet] = useState<SheetName | null>(null);
+  const running = useLoans({ tractorId: tractor.id, status: "open" });
+  // The API keeps one running loan per tractor and none on an inactive one; say so up front.
+  const canAddLoan = tractor.isActive && running.data?.length === 0;
   const close = () => {
     setSheet(null);
   };
@@ -59,14 +62,16 @@ function Tractor({ tractor }: { tractor: TractorDetail }) {
       </DetailList>
       <div className={actions.actions}>
         <ButtonLink to={`/new/service?tractor=${String(tractor.id)}`}>Record service</ButtonLink>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setSheet("loan");
-          }}
-        >
-          Add loan
-        </Button>
+        {canAddLoan ? (
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSheet("loan");
+            }}
+          >
+            Add loan
+          </Button>
+        ) : null}
         <Button
           variant="secondary"
           onClick={() => {
@@ -85,10 +90,10 @@ function Tractor({ tractor }: { tractor: TractorDetail }) {
 }
 
 function Loans({ tractorId }: { tractorId: number }) {
-  const loans = useLoans();
+  const loans = useLoans({ tractorId, status: "all" });
   if (loans.isError) return <LoadError error={loans.error} onRetry={() => void loans.refetch()} />;
   if (!loans.data) return <Loading what="loans" />;
-  const own = loans.data.filter((loan) => loan.tractor.id === tractorId);
+  const own = loans.data;
   return (
     <section className={styles.section} aria-label="Loans">
       <h2 className={styles.subhead}>Loans</h2>
@@ -259,10 +264,11 @@ function AddLoan({ tractor, onClose }: { tractor: TractorDetail; onClose: () => 
             if (/^\d{0,2}$/.test(event.target.value)) set({ emiDay: event.target.value });
           }}
         />
-        <DateField
+        <MonthField
           label="First EMI month"
-          type="month"
           value={values.firstEmiMonth}
+          fromYear={new Date().getFullYear() - 10}
+          toYear={new Date().getFullYear() + 1}
           error={problemOf("firstEmiMonth")}
           onChange={(firstEmiMonth) => {
             set({ firstEmiMonth });
@@ -307,50 +313,5 @@ function AddLoan({ tractor, onClose }: { tractor: TractorDetail; onClose: () => 
         </Button>
       </div>
     </Sheet>
-  );
-}
-
-/** "Tractor EMI" from New entry: pick the loan, then pay on its page. */
-export function NewEmiPage() {
-  const loans = useLoans();
-  const today = todayIso(new Date());
-  const running = loans.data?.filter((loan) => loan.closedOn === null) ?? [];
-  return (
-    <>
-      <PageHeader title="Tractor EMI" />
-      {loans.isError ? (
-        <LoadError error={loans.error} onRetry={() => void loans.refetch()} />
-      ) : null}
-      {loans.isPending ? <Loading what="loans" /> : null}
-      {loans.data ? (
-        <Register label="Loans running">
-          {running.length === 0 ? (
-            <RegisterRow
-              label="No loan is running."
-              detail={
-                <>
-                  Add one from the tractor&apos;s page in{" "}
-                  <Link to="/tractors">Tractors and EMI</Link>.
-                </>
-              }
-            />
-          ) : (
-            running.map((loan) => (
-              <RegisterLink
-                key={loan.id}
-                to={`/loans/${String(loan.id)}${loan.summary.nextDue ? `?pay=${loan.summary.nextDue.month}` : ""}`}
-                label={`${loan.tractor.regNumber}, ${loan.lender}`}
-                detail={
-                  loan.summary.nextDue
-                    ? `Next: ${formatMonth(loan.summary.nextDue.month)}, due ${formatDate(loan.summary.nextDue.dueDate, today)}`
-                    : "All EMIs paid"
-                }
-                amount={<Money paise={loan.emiPaise} />}
-              />
-            ))
-          )}
-        </Register>
-      ) : null}
-    </>
   );
 }

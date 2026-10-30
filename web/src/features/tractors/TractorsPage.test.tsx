@@ -13,6 +13,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+const PAID_OFF = {
+  ...LOAN_SUMMARY,
+  id: 4,
+  lender: "Swaraj Finance",
+  closedOn: "2026-03-10",
+  closedReason: "PAID_OFF" as const,
+};
+
 function tractorsApi(
   extra: Record<string, (request: Request) => Response | Promise<Response>> = {},
 ) {
@@ -20,7 +28,13 @@ function tractorsApi(
     ...signedInRoutes,
     "GET /emi/due": () => json(EMI_DUE),
     "GET /tractors": () => json(TRACTORS),
-    "GET /loans": () => json([LOAN_SUMMARY]),
+    // Running loans unless the screen asks for all of a tractor's, closed ones included.
+    "GET /loans": (request) =>
+      json(
+        new URL(request.url).searchParams.get("status") === "all"
+          ? [LOAN_SUMMARY, PAID_OFF]
+          : [LOAN_SUMMARY],
+      ),
     "GET /loans/5": () => json(LOAN),
     "GET /tractors/3": () => json(TRACTORS.items[0]),
     "GET /tractors/3/services": () => json(SERVICES),
@@ -89,9 +103,21 @@ describe("A tractor", () => {
     );
   });
 
+  it("lists a paid-off loan with the running one", async () => {
+    await renderApp(tractorsApi(), { path: "/tractors/3" });
+
+    const loans = await screen.findByRole("list", { name: "Loans" });
+    expect(within(loans).getByRole("link", { name: /Swaraj Finance/ })).toHaveTextContent(
+      "Closed, 1 of 4 EMIs paid",
+    );
+    // One loan is running, so a second cannot be added until it closes.
+    expect(screen.queryByRole("button", { name: "Add loan" })).not.toBeInTheDocument();
+  });
+
   it("adds a loan after checking it, then opens it", async () => {
     const sent: unknown[] = [];
     const api = tractorsApi({
+      "GET /loans": () => json([]),
       "POST /tractors/3/loans": async (request) => {
         sent.push(await request.json());
         return json(LOAN, 201);
@@ -108,9 +134,8 @@ describe("A tractor", () => {
     expect(within(sheet).getByText("Pick a day from 1 to 28")).toBeInTheDocument();
     await user.clear(within(sheet).getByLabelText("EMI day of the month"));
     await user.type(within(sheet).getByLabelText("EMI day of the month"), "5");
-    // jsdom has no month picker; set the value as the browser would.
-    const month = within(sheet).getByLabelText("First EMI month");
-    await user.type(month, "2026-08");
+    await user.selectOptions(within(sheet).getByLabelText("First EMI month: month"), "Aug");
+    await user.selectOptions(within(sheet).getByLabelText("First EMI month: year"), "2026");
     await user.type(within(sheet).getByLabelText("Number of EMIs"), "4");
     await user.click(within(sheet).getByRole("button", { name: "Add loan" }));
 

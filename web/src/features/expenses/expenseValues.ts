@@ -1,7 +1,7 @@
 import type { ExpenseCategory, ExpenseItem } from "../../api/types.ts";
 import type { IsoDate } from "../../lib/dates.ts";
 import { formatRupees, paiseToRupeeInput, rupeesToPaise } from "../../lib/money.ts";
-import type { PayMode } from "./expenseFilters.ts";
+import type { PayMode } from "../../lib/payModes.ts";
 import type { ExpenseChanges, NewExpense } from "./useExpenses.ts";
 
 /** The kinds entered by hand; EMIs come from a tractor's loan instead. */

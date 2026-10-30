@@ -318,6 +318,7 @@ export const LOAN: Ok<"/loans/{id}", "get"> = {
   notes: null,
   paidPaise: 1820000,
   summary: { paidCount: 1, overdueCount: 1, nextDue: { month: "2026-09", dueDate: "2026-09-05" } },
+  foreclosure: null,
   schedule: [
     {
       number: 1,

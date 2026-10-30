@@ -344,6 +344,28 @@ describe("review fixes", () => {
     expect(last.loan.closedOn).toBe("2026-10-10");
   });
 
+  it("names the payment that closed a loan early, so it can be undone", async () => {
+    const loan = await makeLoan();
+    const closing = await t.post(`/loans/${String(loan.id)}/foreclose`, {
+      closedOn: "2026-10-22",
+      amount: 48000,
+      mode: "CASH",
+    });
+    const { expenseId } = closing.json<{ expenseId: number }>();
+
+    const closed = (await t.get(`/loans/${String(loan.id)}`)).json<LoanDetail>();
+    expect(closed.foreclosure).toEqual({ expenseId, paidOn: "2026-10-22", amountPaise: 4_800_000 });
+
+    const reopened = await t.delete(`/loans/${String(loan.id)}/payments/${String(expenseId)}`);
+    expect(reopened.json<LoanDetail>()).toMatchObject({ closedOn: null, foreclosure: null });
+  });
+
+  it("has no closing payment on a loan still running", async () => {
+    const loan = await makeLoan();
+
+    expect((await t.get(`/loans/${String(loan.id)}`)).json<LoanDetail>().foreclosure).toBeNull();
+  });
+
   it("keeps a foreclosed loan closed when a monthly payment is reversed", async () => {
     const loan = await makeLoan();
     const monthly = await paid(loan, { emiMonth: "2026-08" });

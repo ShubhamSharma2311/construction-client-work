@@ -20,6 +20,7 @@ import {
   SERVER_FIELDS,
   type TripValues,
 } from "./tripForm.ts";
+import { PAY_MODE_OPTIONS } from "../../lib/payModes.ts";
 
 // Fields this form shows, by the API's names; problems with anything else go in the notice.
 const TRIP_FIELDS = [
@@ -41,11 +42,6 @@ const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
   { value: "ONLINE", label: "Online" },
   { value: "DUE", label: "Due" },
   { value: "PARTIAL", label: "Part paid" },
-];
-
-const PAY_MODES = [
-  { value: "CASH" as const, label: "Cash" },
-  { value: "ONLINE" as const, label: "Online" },
 ];
 
 export interface TripFormProps {
@@ -264,7 +260,7 @@ function PaymentFields({
           <Choice
             label="Paid by"
             value={payment.mode}
-            options={PAY_MODES}
+            options={PAY_MODE_OPTIONS}
             error={problemOf("mode")}
             onChange={(mode) => {
               onChange({ ...payment, mode });

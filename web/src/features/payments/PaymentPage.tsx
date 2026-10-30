@@ -29,6 +29,7 @@ import {
   usePayment,
   useUpdatePayment,
 } from "./usePayments.ts";
+import { PAY_MODE_OPTIONS } from "../../lib/payModes.ts";
 
 export function PaymentPage({ id }: { id: number }) {
   const payment = usePayment(id);
@@ -152,11 +153,6 @@ function PaymentActions({ payment }: { payment: Payment }) {
   );
 }
 
-const MODES = [
-  { value: "CASH" as const, label: "Cash" },
-  { value: "ONLINE" as const, label: "Online" },
-];
-
 /** Date, mode, reference and note can change; a different amount is a new entry. */
 function EditPayment({ payment, onClose }: { payment: Payment; onClose: () => void }) {
   const [paidOn, setPaidOn] = useState(payment.paidOn);
@@ -208,7 +204,7 @@ function EditPayment({ payment, onClose }: { payment: Payment; onClose: () => vo
           />
         )}
         {writeOff ? null : (
-          <Choice label="Received as" value={mode} options={MODES} onChange={setMode} />
+          <Choice label="Received as" value={mode} options={PAY_MODE_OPTIONS} onChange={setMode} />
         )}
         {writeOff || mode !== "ONLINE" ? null : (
           <TextField

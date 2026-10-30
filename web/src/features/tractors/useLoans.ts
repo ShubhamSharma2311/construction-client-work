@@ -13,9 +13,18 @@ export type NewLoan = BodyOf<"/tractors/{id}/loans", "post">;
 export type EmiPayment = BodyOf<"/loans/{id}/emi", "post">;
 export type Foreclosure = BodyOf<"/loans/{id}/foreclose", "post">;
 
-export function useLoans(): UseQueryResult<LoanSummary[]> {
+export interface LoanQuery {
+  tractorId?: number;
+  /** The API lists open loans unless asked; a tractor's page wants closed ones too. */
+  status: "open" | "closed" | "all";
+}
+
+export function useLoans(query: LoanQuery): UseQueryResult<LoanSummary[]> {
   const { api } = useServices();
-  return useQuery({ queryKey: ["loans"], queryFn: async () => unwrap(await api.GET("/loans")) });
+  return useQuery({
+    queryKey: ["loans", "list", query],
+    queryFn: async () => unwrap(await api.GET("/loans", { params: { query } })),
+  });
 }
 
 export function useLoan(id: number): UseQueryResult<Loan> {
@@ -35,13 +44,14 @@ export function useEmiDue(days: number): UseQueryResult<Ok<"/emi/due", "get">> {
   });
 }
 
+/** A loan can start in the past, so its EMIs may already be overdue on Today. */
 export function useCreateLoan(tractorId: number) {
   const { api } = useServices();
-  const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async (body: NewLoan) =>
       unwrap(await api.POST("/tractors/{id}/loans", { params: { path: { id: tractorId } }, body })),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["loans"] }),
+    onSuccess: () => refreshMoney(),
   });
 }
 
@@ -97,10 +107,15 @@ export function useUndoEmi(loanId: number) {
 export function useDeleteLoan(loanId: number) {
   const { api } = useServices();
   const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async () => {
       expectNoContent(await api.DELETE("/loans/{id}", { params: { path: { id: loanId } } }));
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["loans"] }),
+    onSuccess: async () => {
+      // The loan is gone: drop its page first, so a refresh does not ask for it and get a 404.
+      queryClient.removeQueries({ queryKey: ["loans", "one", loanId] });
+      await refreshMoney();
+    },
   });
 }

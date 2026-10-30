@@ -3,6 +3,9 @@ import type { RouteObject } from "react-router";
 import { LoginPage } from "../auth/LoginPage.tsx";
 import { RequireAuth } from "../auth/RequireAuth.tsx";
 import { CustomerAccountPage } from "../features/customers/CustomerAccountPage.tsx";
+import { DriverPage } from "../features/drivers/DriverPage.tsx";
+import { DriversPage } from "../features/drivers/DriversPage.tsx";
+import { NewDriverPaymentPage } from "../features/drivers/NewDriverPaymentPage.tsx";
 import { DuesPage } from "../features/dues/DuesPage.tsx";
 import { EditExpensePage, ExpensePage } from "../features/expenses/ExpensePage.tsx";
 import { ExpensesPage } from "../features/expenses/ExpensesPage.tsx";
@@ -14,7 +17,8 @@ import {
 import { NewPaymentPage } from "../features/payments/NewPaymentPage.tsx";
 import { PaymentPage } from "../features/payments/PaymentPage.tsx";
 import { LoanPage } from "../features/tractors/LoanPage.tsx";
-import { NewEmiPage, TractorPage } from "../features/tractors/TractorPage.tsx";
+import { NewEmiPage } from "../features/tractors/NewEmiPage.tsx";
+import { TractorPage } from "../features/tractors/TractorPage.tsx";
 import { TractorsPage } from "../features/tractors/TractorsPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
 import { EditTripPage } from "../features/trips/EditTripPage.tsx";
@@ -41,6 +45,8 @@ const BUILT: Record<string, RouteObject> = {
   "/new/service": { path: "/new/service", element: <NewServicePage /> },
   "/tractors": { path: "/tractors", element: <TractorsPage /> },
   "/new/emi": { path: "/new/emi", element: <NewEmiPage /> },
+  "/drivers": { path: "/drivers", element: <DriversPage /> },
+  "/new/driver-payment": { path: "/new/driver-payment", element: <NewDriverPaymentPage /> },
 };
 
 /** A screen for one entry; the key starts it afresh when the address moves to another. */
@@ -58,6 +64,7 @@ const DETAILS: RouteObject[] = [
   detail("/expenses/:id/edit", (id) => <EditExpensePage key={id} id={id} />),
   detail("/tractors/:id", (id) => <TractorPage key={id} id={id} />),
   detail("/loans/:id", (id) => <LoanPage key={id} id={id} />),
+  detail("/drivers/:id", (id) => <DriverPage key={id} id={id} />),
 ];
 
 function screenFor({ to, label }: Destination): RouteObject {

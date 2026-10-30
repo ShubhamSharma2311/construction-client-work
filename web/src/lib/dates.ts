@@ -90,3 +90,8 @@ export function addDays(iso: IsoDate, days: number): IsoDate {
 export function daysBetween(from: IsoDate, to: IsoDate): number {
   return Math.round((utcDate(to).getTime() - utcDate(from).getTime()) / 86_400_000);
 }
+
+/** The month before the one `day` falls in: "2026-10-28" gives "2026-09". */
+export function previousMonth(day: IsoDate): string {
+  return addDays(`${day.slice(0, 7)}-01`, -1).slice(0, 7);
+}

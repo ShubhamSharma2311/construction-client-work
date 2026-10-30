@@ -3,6 +3,7 @@ import {
   addDays,
   formatAge,
   isIsoDate,
+  previousMonth,
   daysBetween,
   formatDate,
   formatDayLabel,
@@ -64,5 +65,12 @@ describe("date arithmetic", () => {
   it("counts whole days", () => {
     expect(daysBetween("2026-09-24", "2026-10-28")).toBe(34);
     expect(daysBetween("2026-10-28", "2026-10-28")).toBe(0);
+  });
+});
+
+describe("previousMonth", () => {
+  it("steps back across a year end", () => {
+    expect(previousMonth("2026-10-28")).toBe("2026-09");
+    expect(previousMonth("2026-01-05")).toBe("2025-12");
   });
 });

@@ -23,6 +23,7 @@ import { balanceText } from "../trips/balanceText.ts";
 import styles from "./NewPaymentPage.module.css";
 import { checkPayment, type PaymentFormValues, paymentBody, shareOver } from "./paymentForm.ts";
 import { useRecordPayment, useUnpaidTrips } from "./usePayments.ts";
+import { PAY_MODE_OPTIONS } from "../../lib/payModes.ts";
 
 export function NewPaymentPage() {
   const settings = useSettings();
@@ -90,10 +91,6 @@ const PAYMENT_FIELDS = ["paidOn", "amount", "mode", "reference", "notes"] as con
 const KINDS = [
   { value: "PAYMENT" as const, label: "Money received" },
   { value: "WRITE_OFF" as const, label: "Write off" },
-];
-const MODES = [
-  { value: "CASH" as const, label: "Cash" },
-  { value: "ONLINE" as const, label: "Online" },
 ];
 const ALLOCATIONS = [
   { value: "AUTO" as const, label: "Oldest dues first" },
@@ -210,7 +207,7 @@ function PaymentForm({
         <Choice
           label="Received as"
           value={values.mode}
-          options={MODES}
+          options={PAY_MODE_OPTIONS}
           error={problemOf("mode")}
           onChange={(mode) => {
             set({ mode });

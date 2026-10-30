@@ -21,6 +21,7 @@ import {
   ratePerLitre,
   showsReference,
 } from "./expenseValues.ts";
+import { PAY_MODE_OPTIONS } from "../../lib/payModes.ts";
 
 // Fields this form can show, by the API's names; problems with anything else go in the notice.
 const EXPENSE_FIELDS = [
@@ -37,11 +38,6 @@ const EXPENSE_FIELDS = [
   "periodFrom",
   "periodTo",
 ] as const;
-
-const MODES = [
-  { value: "CASH" as const, label: "Cash" },
-  { value: "ONLINE" as const, label: "Online" },
-];
 
 const NOTE_LABELS: Record<EnteredCategory, string> = {
   LABOUR: "Note",
@@ -209,7 +205,7 @@ export function ExpenseForm({
       <Choice
         label="Paid by"
         value={values.mode}
-        options={MODES}
+        options={PAY_MODE_OPTIONS}
         error={problemOf("mode")}
         onChange={(mode) => {
           set({ mode });

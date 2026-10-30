@@ -1,3 +1,4 @@
+import type { PayMode } from "../../lib/payModes.ts";
 import type { PickedCustomer } from "../customers/CustomerPicker.tsx";
 import type { IsoDate } from "../../lib/dates.ts";
 import { rupeesToPaise } from "../../lib/money.ts";
@@ -17,7 +18,6 @@ export interface TripValues {
 }
 
 export type PaymentType = "CASH" | "ONLINE" | "DUE" | "PARTIAL";
-export type PayMode = "CASH" | "ONLINE";
 
 export interface PaymentValues {
   type: PaymentType;

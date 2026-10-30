@@ -21,6 +21,9 @@ export const EMPTY_LOAN: LoanValues = {
   notes: "",
 };
 
+/** The API's own limit on one loan. */
+export const MAX_INSTALMENTS = 120;
+
 export type LoanProblems = Partial<Record<keyof LoanValues, string>>;
 
 export function checkLoan(values: LoanValues): LoanProblems {
@@ -35,8 +38,11 @@ export function checkLoan(values: LoanValues): LoanProblems {
   if (!/^\d{4}-\d{2}$/.test(values.firstEmiMonth))
     problems.firstEmiMonth = "Pick the month of the first EMI";
   const count = Number(values.totalInstallments);
-  if (!/^\d{1,3}$/.test(values.totalInstallments) || count < 1)
+  if (!/^\d{1,3}$/.test(values.totalInstallments) || count < 1) {
     problems.totalInstallments = "Enter how many EMIs in all";
+  } else if (count > MAX_INSTALMENTS) {
+    problems.totalInstallments = `A loan here runs at most ${String(MAX_INSTALMENTS)} EMIs (10 years)`;
+  }
   return problems;
 }
 

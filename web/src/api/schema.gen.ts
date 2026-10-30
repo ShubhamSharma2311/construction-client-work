@@ -3532,6 +3532,11 @@ export interface paths {
                                     lateFeePaise: number;
                                 } | null;
                             }[];
+                            foreclosure: {
+                                expenseId: number;
+                                paidOn: string;
+                                amountPaise: number;
+                            } | null;
                         };
                     };
                 };
@@ -3668,6 +3673,11 @@ export interface paths {
                                     lateFeePaise: number;
                                 } | null;
                             }[];
+                            foreclosure: {
+                                expenseId: number;
+                                paidOn: string;
+                                amountPaise: number;
+                            } | null;
                         };
                     };
                 };
@@ -3761,6 +3771,11 @@ export interface paths {
                                     lateFeePaise: number;
                                 } | null;
                             }[];
+                            foreclosure: {
+                                expenseId: number;
+                                paidOn: string;
+                                amountPaise: number;
+                            } | null;
                         };
                     };
                 };
@@ -3846,6 +3861,11 @@ export interface paths {
                                         lateFeePaise: number;
                                     } | null;
                                 }[];
+                                foreclosure: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                } | null;
                             };
                             expenseId: number;
                             warnings: string[];
@@ -3936,6 +3956,11 @@ export interface paths {
                                         lateFeePaise: number;
                                     } | null;
                                 }[];
+                                foreclosure: {
+                                    expenseId: number;
+                                    paidOn: string;
+                                    amountPaise: number;
+                                } | null;
                             };
                             expenseId: number;
                             warnings: string[];
@@ -4016,6 +4041,11 @@ export interface paths {
                                     lateFeePaise: number;
                                 } | null;
                             }[];
+                            foreclosure: {
+                                expenseId: number;
+                                paidOn: string;
+                                amountPaise: number;
+                            } | null;
                         };
                     };
                 };

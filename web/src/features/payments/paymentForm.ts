@@ -1,3 +1,4 @@
+import type { PayMode } from "../../lib/payModes.ts";
 import type { IsoDate } from "../../lib/dates.ts";
 import { paiseToRupeeInput, rupeesToPaise } from "../../lib/money.ts";
 import type { PickedCustomer } from "../customers/CustomerPicker.tsx";
@@ -5,7 +6,6 @@ import type { TripItem } from "../trips/tripFilters.ts";
 import type { NewPayment } from "./usePayments.ts";
 
 export type PaymentKind = "PAYMENT" | "WRITE_OFF";
-export type PayMode = "CASH" | "ONLINE";
 
 export interface PaymentFormValues {
   customer: PickedCustomer | null;

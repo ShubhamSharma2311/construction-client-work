@@ -92,38 +92,43 @@ function loanLine(loan: LoanSummary | undefined): string {
 
 function TractorList() {
   const tractors = useTractors();
-  const loans = useLoans();
+  const loans = useLoans({ status: "open" });
   if (tractors.isError)
     return <LoadError error={tractors.error} onRetry={() => void tractors.refetch()} />;
   if (!tractors.data) return <Loading what="tractors" />;
   // Only one loan can be open per tractor at a time.
   const openLoanOf = (tractorId: number) =>
-    loans.data?.find((loan) => loan.tractor.id === tractorId && loan.closedOn === null);
+    loans.data?.find((loan) => loan.tractor.id === tractorId);
 
   return (
-    <Register label="Tractors">
-      {tractors.data.length === 0 ? (
-        <RegisterRow label="No tractors yet. Add the first one." />
-      ) : (
-        tractors.data.map((tractor) => (
-          <RegisterLink
-            key={tractor.id}
-            to={`/tractors/${String(tractor.id)}`}
-            label={
-              tractor.isActive
-                ? `${tractor.regNumber}, ${tractor.label}`
-                : `${tractor.regNumber} (inactive)`
-            }
-            detail={[
-              tractor.defaultDriver?.name,
-              loans.data ? loanLine(openLoanOf(tractor.id)) : null,
-            ]
-              .filter(Boolean)
-              .join(", ")}
-          />
-        ))
-      )}
-    </Register>
+    <>
+      {loans.isError ? (
+        <LoadError error={loans.error} onRetry={() => void loans.refetch()} />
+      ) : null}
+      <Register label="Tractors">
+        {tractors.data.length === 0 ? (
+          <RegisterRow label="No tractors yet. Add the first one." />
+        ) : (
+          tractors.data.map((tractor) => (
+            <RegisterLink
+              key={tractor.id}
+              to={`/tractors/${String(tractor.id)}`}
+              label={
+                tractor.isActive
+                  ? `${tractor.regNumber}, ${tractor.label}`
+                  : `${tractor.regNumber} (inactive)`
+              }
+              detail={[
+                tractor.defaultDriver?.name,
+                loans.data ? loanLine(openLoanOf(tractor.id)) : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            />
+          ))
+        )}
+      </Register>
+    </>
   );
 }
 

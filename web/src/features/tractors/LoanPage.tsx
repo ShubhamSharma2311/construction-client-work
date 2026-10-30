@@ -1,45 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
-import { fieldErrors } from "../../api/errors.ts";
-import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
-import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
-import { useToast } from "../../app/Toast.tsx";
+import { Link, useSearchParams } from "react-router";
 import { formatDate, formatFullDate, formatMonth, todayIso } from "../../lib/dates.ts";
-import { formatRupees, paiseToRupeeInput, rupeesToPaise } from "../../lib/money.ts";
 import actions from "../../ui/Actions.module.css";
 import { Button } from "../../ui/Button.tsx";
-import { Choice } from "../../ui/Choice.tsx";
-import { ConfirmDialog } from "../../ui/ConfirmDialog.tsx";
-import { DateField } from "../../ui/DateField.tsx";
 import { Detail, DetailList } from "../../ui/DetailList.tsx";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
-import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
-import { MoneyField } from "../../ui/MoneyField.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
-import { SelectField } from "../../ui/SelectField.tsx";
-import { Sheet } from "../../ui/Sheet.tsx";
-import sheetStyles from "../../ui/Sheet.module.css";
 import { Tag } from "../../ui/Tag.tsx";
-import { TextField } from "../../ui/TextField.tsx";
-import { useSettings } from "../settings/useSettings.ts";
-import { EMI_STATUS_LABELS, EMI_STATUS_TONES, nextUnpaid } from "./emiText.ts";
-import {
-  type Loan,
-  type ScheduleLine,
-  useDeleteLoan,
-  useForeclose,
-  useLoan,
-  usePayEmi,
-  useUndoEmi,
-} from "./useLoans.ts";
-
-const MODES = [
-  { value: "CASH" as const, label: "Cash" },
-  { value: "ONLINE" as const, label: "Online" },
-];
-type PayMode = (typeof MODES)[number]["value"];
+import { EMI_STATUS_LABELS, EMI_STATUS_TONES } from "./emiText.ts";
+import { DeleteLoan, Foreclose, PayEmi, UndoClosing, UndoEmi } from "./LoanSheets.tsx";
+import { type Loan, type ScheduleLine, useLoan } from "./useLoans.ts";
 
 export function LoanPage({ id }: { id: number }) {
   const loan = useLoan(id);
@@ -48,21 +20,39 @@ export function LoanPage({ id }: { id: number }) {
   return <LoanDetails loan={loan.data} />;
 }
 
-type SheetName = "pay" | "foreclose" | "delete";
+type SheetName = "pay" | "foreclose" | "delete" | "undoClosing";
+
+function ordinal(day: number): string {
+  if (day >= 11 && day <= 13) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
 
 function LoanDetails({ loan }: { loan: Loan }) {
   const today = todayIso(new Date());
   const [params, setParams] = useSearchParams();
-  // "?pay=2026-10" arrives from an EMI-due line or an unpaid month: Pay EMI opens on it.
+  // "?pay=2026-10" arrives from an EMI-due line or the Tractor EMI entry: Pay EMI opens on it.
   const asked = params.get("pay");
   const [sheet, setSheet] = useState<SheetName | null>(null);
   const [undoing, setUndoing] = useState<ScheduleLine | null>(null);
   const close = () => {
     setSheet(null);
+    // Replaced, not pushed, so Back leaves the loan instead of reopening the sheet.
     if (asked) setParams({}, { replace: true });
   };
   const open = loan.closedOn === null;
-  const paidAny = loan.schedule.some((line) => line.payment !== null);
+  const paid = loan.schedule.filter((line) => line.payment !== null);
+  const opener = (name: SheetName) => () => {
+    setSheet(name);
+  };
 
   const columns: Column<ScheduleLine>[] = [
     { key: "number", header: "No.", cell: (line) => line.number, phone: "hidden", margin: true },
@@ -124,45 +114,33 @@ function LoanDetails({ loan }: { loan: Loan }) {
         {loan.closedOn ? <Detail label="Closed on">{formatFullDate(loan.closedOn)}</Detail> : null}
         {loan.notes ? <Detail label="Note">{loan.notes}</Detail> : null}
       </DetailList>
-      {open ? (
-        <div className={actions.actions}>
-          <Button
-            onClick={() => {
-              setSheet("pay");
-            }}
-          >
-            Pay EMI
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSheet("foreclose");
-            }}
-          >
-            Close loan early
-          </Button>
-          {paidAny ? null : (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSheet("delete");
-              }}
-            >
-              Delete loan
+      <div className={actions.actions}>
+        {open ? (
+          <>
+            <Button onClick={opener("pay")}>Pay EMI</Button>
+            <Button variant="secondary" onClick={opener("foreclose")}>
+              Close loan early
             </Button>
-          )}
-        </div>
-      ) : null}
+          </>
+        ) : null}
+        {loan.foreclosure ? (
+          <Button variant="secondary" onClick={opener("undoClosing")}>
+            Undo closing
+          </Button>
+        ) : null}
+        {paid.length === 0 && loan.foreclosure === null ? (
+          <Button variant="secondary" onClick={opener("delete")}>
+            Delete loan
+          </Button>
+        ) : null}
+      </div>
       <EntryTable
         caption="EMI schedule"
         rows={loan.schedule}
         columns={columns}
         rowKey={(line) => line.number}
-        rowLink={(line) =>
-          line.payment
-            ? `/expenses/${String(line.payment.expenseId)}`
-            : `/loans/${String(loan.id)}${open ? `?pay=${line.month}` : ""}`
-        }
+        // A paid month opens its expense; an unpaid one opens nothing (Pay EMI is above).
+        rowLink={(line) => (line.payment ? `/expenses/${String(line.payment.expenseId)}` : null)}
         rowLabel={(line) => `${formatMonth(line.month)} EMI`}
         phoneMeta={(line) =>
           line.payment
@@ -171,19 +149,33 @@ function LoanDetails({ loan }: { loan: Loan }) {
         }
         empty="No EMIs in this loan."
       />
-      {open && paidAny ? (
-        <UndoList
-          loan={loan}
-          onPick={(line) => {
-            setUndoing(line);
-          }}
-        />
+      {/* Undo is rare and set apart from the schedule, so a tap there cannot do it by accident.
+          It stays on a closed loan: a mistaken last EMI must be undoable too. */}
+      {paid.length > 0 ? (
+        <details>
+          <summary className={actions.text}>Undo an EMI payment</summary>
+          <div className={actions.actions}>
+            {paid.map((line) => (
+              <Button
+                key={line.number}
+                variant="secondary"
+                aria-label={`Undo the ${formatMonth(line.month)} payment`}
+                onClick={() => {
+                  setUndoing(line);
+                }}
+              >
+                {formatMonth(line.month)}
+              </Button>
+            ))}
+          </div>
+        </details>
       ) : null}
       {open && (sheet === "pay" || asked !== null) ? (
         <PayEmi key={asked ?? "next"} loan={loan} month={asked} onClose={close} />
       ) : null}
       {sheet === "foreclose" ? <Foreclose loan={loan} onClose={close} /> : null}
       {sheet === "delete" ? <DeleteLoan loan={loan} onClose={close} /> : null}
+      {sheet === "undoClosing" ? <UndoClosing loan={loan} onClose={close} /> : null}
       {undoing ? (
         <UndoEmi
           loan={loan}
@@ -194,305 +186,5 @@ function LoanDetails({ loan }: { loan: Loan }) {
         />
       ) : null}
     </>
-  );
-}
-
-function ordinal(day: number): string {
-  if (day >= 11 && day <= 13) return "th";
-  switch (day % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
-}
-
-/** Undoing a payment is rare and separate from the schedule, so a tap there cannot do it by accident. */
-function UndoList({ loan, onPick }: { loan: Loan; onPick: (line: ScheduleLine) => void }) {
-  const paid = loan.schedule.filter((line) => line.payment !== null);
-  return (
-    <details>
-      <summary className={actions.text}>Undo an EMI payment</summary>
-      <div className={actions.actions}>
-        {paid.map((line) => (
-          <Button
-            key={line.number}
-            variant="secondary"
-            onClick={() => {
-              onPick(line);
-            }}
-          >
-            {formatMonth(line.month)}
-          </Button>
-        ))}
-      </div>
-    </details>
-  );
-}
-
-function PayEmi({
-  loan,
-  month,
-  onClose,
-}: {
-  loan: Loan;
-  month: string | null;
-  onClose: () => void;
-}) {
-  const today = todayIso(new Date());
-  const unpaid = loan.schedule.filter((line) => line.payment === null && line.status !== "CLOSED");
-  const first = unpaid.find((line) => line.month === month) ?? nextUnpaid(loan.schedule);
-  const [emiMonth, setEmiMonth] = useState(first?.month ?? "");
-  const [paidOn, setPaidOn] = useState(today);
-  const [amount, setAmount] = useState(paiseToRupeeInput(loan.emiPaise));
-  const [lateFee, setLateFee] = useState("");
-  const [mode, setMode] = useState<PayMode>("ONLINE");
-  const [reference, setReference] = useState("");
-  const [notes, setNotes] = useState("");
-  const { key, renew } = useIdempotencyKey();
-  const pay = usePayEmi(loan.id);
-  const settings = useSettings();
-  const toast = useToast();
-  const errors = fieldErrors(pay.error);
-
-  return (
-    <Sheet open onClose={onClose} title="Pay EMI">
-      <div className={sheetStyles.body}>
-        <FormError
-          error={pay.error}
-          shownFields={["emiMonth", "paidOn", "amount", "lateFee", "mode", "reference", "notes"]}
-        />
-        <SelectField
-          label="Month"
-          value={emiMonth}
-          options={unpaid.map((line) => ({
-            value: line.month,
-            label: `${formatMonth(line.month)}, ${EMI_STATUS_LABELS[line.status].toLowerCase()}`,
-          }))}
-          error={errors["emiMonth"]}
-          onChange={setEmiMonth}
-        />
-        <DateField
-          label="Paid on"
-          value={paidOn}
-          min={settings.data?.businessStartDate}
-          max={today}
-          error={errors["paidOn"]}
-          onChange={setPaidOn}
-        />
-        <MoneyField label="EMI paid" value={amount} error={errors["amount"]} onChange={setAmount} />
-        <MoneyField
-          label="Late fee (if any)"
-          value={lateFee}
-          error={errors["lateFee"]}
-          onChange={setLateFee}
-        />
-        <Choice label="Paid by" value={mode} options={MODES} onChange={setMode} />
-        {mode === "ONLINE" ? (
-          <TextField
-            label="Bank reference"
-            hint="Optional"
-            maxLength={100}
-            value={reference}
-            error={errors["reference"]}
-            onChange={(event) => {
-              setReference(event.target.value);
-            }}
-          />
-        ) : null}
-        <TextField
-          label="Note"
-          maxLength={500}
-          value={notes}
-          error={errors["notes"]}
-          onChange={(event) => {
-            setNotes(event.target.value);
-          }}
-        />
-        <Button
-          block
-          disabled={pay.isPending || emiMonth === "" || amount === ""}
-          onClick={() => {
-            const body = {
-              emiMonth,
-              paidOn,
-              amount,
-              mode,
-              ...(lateFee ? { lateFee } : {}),
-              ...(mode === "ONLINE" && reference.trim() ? { reference: reference.trim() } : {}),
-              ...(notes.trim() ? { notes: notes.trim() } : {}),
-            };
-            pay.mutate(
-              { body, key },
-              {
-                onSuccess: (result) => {
-                  const closed = result.loan.closedOn ? " The loan is now paid off." : "";
-                  toast(
-                    `${formatMonth(emiMonth)} EMI of ${formatRupees(result.loan.emiPaise)} paid.${closed}`,
-                  );
-                  for (const warning of result.warnings) toast(warning);
-                  onClose();
-                },
-                onError: (error) => {
-                  renewAfterMismatch(error, renew);
-                },
-              },
-            );
-          }}
-        >
-          {pay.isPending ? "Saving…" : "Save EMI payment"}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function Foreclose({ loan, onClose }: { loan: Loan; onClose: () => void }) {
-  const today = todayIso(new Date());
-  const [closedOn, setClosedOn] = useState(today);
-  const [amount, setAmount] = useState("");
-  const [mode, setMode] = useState<PayMode>("ONLINE");
-  const [reference, setReference] = useState("");
-  const [notes, setNotes] = useState("");
-  const { key, renew } = useIdempotencyKey();
-  const foreclose = useForeclose(loan.id);
-  const settings = useSettings();
-  const toast = useToast();
-  const errors = fieldErrors(foreclose.error);
-
-  return (
-    <Sheet open onClose={onClose} title="Close loan early">
-      <div className={sheetStyles.body}>
-        <p className={actions.text}>
-          The amount the lender takes to close the loan now. EMIs not yet paid are then not due.
-        </p>
-        <FormError
-          error={foreclose.error}
-          shownFields={["closedOn", "amount", "mode", "reference", "notes"]}
-        />
-        <DateField
-          label="Closed on"
-          value={closedOn}
-          min={settings.data?.businessStartDate}
-          max={today}
-          error={errors["closedOn"]}
-          onChange={setClosedOn}
-        />
-        <MoneyField
-          label="Amount paid to close it"
-          large
-          value={amount}
-          error={errors["amount"]}
-          onChange={setAmount}
-        />
-        <Choice label="Paid by" value={mode} options={MODES} onChange={setMode} />
-        {mode === "ONLINE" ? (
-          <TextField
-            label="Bank reference"
-            hint="Optional"
-            maxLength={100}
-            value={reference}
-            onChange={(event) => {
-              setReference(event.target.value);
-            }}
-          />
-        ) : null}
-        <TextField
-          label="Note"
-          maxLength={500}
-          value={notes}
-          onChange={(event) => {
-            setNotes(event.target.value);
-          }}
-        />
-        <Button
-          block
-          disabled={foreclose.isPending || amount === ""}
-          onClick={() => {
-            const body = {
-              closedOn,
-              amount,
-              mode,
-              ...(mode === "ONLINE" && reference.trim() ? { reference: reference.trim() } : {}),
-              ...(notes.trim() ? { notes: notes.trim() } : {}),
-            };
-            foreclose.mutate(
-              { body, key },
-              {
-                onSuccess: () => {
-                  toast(`Loan closed with ${formatRupees(rupeesToPaise(amount) ?? 0)}.`);
-                  onClose();
-                },
-                onError: (error) => {
-                  renewAfterMismatch(error, renew);
-                },
-              },
-            );
-          }}
-        >
-          {foreclose.isPending ? "Saving…" : "Close the loan"}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function UndoEmi({ loan, line, onClose }: { loan: Loan; line: ScheduleLine; onClose: () => void }) {
-  const undo = useUndoEmi(loan.id);
-  const toast = useToast();
-  const payment = line.payment;
-  if (!payment) return null;
-  return (
-    <ConfirmDialog
-      open
-      title={`Undo the ${formatMonth(line.month)} EMI?`}
-      confirmLabel="Undo payment"
-      busy={undo.isPending}
-      error={undo.isError ? saveErrorMessage(undo.error) : null}
-      onClose={onClose}
-      onConfirm={() => {
-        undo.mutate(payment.expenseId, {
-          onSuccess: () => {
-            toast(`${formatMonth(line.month)} EMI undone; it is due again.`);
-            onClose();
-          },
-        });
-      }}
-    >
-      <p className={actions.text}>
-        The {formatRupees(payment.amountPaise)} paid on {formatFullDate(payment.paidOn)} is removed
-        from the expenses, and the month shows as due again.
-      </p>
-    </ConfirmDialog>
-  );
-}
-
-function DeleteLoan({ loan, onClose }: { loan: Loan; onClose: () => void }) {
-  const remove = useDeleteLoan(loan.id);
-  const toast = useToast();
-  const navigate = useNavigate();
-  return (
-    <ConfirmDialog
-      open
-      title="Delete this loan?"
-      confirmLabel="Delete loan"
-      busy={remove.isPending}
-      error={remove.isError ? saveErrorMessage(remove.error) : null}
-      onClose={onClose}
-      onConfirm={() => {
-        remove.mutate(undefined, {
-          onSuccess: () => {
-            toast("Loan deleted.");
-            void navigate(`/tractors/${String(loan.tractor.id)}`);
-          },
-        });
-      }}
-    >
-      <p className={actions.text}>For a loan entered by mistake. No EMI has been paid on it.</p>
-    </ConfirmDialog>
   );
 }

@@ -30,10 +30,11 @@ function RowBody({ label, detail, amount }: RowContent) {
   );
 }
 
-export function RegisterRow(content: RowContent) {
+export function RegisterRow({ action, ...content }: RowContent & { action?: ReactNode }) {
   return (
-    <li className={styles.row}>
+    <li className={`${styles.row} ${action ? styles.withAction : ""}`}>
       <RowBody {...content} />
+      {action}
     </li>
   );
 }

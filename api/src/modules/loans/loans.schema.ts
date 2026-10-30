@@ -99,7 +99,13 @@ export const loanDto = z.object({
 });
 export type LoanDto = z.infer<typeof loanDto>;
 
-export const loanDetailDto = loanDto.extend({ schedule: z.array(instalmentDto) });
+export const loanDetailDto = loanDto.extend({
+  schedule: z.array(instalmentDto),
+  /** The payment that closed the loan early; undoing it opens the loan again. */
+  foreclosure: z
+    .object({ expenseId: z.number().int(), paidOn: z.string(), amountPaise: z.number().int() })
+    .nullable(),
+});
 export type LoanDetail = z.infer<typeof loanDetailDto>;
 
 export const loanPaymentSavedResponse = z.object({

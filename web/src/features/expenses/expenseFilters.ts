@@ -6,11 +6,9 @@ import {
   writeRange,
   writeSet,
 } from "../../lib/addressFilters.ts";
+import { PAY_MODES, type PayMode } from "../../lib/payModes.ts";
 import type { DateRange } from "../../lib/ranges.ts";
 import { EXPENSE_CATEGORIES } from "./categories.ts";
-
-export type PayMode = "CASH" | "ONLINE";
-export const PAY_MODES = ["CASH", "ONLINE"] as const satisfies readonly PayMode[];
 
 export interface ExpenseFilters {
   range: DateRange | null;

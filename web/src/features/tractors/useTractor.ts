@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { unwrap } from "../../api/client.ts";
 import type { BodyOf, Ok } from "../../api/types.ts";
+import { useRefreshMoney } from "../../app/moneyQueries.ts";
 import { useServices } from "../../app/ServicesContext.tsx";
 
 export type TractorDetail = Ok<"/tractors/{id}", "get">;
@@ -23,7 +24,7 @@ export function useServiceHistory(id: number): UseQueryResult<ServiceHistory> {
   });
 }
 
-/** Tractors appear in every picker and list, so any change reloads them all. */
+/** Tractors appear in every picker, so a new one reloads those lists. */
 export function useCreateTractor() {
   const { api } = useServices();
   const queryClient = useQueryClient();
@@ -34,12 +35,15 @@ export function useCreateTractor() {
   });
 }
 
+/** A tractor's number also shows on its loans, EMIs, trips and expenses; all of them reload. */
 export function useUpdateTractor(id: number) {
   const { api } = useServices();
   const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async (body: BodyOf<"/tractors/{id}", "patch">) =>
       unwrap(await api.PATCH("/tractors/{id}", { params: { path: { id } }, body })),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tractors"] }),
+    onSuccess: () =>
+      Promise.all([queryClient.invalidateQueries({ queryKey: ["tractors"] }), refreshMoney()]),
   });
 }

@@ -1,0 +1,11 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 560px;
+}
+
+.explain {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}

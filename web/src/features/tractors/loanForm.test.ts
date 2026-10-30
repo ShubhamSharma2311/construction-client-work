@@ -28,6 +28,12 @@ describe("a new loan", () => {
     },
   );
 
+  it("refuses more EMIs than the API allows", () => {
+    expect(checkLoan({ ...filled, totalInstallments: "121" })["totalInstallments"]).toContain(
+      "at most 120",
+    );
+  });
+
   it("sends numbers as numbers and a trimmed lender", () => {
     expect(checkLoan(filled)).toEqual({});
     expect(loanBody(filled)).toEqual({

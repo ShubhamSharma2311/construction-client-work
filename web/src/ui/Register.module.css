@@ -53,3 +53,9 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
+
+/* A row with its own small button (such as Undo) after the amount. */
+.withAction {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+}

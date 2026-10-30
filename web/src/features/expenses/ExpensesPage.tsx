@@ -3,6 +3,7 @@ import type { ExpenseItem } from "../../api/types.ts";
 import { useDownload } from "../../api/useDownload.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
+import { PAY_MODE_LABELS, PAY_MODES } from "../../lib/payModes.ts";
 import { presetRange } from "../../lib/ranges.ts";
 import { asTextQuery } from "../../lib/textQuery.ts";
 import { Button } from "../../ui/Button.tsx";
@@ -27,15 +28,12 @@ import { DieselReport } from "./DieselReport.tsx";
 import {
   type ExpenseFilters,
   expenseQuery,
-  PAY_MODES,
   readExpenseFilters,
   writeExpenseFilters,
 } from "./expenseFilters.ts";
 import styles from "./ExpensesPage.module.css";
 import { expenseFor } from "./expenseText.ts";
 import { useExpenseList } from "./useExpenses.ts";
-
-const MODE_LABELS = { CASH: "Cash", ONLINE: "Online" } as const;
 
 const VIEWS = [
   { value: "list", label: "All expenses" },
@@ -132,7 +130,7 @@ function ExpenseList({
     {
       key: "mode",
       header: "Paid by",
-      cell: (expense) => MODE_LABELS[expense.mode],
+      cell: (expense) => PAY_MODE_LABELS[expense.mode],
       phone: "hidden",
     },
     {
@@ -282,7 +280,7 @@ function Filters({
         label="Paid by"
         placeholder="Cash or online"
         value={filters.mode}
-        options={PAY_MODES.map((value) => ({ value, label: MODE_LABELS[value] }))}
+        options={PAY_MODES.map((value) => ({ value, label: PAY_MODE_LABELS[value] }))}
         onChange={(value) => {
           set({ mode: PAY_MODES.find((candidate) => candidate === value) ?? "" });
         }}

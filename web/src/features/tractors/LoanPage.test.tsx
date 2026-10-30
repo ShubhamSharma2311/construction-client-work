@@ -34,10 +34,8 @@ describe("A loan", () => {
       "href",
       "/expenses/70",
     );
-    expect(within(table).getByRole("link", { name: /^Sept? 2026 EMI$/ })).toHaveAttribute(
-      "href",
-      "/loans/5?pay=2026-09",
-    );
+    // An unpaid month opens nothing; Pay EMI above is how it is paid.
+    expect(within(table).queryByRole("link", { name: /^Sept? 2026 EMI$/ })).not.toBeInTheDocument();
     expect(within(table).getAllByText("Overdue")).toHaveLength(2);
     expect(screen.getByText("EMI").nextElementSibling).toHaveTextContent(
       "₹18,200 on the 5th of each month",
@@ -51,7 +49,22 @@ describe("A loan", () => {
     const api = loanApi(LOAN, {
       "POST /loans/5/emi": async (request) => {
         sent.push({ body: await request.json(), key: request.headers.get("idempotency-key") });
-        return json({ loan: LOAN, expenseId: 71, warnings: [] }, 201);
+        // The API answers with the loan as it now stands: September paid, short of the EMI.
+        const schedule = LOAN.schedule.map((line) =>
+          line.month === "2026-09"
+            ? {
+                ...line,
+                status: "PAID" as const,
+                payment: {
+                  expenseId: 71,
+                  paidOn: "2026-10-28",
+                  amountPaise: 1500000,
+                  lateFeePaise: 0,
+                },
+              }
+            : line,
+        );
+        return json({ loan: { ...LOAN, schedule }, expenseId: 71, warnings: [] }, 201);
       },
     });
     const { user } = await renderApp(api, { path: "/loans/5" });
@@ -64,7 +77,7 @@ describe("A loan", () => {
     await user.click(within(sheet).getByRole("button", { name: "Save EMI payment" }));
 
     // The month's short name is the browser's own: "Sep" or "Sept" depending on the device.
-    expect(await screen.findByText(/^Sept? 2026 EMI of ₹18,200 paid\.$/)).toBeInTheDocument();
+    expect(await screen.findByText(/^Sept? 2026 EMI paid: ₹15,000\.$/)).toBeInTheDocument();
     expect(sent[0]?.body).toEqual({
       emiMonth: "2026-09",
       paidOn: "2026-10-28",
@@ -93,7 +106,7 @@ describe("A loan", () => {
     const { user } = await renderApp(api, { path: "/loans/5" });
 
     await user.click(await screen.findByText("Undo an EMI payment"));
-    await user.click(screen.getByRole("button", { name: "Aug 2026" }));
+    await user.click(screen.getByRole("button", { name: "Undo the Aug 2026 payment" }));
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "Undo payment" }),
     );
@@ -109,7 +122,12 @@ describe("A loan", () => {
         sent.push(await request.json());
         return json(
           {
-            loan: { ...LOAN, closedOn: "2026-10-28", closedReason: "FORECLOSED" },
+            loan: {
+              ...LOAN,
+              closedOn: "2026-10-28",
+              closedReason: "FORECLOSED",
+              foreclosure: { expenseId: 72, paidOn: "2026-10-28", amountPaise: 3500000 },
+            },
             expenseId: 72,
             warnings: [],
           },
@@ -147,6 +165,43 @@ describe("A loan", () => {
 
     expect(await screen.findByText("Loan deleted.")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/tractors/3");
+  });
+
+  it("says when a link names a month already paid, and shows the next one due", async () => {
+    await renderApp(loanApi(), { path: "/loans/5?pay=2026-08" });
+
+    const sheet = await screen.findByRole("dialog", { name: "Pay EMI" });
+    expect(within(sheet).getByRole("alert")).toHaveTextContent(
+      /Aug 2026 is already paid or not part of this loan/,
+    );
+    expect(within(sheet).getByLabelText("Month")).toHaveValue("2026-09");
+  });
+
+  it("undoes an early closure, which opens the loan again", async () => {
+    let undone = false;
+    const closed = {
+      ...LOAN,
+      closedOn: "2026-10-22",
+      closedReason: "FORECLOSED" as const,
+      foreclosure: { expenseId: 72, paidOn: "2026-10-22", amountPaise: 3500000 },
+    };
+    const api = loanApi(closed, {
+      "DELETE /loans/5/payments/72": () => {
+        undone = true;
+        return json(LOAN);
+      },
+    });
+    const { user } = await renderApp(api, { path: "/loans/5" });
+
+    await user.click(await screen.findByRole("button", { name: "Undo closing" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Undo closing" }),
+    );
+
+    expect(
+      await screen.findByText("Closing undone; the loan is running again."),
+    ).toBeInTheDocument();
+    expect(undone).toBe(true);
   });
 
   it("offers nothing to pay on a closed loan", async () => {

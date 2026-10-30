@@ -27,9 +27,10 @@ export interface EntryTableProps<T> {
   rows: T[];
   columns: Column<T>[];
   rowKey: (row: T) => string | number;
-  rowLink: (row: T) => string;
+  /** Where a row opens; null for a line that opens nothing, or leave it out for a table of those. */
+  rowLink?: (row: T) => string | null;
   /** Text inside the title cell's link; screen readers read it as the row's name. */
-  rowLabel: (row: T) => string;
+  rowLabel?: (row: T) => string;
   /** The small line under the title on a phone, e.g. "28 Oct, Suresh, Ladnun road". */
   phoneMeta: (row: T) => ReactNode;
   empty: ReactNode;
@@ -85,35 +86,38 @@ export function EntryTable<T>({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr
-              key={rowKey(row)}
-              className={styles.row}
-              // The title cell's link is what keyboards, screen readers and new-tab clicks
-              // use; a plain click anywhere else on the row goes to the same place.
-              onClick={(event) => {
-                if (isPlainRowClick(event)) void navigate(rowLink(row));
-              }}
-            >
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={`${styles[column.phone]} ${column.numeric ? styles.numeric : ""} ${
-                    column.margin ? styles.margin : ""
-                  } ${column.phoneOnly ? styles.phoneOnly : ""}`}
-                >
-                  {column.phone === "title" ? (
-                    <Link to={rowLink(row)} className={styles.link} aria-label={rowLabel(row)}>
-                      {column.cell(row)}
-                    </Link>
-                  ) : (
-                    column.cell(row)
-                  )}
-                </td>
-              ))}
-              <td className={styles.phoneMeta}>{phoneMeta(row)}</td>
-            </tr>
-          ))}
+          {rows.map((row) => {
+            const link = rowLink?.(row) ?? null;
+            return (
+              <tr
+                key={rowKey(row)}
+                className={link ? styles.row : undefined}
+                // The title cell's link is what keyboards, screen readers and new-tab clicks
+                // use; a plain click anywhere else on the row goes to the same place.
+                onClick={(event) => {
+                  if (link && isPlainRowClick(event)) void navigate(link);
+                }}
+              >
+                {columns.map((column) => (
+                  <td
+                    key={column.key}
+                    className={`${styles[column.phone]} ${column.numeric ? styles.numeric : ""} ${
+                      column.margin ? styles.margin : ""
+                    } ${column.phoneOnly ? styles.phoneOnly : ""}`}
+                  >
+                    {column.phone === "title" && link ? (
+                      <Link to={link} className={styles.link} aria-label={rowLabel?.(row)}>
+                        {column.cell(row)}
+                      </Link>
+                    ) : (
+                      column.cell(row)
+                    )}
+                  </td>
+                ))}
+                <td className={styles.phoneMeta}>{phoneMeta(row)}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
