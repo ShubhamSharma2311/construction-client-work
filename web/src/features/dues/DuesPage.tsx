@@ -7,6 +7,7 @@ import { formatAge } from "../../lib/dates.ts";
 import { useDebounced } from "../../lib/useDebounced.ts";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
+import { FilterCheckbox } from "../../ui/FilterPanel.tsx";
 import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError, loadErrorMessage } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
@@ -16,6 +17,7 @@ import { Register, RegisterLink, RegisterRow } from "../../ui/Register.tsx";
 import { Sheet } from "../../ui/Sheet.tsx";
 import sheetStyles from "../../ui/Sheet.module.css";
 import { TextField } from "../../ui/TextField.tsx";
+import { ViewToggle } from "../../ui/ViewToggle.tsx";
 import { addedText } from "../customers/CustomerPicker.tsx";
 import {
   type CustomerFieldValues,
@@ -35,6 +37,11 @@ const BUCKETS = [
 ] as const;
 
 type Tab = "owing" | "all";
+
+const TABS = [
+  { value: "owing", label: "Who owes" },
+  { value: "all", label: "All customers" },
+] as const;
 
 export function DuesPage() {
   const [params, setParams] = useSearchParams();
@@ -60,26 +67,13 @@ export function DuesPage() {
           </>
         }
       />
-      <div className={styles.tabs} role="group" aria-label="Show">
-        {(
-          [
-            ["owing", "Who owes"],
-            ["all", "All customers"],
-          ] as const
-        ).map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={tab === value}
-            className={styles.tab}
-            onClick={() => {
-              setParams(value === "all" ? { tab: "all" } : {}, { replace: true });
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <ViewToggle
+        options={TABS}
+        value={tab}
+        onChange={(value) => {
+          setParams(value === "all" ? { tab: "all" } : {}, { replace: true });
+        }}
+      />
       {tab === "owing" ? (
         <Owing
           onDownload={() => {
@@ -184,16 +178,7 @@ function AllCustomers() {
             setTerm(event.target.value);
           }}
         />
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={inactive}
-            onChange={(event) => {
-              setInactive(event.target.checked);
-            }}
-          />
-          Include inactive
-        </label>
+        <FilterCheckbox label="Include inactive" checked={inactive} onChange={setInactive} />
       </div>
       {list.isPending ? <Loading what="customers" /> : null}
       {list.isError ? <LoadError error={list.error} onRetry={() => void list.refetch()} /> : null}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useDownload } from "../../api/useDownload.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
@@ -8,6 +7,7 @@ import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
 import { LoadError, Loading } from "../../ui/LoadState.tsx";
 import { Money } from "../../ui/Money.tsx";
+import { FilterCheckbox, FilterPanel } from "../../ui/FilterPanel.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { RangeChips } from "../../ui/RangeChips.tsx";
@@ -216,65 +216,57 @@ function Filters({
   const set = (patch: Partial<TripFilters>) => {
     onChange({ ...filters, ...patch });
   };
-  // Open at first if any filter is set; after that the person opens and closes it.
-  const [initiallyOpen] = useState(() => countFilters(filters) > 0);
   const count = countFilters(filters);
 
   return (
-    <details className={styles.filters} open={initiallyOpen}>
-      <summary>{count > 0 ? `Filters (${String(count)})` : "Filters"}</summary>
-      <div className={styles.filterGrid}>
-        <SelectField
-          label="Driver"
-          placeholder="All drivers"
-          value={filters.driverId}
-          options={filterOptions(drivers.data, (item) => item.name)}
-          onChange={(driverId) => {
-            set({ driverId });
-          }}
-        />
-        <SelectField
-          label="Tractor"
-          placeholder="All tractors"
-          value={filters.tractorId}
-          options={filterOptions(tractors.data, (item) => item.regNumber)}
-          onChange={(tractorId) => {
-            set({ tractorId });
-          }}
-        />
-        <SelectField
-          label="Khet"
-          placeholder="All khets"
-          value={filters.khetId}
-          options={filterOptions(khets.data, (item) => item.name)}
-          onChange={(khetId) => {
-            set({ khetId });
-          }}
-        />
-        <SelectField
-          label="Payment"
-          placeholder="Paid or not"
-          value={filters.status}
-          options={TRIP_STATUSES.map((status) => ({
-            value: status,
-            label: TRIP_STATUS_LABELS[status],
-          }))}
-          onChange={(status) => {
-            set({ status: TRIP_STATUSES.find((candidate) => candidate === status) ?? "" });
-          }}
-        />
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={filters.deleted}
-            onChange={(event) => {
-              set({ deleted: event.target.checked });
-            }}
-          />
-          Show deleted trips only
-        </label>
-      </div>
-    </details>
+    <FilterPanel count={count}>
+      <SelectField
+        label="Driver"
+        placeholder="All drivers"
+        value={filters.driverId}
+        options={filterOptions(drivers.data, (item) => item.name)}
+        onChange={(driverId) => {
+          set({ driverId });
+        }}
+      />
+      <SelectField
+        label="Tractor"
+        placeholder="All tractors"
+        value={filters.tractorId}
+        options={filterOptions(tractors.data, (item) => item.regNumber)}
+        onChange={(tractorId) => {
+          set({ tractorId });
+        }}
+      />
+      <SelectField
+        label="Khet"
+        placeholder="All khets"
+        value={filters.khetId}
+        options={filterOptions(khets.data, (item) => item.name)}
+        onChange={(khetId) => {
+          set({ khetId });
+        }}
+      />
+      <SelectField
+        label="Payment"
+        placeholder="Paid or not"
+        value={filters.status}
+        options={TRIP_STATUSES.map((status) => ({
+          value: status,
+          label: TRIP_STATUS_LABELS[status],
+        }))}
+        onChange={(status) => {
+          set({ status: TRIP_STATUSES.find((candidate) => candidate === status) ?? "" });
+        }}
+      />
+      <FilterCheckbox
+        label="Show deleted trips only"
+        checked={filters.deleted}
+        onChange={(deleted) => {
+          set({ deleted });
+        }}
+      />
+    </FilterPanel>
   );
 }
 

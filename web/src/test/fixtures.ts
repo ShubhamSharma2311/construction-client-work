@@ -264,3 +264,42 @@ export const BALANCE_ROUTES = {
   "GET /customers/8/balance": () => json(balance(700000, 900000, 200000)),
   "GET /customers/9/balance": () => json(balance(0, 0, 0)),
 };
+
+export function expensePage(
+  items: Ok<"/expenses", "get">["items"],
+  total = items.length,
+): Ok<"/expenses", "get"> {
+  const byCategory: Record<string, number> = {};
+  for (const item of items)
+    byCategory[item.category] = (byCategory[item.category] ?? 0) + item.amountPaise;
+  return {
+    items,
+    total,
+    page: 1,
+    limit: 50,
+    totals: { amountPaise: items.reduce((sum, item) => sum + item.amountPaise, 0), byCategory },
+  };
+}
+
+export const DIESEL_REPORT: Ok<"/reports/diesel", "get"> = {
+  from: "2026-10-01",
+  to: "2026-10-28",
+  tractors: [
+    {
+      tractor: { id: 3, regNumber: "RJ 21 RA 4412", label: "Mahindra 575" },
+      litres: 95,
+      amountPaise: 900000,
+      trips: 19,
+      litresPerTrip: 5,
+    },
+    {
+      tractor: { id: 4, regNumber: "RJ 21 RB 1190", label: "Swaraj 744" },
+      litres: 40,
+      amountPaise: 380000,
+      trips: 0,
+      litresPerTrip: null,
+    },
+  ],
+  drivers: [{ driver: { id: 2, name: "Suresh" }, litres: 95, amountPaise: 900000, trips: 19 }],
+  totals: { litres: 135, amountPaise: 1280000, trips: 19 },
+};

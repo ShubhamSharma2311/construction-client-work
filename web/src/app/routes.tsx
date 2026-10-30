@@ -4,6 +4,13 @@ import { LoginPage } from "../auth/LoginPage.tsx";
 import { RequireAuth } from "../auth/RequireAuth.tsx";
 import { CustomerAccountPage } from "../features/customers/CustomerAccountPage.tsx";
 import { DuesPage } from "../features/dues/DuesPage.tsx";
+import { EditExpensePage, ExpensePage } from "../features/expenses/ExpensePage.tsx";
+import { ExpensesPage } from "../features/expenses/ExpensesPage.tsx";
+import {
+  NewDieselPage,
+  NewGeneralExpensePage,
+  NewServicePage,
+} from "../features/expenses/NewExpensePage.tsx";
 import { NewPaymentPage } from "../features/payments/NewPaymentPage.tsx";
 import { PaymentPage } from "../features/payments/PaymentPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
@@ -25,6 +32,10 @@ const BUILT: Record<string, RouteObject> = {
   "/new/trip": { path: "/new/trip", element: <NewTripPage /> },
   "/dues": { path: "/dues", element: <DuesPage /> },
   "/new/payment": { path: "/new/payment", element: <NewPaymentPage /> },
+  "/expenses": { path: "/expenses", element: <ExpensesPage /> },
+  "/new/expense": { path: "/new/expense", element: <NewGeneralExpensePage /> },
+  "/new/diesel": { path: "/new/diesel", element: <NewDieselPage /> },
+  "/new/service": { path: "/new/service", element: <NewServicePage /> },
 };
 
 /** A screen for one entry; the key starts it afresh when the address moves to another. */
@@ -38,6 +49,8 @@ const DETAILS: RouteObject[] = [
   detail("/trips/:id/edit", (id) => <EditTripPage key={id} id={id} />),
   detail("/dues/:id", (id) => <CustomerAccountPage key={id} id={id} />),
   detail("/payments/:id", (id) => <PaymentPage key={id} id={id} />),
+  detail("/expenses/:id", (id) => <ExpensePage key={id} id={id} />),
+  detail("/expenses/:id/edit", (id) => <EditExpensePage key={id} id={id} />),
 ];
 
 function screenFor({ to, label }: Destination): RouteObject {
