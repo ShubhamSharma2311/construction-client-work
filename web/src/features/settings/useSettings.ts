@@ -9,6 +9,7 @@ import { expectNoContent, unwrap } from "../../api/client.ts";
 import type { BodyOf, Ok } from "../../api/types.ts";
 import { useRefreshMoney } from "../../app/moneyQueries.ts";
 import { useServices } from "../../app/ServicesContext.tsx";
+import { useToast } from "../../app/Toast.tsx";
 
 export const SETTINGS_KEY = ["settings"] as const;
 
@@ -48,12 +49,21 @@ export function useSaveSettings(): UseMutationResult<Settings, Error, SettingsBo
 
 type PasswordBody = BodyOf<"/auth/change-password", "post">;
 
-/** The API signs every device out when it succeeds, this one included. */
+/**
+ * The API signs every device out when the password changes, this one included, so the
+ * session ends here too. It is done here rather than in the form so it happens even if the
+ * owner has left the screen before the answer came; the toast is said here for the same reason.
+ */
 export function useChangePassword(): UseMutationResult<void, Error, PasswordBody> {
-  const { api } = useServices();
+  const { api, session } = useServices();
+  const toast = useToast();
   return useMutation({
     mutationFn: async (body: PasswordBody) => {
       expectNoContent(await api.POST("/auth/change-password", { body }));
+    },
+    onSuccess: () => {
+      toast("Password changed. Sign in with the new one.");
+      return session.signOut();
     },
   });
 }

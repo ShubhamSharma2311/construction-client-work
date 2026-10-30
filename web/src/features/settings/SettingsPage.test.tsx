@@ -205,4 +205,33 @@ describe("Deleted entries and history", () => {
     expect(await screen.findByText("No khets changed yet.")).toBeInTheDocument();
     expect(asked).toEqual(["Trip", "Khet"]);
   });
+
+  it("does not link a deleted loan, which is gone for good", async () => {
+    const entry = (id: string, action: "CREATE" | "DELETE") => ({
+      id,
+      entity: "TractorLoan",
+      entityId: "5",
+      action,
+      before: null,
+      after: null,
+      at: "2026-10-27T05:00:00.000Z",
+    });
+    const api = settingsApi({
+      "GET /audit": () =>
+        json({ ...NO_HISTORY, total: 2, items: [entry("2", "DELETE"), entry("1", "CREATE")] }),
+    });
+
+    await renderApp(api, { path: "/settings?view=history&kind=TractorLoan" });
+
+    const list = await screen.findByRole("list", { name: "History of tractor loans" });
+    expect(
+      within(list)
+        .getByText(/Deleted loan #5/)
+        .closest("a"),
+    ).toBeNull();
+    expect(within(list).getByRole("link", { name: /Added loan #5/ })).toHaveAttribute(
+      "href",
+      "/loans/5",
+    );
+  });
 });

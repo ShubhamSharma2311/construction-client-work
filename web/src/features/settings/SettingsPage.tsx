@@ -5,7 +5,8 @@ import { PageHeader } from "../../ui/PageHeader.tsx";
 import { Register, RegisterLink } from "../../ui/Register.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
 import { ViewToggle } from "../../ui/ViewToggle.tsx";
-import { HISTORY_KINDS, HistoryView } from "../history/HistoryView.tsx";
+import { HISTORY_KINDS } from "../history/historyKinds.ts";
+import { HistoryView } from "../history/HistoryView.tsx";
 import { BusinessForm } from "./BusinessForm.tsx";
 import { PasswordForm } from "./PasswordForm.tsx";
 import styles from "./SettingsPage.module.css";
@@ -20,18 +21,16 @@ const VIEWS = [
 
 type View = (typeof VIEWS)[number]["value"];
 const VIEW_NAMES = VIEWS.map((view) => view.value);
-const KIND_NAMES = HISTORY_KINDS.map((kind) => kind.value);
 
 export function SettingsPage() {
   const settings = useSettings();
   const [params, setParams] = useSearchParams();
   const view: View = readChoice(params, "view", VIEW_NAMES) || "business";
-  const kindName = readChoice(params, "kind", KIND_NAMES) || "Trip";
-  const kind = HISTORY_KINDS.find((candidate) => candidate.value === kindName) ?? HISTORY_KINDS[0];
+  const kind = HISTORY_KINDS.find((one) => one.value === params.get("kind")) ?? HISTORY_KINDS[0];
   const show = (next: { view: View; kind?: string }) => {
     setParams(
       next.view === "history"
-        ? { view: next.view, kind: next.kind ?? kindName }
+        ? { view: next.view, kind: next.kind ?? kind.value }
         : { view: next.view },
       {
         replace: true,

@@ -1,10 +1,7 @@
 import { type SubmitEvent, useState } from "react";
 import { fieldErrors } from "../../api/errors.ts";
-import { useToast } from "../../app/Toast.tsx";
 import { Button } from "../../ui/Button.tsx";
-import { useSignOut } from "../../shell/useSignOut.ts";
 import { FormError } from "../../ui/FormError.tsx";
-import { ErrorNotice } from "../../ui/Notice.tsx";
 import { TextField } from "../../ui/TextField.tsx";
 import styles from "./SettingsPage.module.css";
 import { useChangePassword } from "./useSettings.ts";
@@ -25,8 +22,6 @@ export function PasswordForm() {
   const [repeat, setRepeat] = useState("");
   const [tried, setTried] = useState(false);
   const change = useChangePassword();
-  const signOut = useSignOut();
-  const toast = useToast();
   const problems = tried ? problemsOf(next, repeat) : {};
   const server = fieldErrors(change.error);
 
@@ -34,16 +29,7 @@ export function PasswordForm() {
     event.preventDefault();
     setTried(true);
     if (current === "" || Object.keys(problemsOf(next, repeat)).length > 0) return;
-    change.mutate(
-      { currentPassword: current, newPassword: next },
-      {
-        onSuccess: () => {
-          toast("Password changed. Sign in with the new one.");
-          // This browser's sign in was ended too; this brings the screen in line with it.
-          signOut.signOut();
-        },
-      },
-    );
+    change.mutate({ currentPassword: current, newPassword: next });
   };
 
   return (
@@ -51,7 +37,6 @@ export function PasswordForm() {
       <p className={styles.note}>
         Changing the password signs out every phone and computer, this one too.
       </p>
-      {signOut.errorMessage ? <ErrorNotice>{signOut.errorMessage}</ErrorNotice> : null}
       <FormError error={change.error} shownFields={["currentPassword", "newPassword"]} />
       <TextField
         label="Current password"

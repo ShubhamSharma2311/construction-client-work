@@ -1,13 +1,23 @@
-import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
+import { formatDate, formatMonth, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import type { AuditAction } from "./useHistory.ts";
 
 type Row = Record<string, unknown>;
 
-// Bookkeeping every row carries, or lists the entry holds that would not read as one line.
-const SKIPPED = new Set(["id", "createdAt", "updatedAt", "deletedAt", "passwordHash"]);
-const MIDNIGHT_UTC = /^(\d{4}-\d{2}-\d{2})T00:00:00\.000Z$/;
-const LABELS: Record<string, string> = { isActive: "In use", dieselMl: "Diesel" };
+// Bookkeeping the API keeps on rows (times, ids, the search form of a name); not the owner's.
+const SKIPPED = new Set(["id", "createdAt", "updatedAt", "deletedAt", "nameKey"]);
+// A business date arrives as a plain date, or as midnight UTC from a stored row.
+const DAY = /^(\d{4}-\d{2}-\d{2})(T00:00:00\.000Z)?$/;
+// Fields holding the first day of a month that stands for the whole month.
+const MONTH_FIELDS = new Set(["month", "emiMonth", "forMonth", "effectiveFrom", "firstEmiMonth"]);
+// Fields holding the API's code words, such as CASH or TRACTOR_SERVICE; typed text keeps its case.
+const CODE_FIELDS = new Set(["mode", "category", "kind", "type", "direction", "closedReason"]);
+const LABELS: Record<string, string> = {
+  isActive: "In use",
+  dieselMl: "Diesel",
+  emiMonth: "EMI month",
+  shareBasisPoints: "Share",
+};
 
 const time = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata",
@@ -38,14 +48,14 @@ function valueText(key: string, value: unknown, today: IsoDate): string | null {
   if (typeof value === "number") {
     if (key.endsWith("Paise")) return formatRupees(value);
     if (key.endsWith("Ml")) return `${String(value / 1000)} L`;
+    if (key === "shareBasisPoints") return `${String(value / 100)}%`;
     if (key.endsWith("Id")) return `#${String(value)}`;
     return String(value);
   }
   if (typeof value === "string") {
-    const day = MIDNIGHT_UTC.exec(value)?.[1];
-    if (day) return formatDate(day, today);
-    // Code words such as CASH or TRACTOR_SERVICE read as plain words.
-    return /^[A-Z_]+$/.test(value) ? value.replace(/_/g, " ").toLowerCase() : value;
+    const day = DAY.exec(value)?.[1];
+    if (day) return MONTH_FIELDS.has(key) ? formatMonth(day.slice(0, 7)) : formatDate(day, today);
+    return CODE_FIELDS.has(key) ? value.replace(/_/g, " ").toLowerCase() : value;
   }
   if (isRow(value)) {
     const name = value["name"] ?? value["regNumber"];
@@ -76,6 +86,8 @@ export function changeLines(
     return [`Amount: ${formatRupees(row["amountPaise"])}`];
   }
   if (!isRow(before) || !isRow(after)) return [];
+  const credit = after["appliedToTrips"];
+  if (Array.isArray(credit)) return creditLines(credit);
   const lines: string[] = [];
   for (const key of Object.keys(after)) {
     if (SKIPPED.has(key) || hasNamedSibling(key, before, after)) continue;
@@ -85,6 +97,15 @@ export function changeLines(
     lines.push(`${labelOf(key)}: ${was} → ${now}`);
   }
   return lines.length > 0 ? lines : ["Saved with no change"];
+}
+
+/** A customer's credit set against their due trips, as the API records it. */
+function creditLines(lines: unknown[]): string[] {
+  return lines.filter(isRow).map((line) => {
+    const trip = typeof line["tripId"] === "number" ? ` #${String(line["tripId"])}` : "";
+    const amount = typeof line["amountPaise"] === "number" ? formatRupees(line["amountPaise"]) : "";
+    return `Set against trip${trip}: ${amount}`;
+  });
 }
 
 /** "28 Oct, 4:26 pm" in India, with the year when it is not this one. */

@@ -57,6 +57,62 @@ describe("what changed in an entry", () => {
     expect(changeLines("DELETE", { name: "Didwana" }, null, "2026-10-28")).toEqual([]);
   });
 
+  it("words credit set against trips", () => {
+    expect(
+      changeLines(
+        "UPDATE",
+        { allocatedPaise: 0 },
+        {
+          appliedToTrips: [
+            { tripId: 12, amountPaise: 150000 },
+            { tripId: 14, amountPaise: 50000 },
+          ],
+        },
+        "2026-10-28",
+      ),
+    ).toEqual(["Set against trip #12: ₹1,500", "Set against trip #14: ₹500"]);
+  });
+
+  it("leaves out the search key kept beside a name", () => {
+    expect(
+      changeLines(
+        "UPDATE",
+        { name: "Ram Lal", nameKey: "ram lal" },
+        { name: "Ramesh", nameKey: "ramesh" },
+        "2026-10-28",
+      ),
+    ).toEqual(["Name: Ram Lal → Ramesh"]);
+  });
+
+  it("words plain dates, months and a share, keeping typed capitals", () => {
+    expect(
+      changeLines(
+        "UPDATE",
+        {
+          businessStartDate: "2026-04-01",
+          emiMonth: "2026-05-01T00:00:00.000Z",
+          shareBasisPoints: 5000,
+          reference: "UPI",
+          direction: "PAID_TO_PARTNER",
+        },
+        {
+          businessStartDate: "2026-05-01",
+          emiMonth: "2026-06-01T00:00:00.000Z",
+          shareBasisPoints: 3333,
+          reference: "NEFT",
+          direction: "RECEIVED_FROM_PARTNER",
+        },
+        "2026-10-28",
+      ),
+    ).toEqual([
+      "Business start date: 1 Apr → 1 May",
+      "EMI month: May 2026 → Jun 2026",
+      "Share: 50% → 33.33%",
+      "Reference: UPI → NEFT",
+      "Direction: paid to partner → received from partner",
+    ]);
+  });
+
   it("says when an edit was saved with nothing changed", () => {
     expect(
       changeLines("UPDATE", trip, { ...trip, updatedAt: "2026-10-20T00:00:00.000Z" }, "2026-10-28"),
