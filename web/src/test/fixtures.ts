@@ -303,3 +303,89 @@ export const DIESEL_REPORT: Ok<"/reports/diesel", "get"> = {
   drivers: [{ driver: { id: 2, name: "Suresh" }, litres: 95, amountPaise: 900000, trips: 19 }],
   totals: { litres: 135, amountPaise: 1280000, trips: 19 },
 };
+
+export const LOAN: Ok<"/loans/{id}", "get"> = {
+  id: 5,
+  tractor: { id: 3, regNumber: "RJ 21 RA 4412" },
+  lender: "Mahindra Finance",
+  emiPaise: 1820000,
+  emiDay: 5,
+  firstEmiMonth: "2026-08",
+  lastEmiMonth: "2026-11",
+  totalInstallments: 4,
+  closedOn: null,
+  closedReason: null,
+  notes: null,
+  paidPaise: 1820000,
+  summary: { paidCount: 1, overdueCount: 1, nextDue: { month: "2026-09", dueDate: "2026-09-05" } },
+  schedule: [
+    {
+      number: 1,
+      month: "2026-08",
+      dueDate: "2026-08-05",
+      status: "PAID",
+      payment: { expenseId: 70, paidOn: "2026-08-04", amountPaise: 1820000, lateFeePaise: 0 },
+    },
+    { number: 2, month: "2026-09", dueDate: "2026-09-05", status: "OVERDUE", payment: null },
+    { number: 3, month: "2026-10", dueDate: "2026-10-05", status: "OVERDUE", payment: null },
+    { number: 4, month: "2026-11", dueDate: "2026-11-05", status: "UPCOMING", payment: null },
+  ],
+};
+
+export const LOAN_SUMMARY: Ok<"/loans", "get">[number] = {
+  id: LOAN.id,
+  tractor: LOAN.tractor,
+  lender: LOAN.lender,
+  emiPaise: LOAN.emiPaise,
+  emiDay: LOAN.emiDay,
+  firstEmiMonth: LOAN.firstEmiMonth,
+  lastEmiMonth: LOAN.lastEmiMonth,
+  totalInstallments: LOAN.totalInstallments,
+  closedOn: null,
+  closedReason: null,
+  notes: null,
+  paidPaise: LOAN.paidPaise,
+  summary: LOAN.summary,
+};
+
+export const EMI_DUE: Ok<"/emi/due", "get"> = {
+  asOf: "2026-10-28",
+  items: [
+    {
+      loan: { id: 5, lender: "Mahindra Finance" },
+      tractor: { id: 3, regNumber: "RJ 21 RA 4412" },
+      month: "2026-09",
+      dueDate: "2026-09-05",
+      status: "OVERDUE",
+      emiPaise: 1820000,
+      daysLate: 53,
+    },
+    {
+      loan: { id: 5, lender: "Mahindra Finance" },
+      tractor: { id: 3, regNumber: "RJ 21 RA 4412" },
+      month: "2026-11",
+      dueDate: "2026-11-05",
+      status: "UPCOMING",
+      emiPaise: 1820000,
+      daysLate: 0,
+    },
+  ],
+};
+
+export const SERVICES: Ok<"/tractors/{id}/services", "get"> = {
+  tractor: { id: 3, regNumber: "RJ 21 RA 4412", label: "Mahindra 575" },
+  lastService: { date: "2026-10-12", hourMeter: 1450, notes: "Oil change" },
+  services: [
+    {
+      ...EXPENSE,
+      id: 80,
+      category: "TRACTOR_SERVICE",
+      spentOn: "2026-10-12",
+      amountPaise: 250000,
+      driver: null,
+      dieselLitres: null,
+      hourMeter: 1450,
+      notes: "Oil change",
+    },
+  ],
+};

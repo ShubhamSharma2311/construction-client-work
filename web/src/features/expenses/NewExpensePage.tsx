@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
 import { useToast } from "../../app/Toast.tsx";
+import { readIdParam } from "../../lib/addressFilters.ts";
 import { type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import { PageHeader } from "../../ui/PageHeader.tsx";
@@ -43,7 +45,12 @@ function NewExpense({
   const { key, renew } = useIdempotencyKey();
   const create = useCreateExpense();
   const toast = useToast();
-  const [next, setNext] = useState<ExpenseValues>(() => emptyExpense(categories[0], today));
+  const [params] = useSearchParams();
+  // "Record service" on a tractor's page arrives with that tractor chosen.
+  const [next, setNext] = useState<ExpenseValues>(() => ({
+    ...emptyExpense(categories[0], today),
+    tractorId: readIdParam(params, "tractor"),
+  }));
   const [entry, setEntry] = useState(0);
 
   return (

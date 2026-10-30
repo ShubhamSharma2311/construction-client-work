@@ -13,6 +13,9 @@ import {
 } from "../features/expenses/NewExpensePage.tsx";
 import { NewPaymentPage } from "../features/payments/NewPaymentPage.tsx";
 import { PaymentPage } from "../features/payments/PaymentPage.tsx";
+import { LoanPage } from "../features/tractors/LoanPage.tsx";
+import { NewEmiPage, TractorPage } from "../features/tractors/TractorPage.tsx";
+import { TractorsPage } from "../features/tractors/TractorsPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
 import { EditTripPage } from "../features/trips/EditTripPage.tsx";
 import { NewTripPage } from "../features/trips/NewTripPage.tsx";
@@ -36,6 +39,8 @@ const BUILT: Record<string, RouteObject> = {
   "/new/expense": { path: "/new/expense", element: <NewGeneralExpensePage /> },
   "/new/diesel": { path: "/new/diesel", element: <NewDieselPage /> },
   "/new/service": { path: "/new/service", element: <NewServicePage /> },
+  "/tractors": { path: "/tractors", element: <TractorsPage /> },
+  "/new/emi": { path: "/new/emi", element: <NewEmiPage /> },
 };
 
 /** A screen for one entry; the key starts it afresh when the address moves to another. */
@@ -51,6 +56,8 @@ const DETAILS: RouteObject[] = [
   detail("/payments/:id", (id) => <PaymentPage key={id} id={id} />),
   detail("/expenses/:id", (id) => <ExpensePage key={id} id={id} />),
   detail("/expenses/:id/edit", (id) => <EditExpensePage key={id} id={id} />),
+  detail("/tractors/:id", (id) => <TractorPage key={id} id={id} />),
+  detail("/loans/:id", (id) => <LoanPage key={id} id={id} />),
 ];
 
 function screenFor({ to, label }: Destination): RouteObject {
