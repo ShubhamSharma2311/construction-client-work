@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { unwrap } from "./client.ts";
+import { expectNoContent, unwrap } from "./client.ts";
 import { fieldErrors, toApiError } from "./errors.ts";
 
 describe("API errors", () => {
@@ -64,5 +64,19 @@ describe("field errors", () => {
 
   it("has none for errors that are not from the API", () => {
     expect(fieldErrors(new TypeError("Failed to fetch"))).toEqual({});
+  });
+});
+
+describe("expectNoContent", () => {
+  it("accepts an empty success and throws the server's words on failure", () => {
+    expect(() => {
+      expectNoContent({ response: new Response(null, { status: 204 }) });
+    }).not.toThrow();
+    expect(() => {
+      expectNoContent({
+        response: new Response(null, { status: 409 }),
+        error: { error: { code: "CONFLICT", message: "Loan has payment history" } },
+      });
+    }).toThrow("Loan has payment history");
   });
 });

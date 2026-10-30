@@ -23,3 +23,8 @@ export function unwrap<T>(result: ApiResult<T>): T {
   }
   return result.data;
 }
+
+/** For calls that answer 204 with no body, such as a delete; anything but success throws. */
+export function expectNoContent(result: { error?: unknown; response: Response }): void {
+  if (!result.response.ok) throw toApiError(result.response, result.error);
+}

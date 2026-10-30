@@ -73,18 +73,32 @@ export function expenseValuesOf(
   };
 }
 
-const LITRES = /^\d{0,3}(\.\d{0,2})?$/;
+const LITRES_INPUT = /^\d{0,3}(\.\d{0,2})?$/;
 const MAX_LITRES_CENTI = 50_000;
 
 /** Whether text typed into the litres field can still become an amount of diesel. */
 export function isLitresInput(text: string): boolean {
-  return LITRES.test(text);
+  return LITRES_INPUT.test(text);
 }
 
-/** Hundredths of a litre, so diesel maths stays in whole numbers like money does. */
-function centilitres(text: string): number | null {
-  const paise = rupeesToPaise(text);
-  return paise === null ? null : paise;
+/**
+ * Hundredths of a litre from what was typed ("45", "45.5", ".5", "45."), or null when no
+ * digits were typed; diesel maths stays in whole numbers, as money does.
+ */
+export function centilitres(text: string): number | null {
+  const match = /^(\d{0,3})(?:\.(\d{0,2}))?$/.exec(text);
+  if (!match || (match[1] === "" && (match[2] ?? "") === "")) return null;
+  return Number(match[1] || "0") * 100 + Number((match[2] ?? "").padEnd(2, "0"));
+}
+
+/** Litres as the API reads them: always digits on both sides of a point, "45." becomes "45". */
+function litresText(text: string): string {
+  return String((centilitres(text) ?? 0) / 100);
+}
+
+/** The reference field is for online money and a royalty's receipt number; nothing else shows it. */
+export function showsReference(values: Pick<ExpenseValues, "category" | "mode">): boolean {
+  return values.mode === "ONLINE" || values.category === "ROYALTY";
 }
 
 /** "₹95.20 a litre", or null until both amount and litres are filled in. */
@@ -102,8 +116,10 @@ const NOTE_REQUIRED: Partial<Record<EnteredCategory, string>> = {
   TRACTOR_SERVICE: "Say what work was done",
 };
 
-export function checkExpense(values: ExpenseValues): Record<string, string> {
-  const problems: Record<string, string> = {};
+export type ExpenseProblems = Partial<Record<keyof ExpenseValues, string>>;
+
+export function checkExpense(values: ExpenseValues): ExpenseProblems {
+  const problems: ExpenseProblems = {};
   if (!values.spentOn) problems["spentOn"] = "Pick the date";
   const amount = rupeesToPaise(values.amount);
   if (amount === null || amount === 0) problems["amount"] = "Enter the amount paid";
@@ -152,7 +168,7 @@ function idOrNothing(id: string): number | undefined {
 
 /** The expense as the API takes it, with only its own kind's fields. Call once checkExpense finds nothing. */
 export function expenseBody(values: ExpenseValues): NewExpense {
-  const reference = optional(values.reference);
+  const reference = showsReference(values) ? optional(values.reference) : undefined;
   const notes = optional(values.notes) ?? "";
   const common = {
     spentOn: values.spentOn,
@@ -201,36 +217,41 @@ export function expenseBody(values: ExpenseValues): NewExpense {
         ...withNotes,
         tractorId: Number(values.tractorId),
         driverId: Number(values.driverId),
-        litres: values.litres,
+        litres: litresText(values.litres),
       };
   }
 }
 
-/** Only what changed; the API refuses an edit that names nothing. */
+/** An id as the edit takes it: a number, or null when a field that may be empty was cleared. */
+function idChange(id: string): number | null {
+  return id === "" ? null : Number(id);
+}
+
+/**
+ * Only what changed; the API refuses an edit that names nothing. A cleared optional field
+ * (an emergency's tractor, a service's hour meter, a royalty's period, a hidden reference)
+ * is sent as null so it is removed, not left as it was.
+ */
 export function expenseChanges(before: ExpenseValues, after: ExpenseValues): ExpenseChanges {
   const changes: ExpenseChanges = {};
   if (after.spentOn !== before.spentOn) changes.spentOn = after.spentOn;
   if (rupeesToPaise(after.amount) !== rupeesToPaise(before.amount)) changes.amount = after.amount;
   if (after.mode !== before.mode) changes.mode = after.mode;
-  if (after.reference.trim() !== before.reference) changes.reference = after.reference.trim();
+  const reference = showsReference(after) ? after.reference.trim() : "";
+  if (reference !== before.reference) changes.reference = reference === "" ? null : reference;
   if (after.notes.trim() !== before.notes) changes.notes = after.notes.trim();
   if (after.labourerId !== before.labourerId && after.labourerId)
     changes.labourerId = Number(after.labourerId);
-  if (after.tractorId !== before.tractorId && after.tractorId)
-    changes.tractorId = Number(after.tractorId);
-  if (after.driverId !== before.driverId && after.driverId)
-    changes.driverId = Number(after.driverId);
-  if (centilitres(after.litres) !== centilitres(before.litres) && after.litres)
-    changes.litres = after.litres;
-  if (after.hourMeter !== before.hourMeter && after.hourMeter)
-    changes.hourMeter = Number(after.hourMeter);
-  if (
-    (after.periodFrom !== before.periodFrom || after.periodTo !== before.periodTo) &&
-    after.periodFrom &&
-    after.periodTo
-  ) {
-    changes.periodFrom = after.periodFrom;
-    changes.periodTo = after.periodTo;
+  if (after.tractorId !== before.tractorId) changes.tractorId = idChange(after.tractorId);
+  if (after.driverId !== before.driverId) changes.driverId = idChange(after.driverId);
+  if (centilitres(after.litres) !== centilitres(before.litres) && after.litres) {
+    changes.litres = litresText(after.litres);
+  }
+  if (after.hourMeter !== before.hourMeter)
+    changes.hourMeter = after.hourMeter === "" ? null : Number(after.hourMeter);
+  if (after.periodFrom !== before.periodFrom || after.periodTo !== before.periodTo) {
+    changes.periodFrom = after.periodFrom === "" ? null : after.periodFrom;
+    changes.periodTo = after.periodTo === "" ? null : after.periodTo;
   }
   return changes;
 }

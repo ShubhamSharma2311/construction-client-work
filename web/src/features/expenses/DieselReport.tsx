@@ -1,6 +1,7 @@
 import type { DateRange } from "../../lib/ranges.ts";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
+import { FigureStrip } from "../../ui/FigureStrip.tsx";
 import { Money } from "../../ui/Money.tsx";
 import styles from "./DieselReport.module.css";
 import { type DieselReport as Report, useDieselReport } from "./useExpenses.ts";
@@ -45,7 +46,8 @@ export function DieselReport({ range }: { range: DateRange | null }) {
       key: "perTrip",
       header: "Litres a trip",
       // A tractor that burned diesel without a trip is worth a look, so it says so.
-      cell: (row) => (row.litresPerTrip === null ? "no trips" : litres(row.litresPerTrip)),
+      cell: (row) =>
+        row.litresPerTrip === null ? "no trips" : `${litres(row.litresPerTrip)} a trip`,
       phone: "status",
       numeric: true,
     },
@@ -66,27 +68,19 @@ export function DieselReport({ range }: { range: DateRange | null }) {
       phone: "amount",
       numeric: true,
     },
-    { key: "trips", header: "Trips", cell: (row) => row.trips, phone: "status", numeric: true },
+    { key: "trips", header: "Trips", cell: (row) => row.trips, phone: "hidden", numeric: true },
   ];
 
   return (
     <>
-      <dl className={styles.totals}>
-        <div>
-          <dt>Diesel</dt>
-          <dd>{litres(totals.litres)}</dd>
-        </div>
-        <div>
-          <dt>Cost</dt>
-          <dd>
-            <Money paise={totals.amountPaise} />
-          </dd>
-        </div>
-        <div>
-          <dt>Trips</dt>
-          <dd>{totals.trips}</dd>
-        </div>
-      </dl>
+      <FigureStrip
+        label="Diesel totals"
+        figures={[
+          { label: "Diesel", value: litres(totals.litres) },
+          { label: "Cost", value: <Money paise={totals.amountPaise} /> },
+          { label: "Trips", value: totals.trips },
+        ]}
+      />
       <h2 className={styles.subhead}>By tractor</h2>
       <EntryTable
         caption="Diesel by tractor"
@@ -106,7 +100,7 @@ export function DieselReport({ range }: { range: DateRange | null }) {
         rowKey={(row) => row.driver.id}
         rowLink={(row) => billsLink(range, "driver", row.driver.id)}
         rowLabel={(row) => `${row.driver.name} diesel bills`}
-        phoneMeta={(row) => litres(row.litres)}
+        phoneMeta={(row) => `${litres(row.litres)}, ${String(row.trips)} trips`}
         empty="No diesel in these dates."
       />
     </>

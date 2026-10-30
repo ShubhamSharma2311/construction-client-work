@@ -10,6 +10,7 @@ import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { FilterCheckbox } from "../../ui/FilterPanel.tsx";
 import { FormError } from "../../ui/FormError.tsx";
 import { Loading, LoadError, loadErrorMessage } from "../../ui/LoadState.tsx";
+import { BigTotal } from "../../ui/FigureStrip.tsx";
 import { Money } from "../../ui/Money.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
@@ -105,12 +106,9 @@ function Owing({ onDownload, downloading }: { onDownload: () => void; downloadin
   return (
     <>
       <section className={styles.summary} aria-label="Dues by age">
-        <div className={styles.total}>
-          <span className={styles.totalLabel}>Customers owe</span>
-          <span className={styles.totalFigure}>
-            <Money paise={total} tone={total > 0 ? "owed" : "plain"} />
-          </span>
-        </div>
+        <BigTotal label="Customers owe">
+          <Money paise={total} tone={total > 0 ? "owed" : "plain"} />
+        </BigTotal>
         <dl className={styles.buckets}>
           {BUCKETS.map((bucket) => (
             <div key={bucket.key} className={styles.bucket} data-bucket={bucket.key}>

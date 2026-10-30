@@ -63,8 +63,3 @@ export function expenseQuery(filters: ExpenseFilters) {
     ...(filters.deleted ? { deleted: "true" as const } : {}),
   };
 }
-
-/** The same query as text, for the spreadsheet download. */
-export function asTextQuery(query: Record<string, string | number>): Record<string, string> {
-  return Object.fromEntries(Object.entries(query).map(([key, value]) => [key, String(value)]));
-}

@@ -19,6 +19,7 @@ import {
   type ExpenseValues,
   isLitresInput,
   ratePerLitre,
+  showsReference,
 } from "./expenseValues.ts";
 
 // Fields this form can show, by the API's names; problems with anything else go in the notice.
@@ -79,7 +80,7 @@ export function ExpenseForm({
   const [tried, setTried] = useState(false);
   const problems = tried ? checkExpense(values) : {};
   const server = fieldErrors(error);
-  const problemOf = (field: string) => problems[field] ?? server[field];
+  const problemOf = (field: keyof ExpenseValues) => problems[field] ?? server[field];
   const set = (patch: Partial<ExpenseValues>) => {
     setValues((current) => ({ ...current, ...patch }));
   };
@@ -250,7 +251,7 @@ export function ExpenseForm({
         </div>
       ) : null}
 
-      {values.mode === "ONLINE" || category === "ROYALTY" ? (
+      {showsReference(values) ? (
         <TextField
           label={category === "ROYALTY" ? "Receipt number" : "UPI or bank reference"}
           hint="Optional"

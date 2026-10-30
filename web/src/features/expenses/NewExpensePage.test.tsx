@@ -13,17 +13,34 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function newExpenseApi(warnings: string[] = []) {
+function categoryOf(body: unknown): string {
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "category" in body &&
+    typeof body.category === "string"
+  ) {
+    return body.category;
+  }
+  throw new Error("expense body has no category");
+}
+
+function newExpenseApi(warnings: string[] = [], failFirst = false) {
   const sent: { body: unknown; key: string | null }[] = [];
+  let failing = failFirst;
   const api = fakeApi({
     ...signedInRoutes,
     "GET /tractors": () => json(TRACTORS),
     "GET /drivers": () => json(DRIVERS),
     "GET /labourers": () => json(LABOURERS),
     "POST /expenses": async (request) => {
-      const body = (await request.json()) as { category: string };
+      const body: unknown = await request.json();
       sent.push({ body, key: request.headers.get("idempotency-key") });
-      return json({ expense: { ...EXPENSE, category: body.category }, warnings }, 201);
+      if (failing) {
+        failing = false;
+        throw new TypeError("Failed to fetch");
+      }
+      return json({ expense: { ...EXPENSE, category: categoryOf(body) }, warnings }, 201);
     },
   });
   return { api, sent };
@@ -49,6 +66,28 @@ describe("New expense", () => {
     });
     expect(screen.getByLabelText("Amount paid")).toHaveValue("");
     expect(screen.getByLabelText("Kind of expense")).toHaveValue("LABOUR");
+  });
+
+  it("reuses the key when a save is retried, and takes a new one for the next expense", async () => {
+    const { api, sent } = newExpenseApi([], true);
+    const { user } = await renderApp(api, { path: "/new/expense" });
+    await screen.findByRole("option", { name: "Mangilal" });
+    await user.selectOptions(screen.getByLabelText("Paid to"), "Mangilal");
+    await user.type(screen.getByLabelText("Amount paid"), "500");
+
+    await user.click(screen.getByRole("button", { name: "Save expense" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("will not be entered twice");
+    await user.click(screen.getByRole("button", { name: "Save expense" }));
+    await screen.findByText(/saved/);
+    await user.selectOptions(screen.getByLabelText("Paid to"), "Mangilal");
+    await user.type(screen.getByLabelText("Amount paid"), "300");
+    await user.click(screen.getByRole("button", { name: "Save expense" }));
+
+    await vi.waitFor(() => {
+      expect(sent).toHaveLength(3);
+    });
+    expect(sent[1]?.key).toBe(sent[0]?.key);
+    expect(sent[2]?.key).not.toBe(sent[0]?.key);
   });
 
   it("asks police money for who and why", async () => {

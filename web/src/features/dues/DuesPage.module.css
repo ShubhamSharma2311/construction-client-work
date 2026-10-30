@@ -10,20 +10,6 @@
   }
 }
 
-.total {
-  display: grid;
-}
-
-.totalLabel {
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-}
-
-.totalFigure {
-  font: 700 var(--text-2xl) / 1.1 var(--font-display);
-  overflow-wrap: anywhere;
-}
-
 /* Older dues get a stronger red edge: the longer it waits, the louder it is. */
 .buckets {
   margin: 0;

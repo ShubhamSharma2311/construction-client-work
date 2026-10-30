@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
 import type { ExpenseItem } from "../../api/types.ts";
 import { useToast } from "../../app/Toast.tsx";
+import { useLeave } from "../../app/useLeave.ts";
 import { formatFullDate, formatMonth, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import actions from "../../ui/Actions.module.css";
@@ -97,7 +98,7 @@ function ExpenseActions({ expense }: { expense: EnteredExpense }) {
   const [confirming, setConfirming] = useState(false);
   const remove = useDeleteExpense(expense.id);
   const toast = useToast();
-  const navigate = useNavigate();
+  const leave = useLeave("/expenses");
   return (
     <div className={actions.actions}>
       <ButtonLink to={`/expenses/${String(expense.id)}/edit`}>Edit expense</ButtonLink>
@@ -125,7 +126,7 @@ function ExpenseActions({ expense }: { expense: EnteredExpense }) {
               toast(
                 `${EXPENSE_CATEGORY_LABELS[expense.category]} of ${formatRupees(expense.amountPaise)} deleted.`,
               );
-              void navigate("/expenses");
+              leave();
             },
           });
         }}

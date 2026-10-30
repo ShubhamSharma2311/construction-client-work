@@ -4,16 +4,19 @@ import { useDownload } from "../../api/useDownload.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import { presetRange } from "../../lib/ranges.ts";
+import { asTextQuery } from "../../lib/textQuery.ts";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
 import { Loading, LoadError, loadErrorMessage } from "../../ui/LoadState.tsx";
+import { BigTotal } from "../../ui/FigureStrip.tsx";
 import { Money } from "../../ui/Money.tsx";
 import { FilterCheckbox, FilterPanel } from "../../ui/FilterPanel.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { RangeChips } from "../../ui/RangeChips.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
+import { ShowMore } from "../../ui/ShowMore.tsx";
 import { Tag } from "../../ui/Tag.tsx";
 import { ViewToggle } from "../../ui/ViewToggle.tsx";
 import { filterOptions, useDrivers, useLabourers, useTractors } from "../masters/useMasters.ts";
@@ -22,7 +25,6 @@ import { useSettings } from "../settings/useSettings.ts";
 import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABELS } from "./categories.ts";
 import { DieselReport } from "./DieselReport.tsx";
 import {
-  asTextQuery,
   type ExpenseFilters,
   expenseQuery,
   PAY_MODES,
@@ -153,10 +155,9 @@ function ExpenseList({
       <Filters filters={filters} onChange={onChange} />
       {first ? (
         <section className={styles.totals} aria-label="Totals">
-          <div className={styles.total}>
-            <span className={styles.totalLabel}>Spent</span>
+          <BigTotal label={filters.deleted ? "Deleted" : "Spent"}>
             <Money paise={first.totals.amountPaise} />
-          </div>
+          </BigTotal>
           <ul className={styles.byKind} aria-label="Spent by kind">
             {EXPENSE_CATEGORIES.filter(
               (category) => (first.totals.byCategory[category] ?? 0) > 0,
@@ -203,18 +204,12 @@ function ExpenseList({
         />
       ) : null}
       {list.hasNextPage ? (
-        <div className={styles.more}>
-          <span>
-            Showing {rows.length} of {first?.total ?? rows.length}
-          </span>
-          <Button
-            variant="secondary"
-            disabled={list.isFetchingNextPage}
-            onClick={() => void list.fetchNextPage()}
-          >
-            {list.isFetchingNextPage ? "Loading…" : "Show more"}
-          </Button>
-        </div>
+        <ShowMore
+          shown={rows.length}
+          total={first?.total ?? rows.length}
+          loading={list.isFetchingNextPage}
+          onMore={() => void list.fetchNextPage()}
+        />
       ) : null}
     </>
   );

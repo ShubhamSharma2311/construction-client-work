@@ -2,16 +2,19 @@ import { useSearchParams } from "react-router";
 import { useDownload } from "../../api/useDownload.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
 import { presetRange } from "../../lib/ranges.ts";
+import { asTextQuery } from "../../lib/textQuery.ts";
 import { Button } from "../../ui/Button.tsx";
 import { ButtonLink } from "../../ui/ButtonLink.tsx";
 import { type Column, EntryTable } from "../../ui/EntryTable.tsx";
 import { LoadError, Loading } from "../../ui/LoadState.tsx";
+import { FigureStrip } from "../../ui/FigureStrip.tsx";
 import { Money } from "../../ui/Money.tsx";
 import { FilterCheckbox, FilterPanel } from "../../ui/FilterPanel.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { RangeChips } from "../../ui/RangeChips.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
+import { ShowMore } from "../../ui/ShowMore.tsx";
 import { loadErrorMessage } from "../../ui/LoadState.tsx";
 import { filterOptions, useDrivers, useKhets, useTractors } from "../masters/useMasters.ts";
 import { SetupPrompt } from "../settings/SetupPrompt.tsx";
@@ -25,7 +28,6 @@ import {
   tripQuery,
   writeTripFilters,
 } from "./tripFilters.ts";
-import styles from "./TripsPage.module.css";
 import { TripStatusTag } from "./TripStatusTag.tsx";
 import { useTripList } from "./useTrips.ts";
 
@@ -65,10 +67,7 @@ function TripsList({ startDate }: { startDate: IsoDate }) {
               variant="secondary"
               disabled={download.isPending}
               onClick={() => {
-                const query = Object.fromEntries(
-                  Object.entries(tripQuery(filters)).map(([key, value]) => [key, String(value)]),
-                );
-                download.mutate({ path: "/trips/export", query });
+                download.mutate({ path: "/trips/export", query: asTextQuery(tripQuery(filters)) });
               }}
             >
               {download.isPending ? "Preparing…" : "Download"}
@@ -89,33 +88,26 @@ function TripsList({ startDate }: { startDate: IsoDate }) {
       <Filters filters={filters} onChange={setFilters} />
 
       {first ? (
-        <dl className={styles.totals}>
-          <div>
-            <dt>Trips</dt>
-            <dd>{first.totals.count}</dd>
-          </div>
-          <div>
-            <dt>Amount</dt>
-            <dd>
-              <Money paise={first.totals.amountPaise} />
-            </dd>
-          </div>
-          <div>
-            <dt>Received</dt>
-            <dd>
-              <Money paise={first.totals.receivedPaise} tone="received" />
-            </dd>
-          </div>
-          <div>
-            <dt>Still due</dt>
-            <dd>
-              <Money
-                paise={first.totals.duePaise}
-                tone={first.totals.duePaise > 0 ? "owed" : "plain"}
-              />
-            </dd>
-          </div>
-        </dl>
+        <FigureStrip
+          label="Totals"
+          figures={[
+            { label: "Trips", value: first.totals.count },
+            { label: "Amount", value: <Money paise={first.totals.amountPaise} /> },
+            {
+              label: "Received",
+              value: <Money paise={first.totals.receivedPaise} tone="received" />,
+            },
+            {
+              label: "Still due",
+              value: (
+                <Money
+                  paise={first.totals.duePaise}
+                  tone={first.totals.duePaise > 0 ? "owed" : "plain"}
+                />
+              ),
+            },
+          ]}
+        />
       ) : null}
 
       {list.isPending ? <Loading what="trips" /> : null}
@@ -137,18 +129,12 @@ function TripsList({ startDate }: { startDate: IsoDate }) {
         />
       ) : null}
       {list.hasNextPage ? (
-        <div className={styles.more}>
-          <span>
-            Showing {rows.length} of {first?.total ?? rows.length}
-          </span>
-          <Button
-            variant="secondary"
-            disabled={list.isFetchingNextPage}
-            onClick={() => void list.fetchNextPage()}
-          >
-            {list.isFetchingNextPage ? "Loading…" : "Show more"}
-          </Button>
-        </div>
+        <ShowMore
+          shown={rows.length}
+          total={first?.total ?? rows.length}
+          loading={list.isFetchingNextPage}
+          onMore={() => void list.fetchNextPage()}
+        />
       ) : null}
     </>
   );

@@ -66,6 +66,15 @@ describe("Expenses", () => {
     expect(asked[0]?.searchParams.get("from")).toBe("2026-10-01");
   });
 
+  it("calls the total Deleted when only deleted expenses are shown", async () => {
+    const { api } = expensesApi();
+
+    await renderApp(api, { path: "/expenses?deleted=true" });
+
+    expect(await screen.findByText("Deleted")).toBeInTheDocument();
+    expect(screen.queryByText("Spent")).not.toBeInTheDocument();
+  });
+
   it("narrows to one kind and keeps it in the address", async () => {
     const { api, asked } = expensesApi();
     const { user, router } = await renderApp(api, { path: "/expenses" });

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
 import { useToast } from "../../app/Toast.tsx";
+import { useLeave } from "../../app/useLeave.ts";
 import { formatFullDate } from "../../lib/dates.ts";
 import { formatRupees } from "../../lib/money.ts";
 import { Button } from "../../ui/Button.tsx";
@@ -70,7 +71,7 @@ function TripActions({ trip }: { trip: TripItem }) {
   const [confirming, setConfirming] = useState(false);
   const remove = useDeleteTrip(trip.id);
   const toast = useToast();
-  const navigate = useNavigate();
+  const leave = useLeave("/trips");
   const received = trip.receivedPaise > 0;
 
   return (
@@ -110,7 +111,7 @@ function TripActions({ trip }: { trip: TripItem }) {
               toast(
                 `Entry deleted.${moved} ${balanceText(trip.customer.name, result.customerBalance)}`,
               );
-              void navigate("/trips");
+              leave();
             },
           });
         }}

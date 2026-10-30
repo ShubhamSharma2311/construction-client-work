@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  centilitres,
   checkExpense,
   emptyExpense,
   expenseBody,
@@ -134,5 +135,102 @@ describe("price of diesel", () => {
   it("works out the rate per litre", () => {
     expect(ratePerLitre("4500", "47.5")).toBe("₹94.74 a litre");
     expect(ratePerLitre("", "47.5")).toBeNull();
+  });
+});
+
+describe("clearing on an edit", () => {
+  it("removes an emergency's tractor and driver with null", () => {
+    const before = {
+      ...emptyExpense("EMERGENCY", day),
+      amount: "800",
+      notes: "Puncture",
+      tractorId: "3",
+      driverId: "2",
+    };
+
+    expect(expenseChanges(before, { ...before, tractorId: "", driverId: "" })).toEqual({
+      tractorId: null,
+      driverId: null,
+    });
+  });
+
+  it("removes a royalty's period and a service's hour meter with null", () => {
+    const royalty = {
+      ...emptyExpense("ROYALTY", day),
+      amount: "15000",
+      periodFrom: "2026-10-01",
+      periodTo: "2026-10-15",
+    };
+    const service = {
+      ...emptyExpense("TRACTOR_SERVICE", day),
+      amount: "2500",
+      tractorId: "3",
+      notes: "Oil",
+      hourMeter: "1450",
+    };
+
+    expect(expenseChanges(royalty, { ...royalty, periodFrom: "", periodTo: "" })).toEqual({
+      periodFrom: null,
+      periodTo: null,
+    });
+    expect(expenseChanges(service, { ...service, hourMeter: "" })).toEqual({ hourMeter: null });
+  });
+
+  it("removes the reference when online money becomes cash", () => {
+    const before = {
+      ...emptyExpense("OTHER", day),
+      amount: "500",
+      notes: "Rope",
+      mode: "ONLINE" as const,
+      reference: "UPI123",
+    };
+
+    expect(expenseChanges(before, { ...before, mode: "CASH" })).toEqual({
+      mode: "CASH",
+      reference: null,
+    });
+  });
+});
+
+describe("the reference field", () => {
+  it("is not sent once its field is hidden", () => {
+    const police = {
+      ...emptyExpense("POLICE", day),
+      amount: "1000",
+      notes: "Checkpost",
+      reference: "R-12",
+    };
+
+    expect(expenseBody(police)).not.toHaveProperty("reference");
+    expect(expenseBody({ ...police, mode: "ONLINE" })).toMatchObject({ reference: "R-12" });
+  });
+});
+
+describe("litres", () => {
+  it.each([
+    ["45", 4500],
+    ["45.", 4500],
+    [".5", 50],
+    ["47.25", 4725],
+  ])("reads %j as %i hundredths", (text, centi) => {
+    expect(centilitres(text)).toBe(centi);
+  });
+
+  it("has none for an empty field", () => {
+    expect(centilitres("")).toBeNull();
+    expect(centilitres(".")).toBeNull();
+  });
+
+  it("sends litres the API can read", () => {
+    const diesel = {
+      ...emptyExpense("DIESEL", day),
+      amount: "4500",
+      tractorId: "3",
+      driverId: "2",
+      litres: "45.",
+    };
+
+    expect(expenseBody(diesel)).toMatchObject({ litres: "45" });
+    expect(expenseBody({ ...diesel, litres: ".5" })).toMatchObject({ litres: "0.5" });
   });
 });
