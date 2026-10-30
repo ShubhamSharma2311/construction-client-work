@@ -65,9 +65,8 @@ export async function updateKhet(db: Db, id: number, input: KhetUpdateInput): Pr
 async function assertNameFree(tx: Tx, key: string): Promise<void> {
   const existing = await tx.khet.findUnique({ where: { nameKey: key } });
   if (existing) {
-    throw new AppError(
-      "CONFLICT",
-      `Khet "${existing.name}" already exists as #${String(existing.id)}`,
-    );
+    // A khet taken out of use still holds its name; say so, so the owner turns it back on.
+    const retired = existing.isActive ? "" : ", not in use. Turn it back on instead";
+    throw new AppError("CONFLICT", `A khet named "${existing.name}" already exists${retired}`);
   }
 }

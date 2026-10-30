@@ -3,7 +3,13 @@ import { Button } from "../../ui/Button.tsx";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
 import { Register, RegisterRow } from "../../ui/Register.tsx";
-import { type Khet, type Labourer, useKhets, useLabourers } from "../masters/useMasters.ts";
+import {
+  type Khet,
+  type Labourer,
+  useKhets,
+  useLabourers,
+  withStatus,
+} from "../masters/useMasters.ts";
 import styles from "./SetupPage.module.css";
 import { AddKhet, AddLabourer, EditKhet, EditLabourer } from "./SetupSheets.tsx";
 
@@ -56,10 +62,6 @@ function EditButton({ name, onClick }: { name: string; onClick: () => void }) {
   );
 }
 
-/** Inactive entries stay listed, so one stopped by mistake can be brought back. */
-const shownName = (item: { name: string; isActive: boolean }) =>
-  item.isActive ? item.name : `${item.name} (not in use)`;
-
 function Khets({ onAdd, onEdit }: { onAdd: () => void; onEdit: (khet: Khet) => void }) {
   const khets = useKhets();
   return (
@@ -82,7 +84,7 @@ function Khets({ onAdd, onEdit }: { onAdd: () => void; onEdit: (khet: Khet) => v
             khets.data.map((khet) => (
               <RegisterRow
                 key={khet.id}
-                label={shownName(khet)}
+                label={withStatus(khet)}
                 detail={khet.location}
                 action={
                   <EditButton
@@ -123,7 +125,7 @@ function Labourers({ onAdd, onEdit }: { onAdd: () => void; onEdit: (labourer: La
             labourers.data.map((labourer) => (
               <RegisterRow
                 key={labourer.id}
-                label={shownName(labourer)}
+                label={withStatus(labourer)}
                 detail={[labourer.phone, labourer.notes].filter(Boolean).join(", ")}
                 action={
                   <EditButton

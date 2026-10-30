@@ -139,6 +139,22 @@ describe("New trip", () => {
     expect(sent[1]?.key).not.toBe(sent[0]?.key);
   });
 
+  it("points to Khets and labour when no khet is in use", async () => {
+    const { api } = newTripApi();
+    const retired = { ...KHETS, items: KHETS.items.map((khet) => ({ ...khet, isActive: false })) };
+    const noKhets = {
+      ...api,
+      fetch: (request: Request) =>
+        new URL(request.url).pathname.endsWith("/khets")
+          ? Promise.resolve(json(retired))
+          : api.fetch(request),
+    };
+
+    await renderApp(noKhets, { path: "/new/trip" });
+
+    expect(await screen.findByText(/No khets in use/)).toBeInTheDocument();
+  });
+
   it("fills in the driver's usual tractor", async () => {
     const { api } = newTripApi();
     const { user } = await renderApp(api, { path: "/new/trip" });

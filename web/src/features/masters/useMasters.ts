@@ -13,6 +13,9 @@ export type Labourer = Ok<"/labourers", "get">["items"][number];
 // loaded whole, inactive ones included, and filtered on the screen.
 const ALL = { active: "all", limit: 200 } as const;
 
+export const KHETS_KEY = ["khets"] as const;
+export const LABOURERS_KEY = ["labourers"] as const;
+
 export function useDrivers() {
   const { api } = useServices();
   return useQuery({
@@ -32,7 +35,7 @@ export function useTractors() {
 export function useKhets() {
   const { api } = useServices();
   return useQuery({
-    queryKey: ["khets"],
+    queryKey: KHETS_KEY,
     queryFn: async () => unwrap(await api.GET("/khets", { params: { query: ALL } })).items,
   });
 }
@@ -40,7 +43,7 @@ export function useKhets() {
 export function useLabourers() {
   const { api } = useServices();
   return useQuery({
-    queryKey: ["labourers"],
+    queryKey: LABOURERS_KEY,
     queryFn: async () => unwrap(await api.GET("/labourers", { params: { query: ALL } })).items,
   });
 }
@@ -62,6 +65,11 @@ export function pickerOptions<T extends Master>(
   return (items ?? [])
     .filter((item) => item.isActive || String(item.id) === currentId)
     .map((item) => ({ value: String(item.id), label: label(item) }));
+}
+
+/** A name as lists show it: one no longer in use is marked, but stays listed. */
+export function withStatus(item: { name: string; isActive: boolean }): string {
+  return item.isActive ? item.name : `${item.name} (inactive)`;
 }
 
 /** Options for a list filter: every entry, with inactive ones marked. */

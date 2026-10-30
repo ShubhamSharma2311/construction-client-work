@@ -32,7 +32,7 @@ describe("Khets and labour", () => {
 
     const khets = await screen.findByRole("list", { name: "Khets" });
     expect(khets).toHaveTextContent("Ladnun roadNear the canal");
-    expect(khets).toHaveTextContent("Didwana (not in use)");
+    expect(khets).toHaveTextContent("Didwana (inactive)");
     expect(await screen.findByRole("list", { name: "Labour" })).toHaveTextContent("Mangilal");
   });
 
@@ -58,7 +58,7 @@ describe("Khets and labour", () => {
 
   it("shows the API's refusal of a khet name already used", async () => {
     const api = setupApi({
-      "POST /khets": () => apiError(409, "CONFLICT", "A khet named Didwana already exists"),
+      "POST /khets": () => apiError(409, "CONFLICT", 'A khet named "Didwana" already exists'),
     });
     const { user } = await renderApp(api, { path: "/setup" });
 
@@ -68,7 +68,7 @@ describe("Khets and labour", () => {
     await user.click(within(sheet).getByRole("button", { name: "Add khet" }));
 
     expect(await within(sheet).findByRole("alert")).toHaveTextContent(
-      "A khet named Didwana already exists.",
+      'A khet named "Didwana" already exists.',
     );
   });
 

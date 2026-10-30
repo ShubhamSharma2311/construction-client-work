@@ -11,3 +11,4 @@ api/src/generated/
 
 test-results/
 playwright-report/
+*.tsbuildinfo

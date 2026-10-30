@@ -11,6 +11,7 @@ import { ErrorNotice } from "../../ui/Notice.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
 import { TextField } from "../../ui/TextField.tsx";
 import { CustomerPicker } from "../customers/CustomerPicker.tsx";
+import { SetupHint } from "../masters/SetupHint.tsx";
 import { pickerOptions, useDrivers, useKhets, useTractors } from "../masters/useMasters.ts";
 import styles from "./TripForm.module.css";
 import {
@@ -74,6 +75,7 @@ export function TripForm({
   const drivers = useDrivers();
   const tractors = useTractors();
   const khets = useKhets();
+  const khetOptions = pickerOptions(khets.data, values.khetId, (item) => item.name);
 
   const serverProblems = Object.fromEntries(
     Object.entries(fieldErrors(error)).map(([field, message]) => [
@@ -163,8 +165,9 @@ export function TripForm({
         label="Khet"
         placeholder="Where the sand came from"
         value={values.khetId}
-        options={pickerOptions(khets.data, values.khetId, (item) => item.name)}
+        options={khetOptions}
         error={problemOf("khetId")}
+        hint={khets.data && khetOptions.length === 0 ? <SetupHint what="khets" /> : undefined}
         onChange={(khetId) => {
           set("khetId", khetId);
         }}

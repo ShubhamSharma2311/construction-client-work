@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useTestApp } from "../../../test/app.ts";
+import { errorOf, useTestApp } from "../../../test/app.ts";
 import { makeKhet } from "../../../test/factories.ts";
 import type { Page } from "../../lib/listing.ts";
 import type { KhetDto } from "./khets.schema.ts";
@@ -14,6 +14,19 @@ describe("khets", () => {
 
     expect(khet).toMatchObject({ name: "Luni Nadi", location: "Near Bilara", isActive: true });
     expect(duplicate.statusCode).toBe(409);
+  });
+
+  it("names the khet that already has the name, and says when it is not in use", async () => {
+    const old = await makeKhet(t, { name: "Luni Nadi" });
+
+    const inUse = await t.post("/khets", { name: "luni nadi" });
+    await t.patch(`/khets/${String(old.id)}`, { isActive: false });
+    const retired = await t.post("/khets", { name: "luni nadi" });
+
+    expect(errorOf(inUse).message).toBe('A khet named "Luni Nadi" already exists');
+    expect(errorOf(retired).message).toBe(
+      'A khet named "Luni Nadi" already exists, not in use. Turn it back on instead',
+    );
   });
 
   it("renames, refuses a rename onto another khet, and allows a case-only rename", async () => {

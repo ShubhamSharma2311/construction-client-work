@@ -1,5 +1,4 @@
 import { type SubmitEvent, useState } from "react";
-import { Link } from "react-router";
 import { fieldErrors } from "../../api/errors.ts";
 import type { IsoDate } from "../../lib/dates.ts";
 import { Button } from "../../ui/Button.tsx";
@@ -10,6 +9,7 @@ import { MoneyField } from "../../ui/MoneyField.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
 import { TextField } from "../../ui/TextField.tsx";
+import { SetupHint } from "../masters/SetupHint.tsx";
 import { pickerOptions, useDrivers, useLabourers, useTractors } from "../masters/useMasters.ts";
 import { EXPENSE_CATEGORY_LABELS } from "./categories.ts";
 import styles from "./ExpenseForm.module.css";
@@ -83,6 +83,7 @@ export function ExpenseForm({
   const tractors = useTractors();
   const drivers = useDrivers();
   const labourers = useLabourers();
+  const labourerOptions = pickerOptions(labourers.data, values.labourerId, (item) => item.name);
   const { category } = values;
   const usesTractor =
     category === "DIESEL" || category === "TRACTOR_SERVICE" || category === "EMERGENCY";
@@ -129,13 +130,11 @@ export function ExpenseForm({
           label="Paid to"
           placeholder="Choose who was paid"
           value={values.labourerId}
-          options={pickerOptions(labourers.data, values.labourerId, (item) => item.name)}
+          options={labourerOptions}
           error={problemOf("labourerId")}
           hint={
-            labourers.data?.length === 0 ? (
-              <>
-                No labourers yet. <Link to="/setup">Add them under Khets and labour.</Link>
-              </>
+            labourers.data && labourerOptions.length === 0 ? (
+              <SetupHint what="labourers" />
             ) : undefined
           }
           onChange={(labourerId) => {

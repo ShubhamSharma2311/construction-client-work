@@ -23,6 +23,7 @@ import { NewEmiPage } from "../features/tractors/NewEmiPage.tsx";
 import { TractorPage } from "../features/tractors/TractorPage.tsx";
 import { TractorsPage } from "../features/tractors/TractorsPage.tsx";
 import { ReportsPage } from "../features/reports/ReportsPage.tsx";
+import { SettingsPage } from "../features/settings/SettingsPage.tsx";
 import { SetupPage } from "../features/setup/SetupPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
 import { EditTripPage } from "../features/trips/EditTripPage.tsx";
@@ -30,14 +31,13 @@ import { NewTripPage } from "../features/trips/NewTripPage.tsx";
 import { TripPage } from "../features/trips/TripPage.tsx";
 import { TripsPage } from "../features/trips/TripsPage.tsx";
 import { MorePage } from "../pages/MorePage.tsx";
-import { NotBuiltYet } from "../pages/NotBuiltYet.tsx";
 import { NotFoundPage } from "../pages/NotFoundPage.tsx";
 import { AppShell } from "../shell/AppShell.tsx";
 import { type Destination, NAV_GROUPS, NEW_ENTRIES } from "../shell/nav.ts";
 import { WithId } from "./WithId.tsx";
 
-// Screens that exist; every other menu destination is a placeholder until its block lands.
-const BUILT: Record<string, RouteObject> = {
+// The screen behind each menu destination.
+const SCREENS: Record<string, RouteObject> = {
   "/": { index: true, element: <TodayPage /> },
   "/trips": { path: "/trips", element: <TripsPage /> },
   "/new/trip": { path: "/new/trip", element: <NewTripPage /> },
@@ -53,6 +53,7 @@ const BUILT: Record<string, RouteObject> = {
   "/partner": { path: "/partner", element: <PartnersPage /> },
   "/reports": { path: "/reports", element: <ReportsPage /> },
   "/setup": { path: "/setup", element: <SetupPage /> },
+  "/settings": { path: "/settings", element: <SettingsPage /> },
   "/new/partner": { path: "/new/partner", element: <NewPartnerTxnPage /> },
   "/new/driver-payment": { path: "/new/driver-payment", element: <NewDriverPaymentPage /> },
 };
@@ -76,8 +77,11 @@ const DETAILS: RouteObject[] = [
   detail("/partner/:id", (id) => <PartnerByIdPage key={id} id={id} />),
 ];
 
-function screenFor({ to, label }: Destination): RouteObject {
-  return BUILT[to] ?? { path: to, element: <NotBuiltYet title={label} /> };
+function screenFor({ to }: Destination): RouteObject {
+  const screen = SCREENS[to];
+  // A menu item with no screen is a wiring mistake; failing at start shows it at once.
+  if (!screen) throw new Error(`No screen for the menu destination ${to}`);
+  return screen;
 }
 
 export const routes: RouteObject[] = [

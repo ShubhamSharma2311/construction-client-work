@@ -33,5 +33,5 @@ test("a khet is added and taken out of use, and the lists fit the screen", async
   });
   await edit.getByText("In use (shown when entering trips)").click();
   await edit.getByRole("button", { name: "Save" }).click();
-  await expect(khets.getByText(`${name} (not in use)`)).toBeVisible();
+  await expect(khets.getByText(`${name} (inactive)`)).toBeVisible();
 });

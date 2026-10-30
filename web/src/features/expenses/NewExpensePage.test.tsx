@@ -68,6 +68,25 @@ describe("New expense", () => {
     expect(screen.getByLabelText("Kind of expense")).toHaveValue("LABOUR");
   });
 
+  it("points to Khets and labour when no labourer is in use", async () => {
+    const api = fakeApi({
+      ...signedInRoutes,
+      "GET /tractors": () => json(TRACTORS),
+      "GET /drivers": () => json(DRIVERS),
+      "GET /labourers": () =>
+        json({ ...LABOURERS, items: [{ ...LABOURERS.items[0], isActive: false }] }),
+    });
+
+    await renderApp(api, { path: "/new/expense" });
+
+    expect(
+      await screen.findByRole("link", {
+        name: "Add one, or turn one back on, under Khets and labour.",
+      }),
+    ).toHaveAttribute("href", "/setup");
+    expect(screen.getByText(/No labourers in use/)).toBeInTheDocument();
+  });
+
   it("reuses the key when a save is retried, and takes a new one for the next expense", async () => {
     const { api, sent } = newExpenseApi([], true);
     const { user } = await renderApp(api, { path: "/new/expense" });
