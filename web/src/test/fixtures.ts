@@ -507,3 +507,134 @@ export const PARTNER_SHARE: Ok<"/partners/{id}/share", "get"> = {
   netPaidPaise: 2000000,
   balancePaise: 1200000,
 };
+
+export const PROFIT: Ok<"/reports/pnl", "get"> = {
+  from: "2026-10-01",
+  to: "2026-10-28",
+  revenue: { tripsPaise: 31500000, writeOffsPaise: 20000, netPaise: 31480000 },
+  expenses: { byCategory: { DIESEL: 9850000, LABOUR: 2000000, ROYALTY: 0 }, totalPaise: 11850000 },
+  driverSalaryPaise: 5400000,
+  profitPaise: 14230000,
+};
+
+export const CASH_BOOK: Ok<"/reports/cashbook", "get"> = {
+  mode: "CASH",
+  from: "2026-10-01",
+  to: "2026-10-28",
+  openingPaise: 1000000,
+  lines: [
+    {
+      date: "2026-10-12",
+      kind: "CUSTOMER_PAYMENT",
+      refId: 31,
+      description: "Payment from Ramesh Bishnoi",
+      inPaise: 500000,
+      outPaise: 0,
+      balancePaise: 1500000,
+    },
+    {
+      date: "2026-10-14",
+      kind: "DRIVER_PAYMENT",
+      refId: 8,
+      description: "Advance to Suresh",
+      inPaise: 0,
+      outPaise: 200000,
+      balancePaise: 1300000,
+    },
+    {
+      date: "2026-10-15",
+      kind: "EXPENSE",
+      refId: 41,
+      description: "Diesel, RJ19 GA 4521",
+      inPaise: 0,
+      outPaise: 1600000,
+      balancePaise: -300000,
+    },
+  ],
+  totals: { inPaise: 500000, outPaise: 1800000 },
+  closingPaise: -300000,
+};
+
+const QUIET_DAY = {
+  trips: 0,
+  revenuePaise: 0,
+  cashInPaise: 0,
+  onlineInPaise: 0,
+  newDuesPaise: 0,
+  duesRecoveredPaise: 0,
+  expensesPaise: 0,
+  driverPaymentsPaise: 0,
+  partnerNetPaidPaise: 0,
+};
+
+const BUSY_DAY = {
+  trips: 9,
+  revenuePaise: 3150000,
+  cashInPaise: 1400000,
+  onlineInPaise: 950000,
+  newDuesPaise: 800000,
+  duesRecoveredPaise: 600000,
+  expensesPaise: 1185000,
+  driverPaymentsPaise: 200000,
+  partnerNetPaidPaise: 0,
+};
+
+export const DAY_SUMMARY: Ok<"/reports/summary", "get"> = {
+  from: "2026-10-27",
+  to: "2026-10-28",
+  days: [
+    { ...QUIET_DAY, date: "2026-10-27" },
+    { ...BUSY_DAY, date: "2026-10-28" },
+  ],
+  totals: BUSY_DAY,
+};
+
+export const TRACTOR_REPORT: Ok<"/reports/tractors", "get"> = {
+  from: "2026-10-01",
+  to: "2026-10-28",
+  tractors: [
+    {
+      tractor: { id: 3, regNumber: "RJ 21 RA 4412", label: "Mahindra 575" },
+      trips: 40,
+      revenuePaise: 14000000,
+      dieselPaise: 4000000,
+      servicePaise: 500000,
+      emiPaise: 2500000,
+      otherPaise: 0,
+      contributionPaise: 7000000,
+    },
+    {
+      tractor: { id: 4, regNumber: "RJ 21 RB 1190", label: "Swaraj 744" },
+      trips: 2,
+      revenuePaise: 700000,
+      dieselPaise: 300000,
+      servicePaise: 1200000,
+      emiPaise: 0,
+      otherPaise: 0,
+      contributionPaise: -800000,
+    },
+  ],
+};
+
+export const KHET_REPORT: Ok<"/reports/khets", "get"> = {
+  from: "2026-10-01",
+  to: "2026-10-28",
+  khets: [{ khet: { id: 4, name: "Ladnun road" }, trips: 42, revenuePaise: 14700000 }],
+};
+
+export const DRIVER_REPORT: Ok<"/reports/drivers", "get"> = {
+  from: "2026-10-01",
+  to: "2026-10-28",
+  drivers: [
+    {
+      driver: { id: 2, name: "Suresh" },
+      trips: 40,
+      revenuePaise: 14000000,
+      dieselLitres: 412.5,
+      dieselPaise: 4000000,
+      salaryEarnedPaise: 1800000,
+      advancesPaise: 300000,
+      salaryPaidPaise: 1500000,
+    },
+  ],
+};

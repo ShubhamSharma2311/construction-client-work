@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchPreset, presetRange } from "./ranges.ts";
+import { businessDates, matchPreset, presetRange } from "./ranges.ts";
 
 describe("date range presets", () => {
   it.each([
@@ -22,5 +22,28 @@ describe("date range presets", () => {
     expect(matchPreset({ from: "2026-10-01", to: "2026-10-28" }, "2026-10-28")).toBe("month");
     expect(matchPreset(null, "2026-10-28")).toBe("all");
     expect(matchPreset({ from: "2026-10-03", to: "2026-10-09" }, "2026-10-28")).toBeNull();
+  });
+});
+
+describe("business dates", () => {
+  it.each([
+    [
+      "a range inside the business stays as it is",
+      { from: "2026-10-01", to: "2026-10-28" },
+      { from: "2026-10-01", to: "2026-10-28" },
+    ],
+    ["all time runs from the start to today", null, { from: "2026-04-01", to: "2026-10-28" }],
+    [
+      "a range that began earlier starts on the first day",
+      { from: "2026-03-01", to: "2026-04-30" },
+      { from: "2026-04-01", to: "2026-04-30" },
+    ],
+    [
+      "a range wholly before the start has no dates",
+      { from: "2026-03-01", to: "2026-03-31" },
+      null,
+    ],
+  ] as const)("%s", (_, range, expected) => {
+    expect(businessDates(range, "2026-04-01", "2026-10-28")).toEqual(expected);
   });
 });

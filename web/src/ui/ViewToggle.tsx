@@ -5,7 +5,7 @@ export interface ViewOption<T extends string> {
   label: string;
 }
 
-/** Two or three ways to look at one screen, such as "Who owes" and "All customers". */
+/** Ways to look at one screen, such as "Who owes" and "All customers". Many scroll sideways. */
 export function ViewToggle<T extends string>({
   options,
   value,

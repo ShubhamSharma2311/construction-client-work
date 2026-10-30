@@ -52,3 +52,17 @@ export function matchPreset(range: DateRange | null, today: IsoDate): RangePrese
     }) ?? null
   );
 }
+
+/**
+ * The dates a report can cover: nothing exists before the business started, so a range is
+ * cut to start there, all time runs from then to today, and a range wholly before it is null.
+ */
+export function businessDates(
+  range: DateRange | null,
+  startDate: IsoDate,
+  today: IsoDate,
+): DateRange | null {
+  if (!range) return { from: startDate, to: today };
+  if (range.to < startDate) return null;
+  return { from: range.from < startDate ? startDate : range.from, to: range.to };
+}

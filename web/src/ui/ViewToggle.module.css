@@ -1,10 +1,14 @@
+/* One row that scrolls sideways on a phone when there are more views than fit. */
 .views {
   display: flex;
   gap: var(--space-1);
   border-bottom: 1px solid var(--ruling);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .view {
+  flex: none;
   min-height: var(--tap);
   padding: 0 var(--space-4);
   border: 0;

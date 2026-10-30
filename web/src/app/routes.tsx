@@ -22,6 +22,7 @@ import { LoanPage } from "../features/tractors/LoanPage.tsx";
 import { NewEmiPage } from "../features/tractors/NewEmiPage.tsx";
 import { TractorPage } from "../features/tractors/TractorPage.tsx";
 import { TractorsPage } from "../features/tractors/TractorsPage.tsx";
+import { ReportsPage } from "../features/reports/ReportsPage.tsx";
 import { TodayPage } from "../features/today/TodayPage.tsx";
 import { EditTripPage } from "../features/trips/EditTripPage.tsx";
 import { NewTripPage } from "../features/trips/NewTripPage.tsx";
@@ -49,6 +50,7 @@ const BUILT: Record<string, RouteObject> = {
   "/new/emi": { path: "/new/emi", element: <NewEmiPage /> },
   "/drivers": { path: "/drivers", element: <DriversPage /> },
   "/partner": { path: "/partner", element: <PartnersPage /> },
+  "/reports": { path: "/reports", element: <ReportsPage /> },
   "/new/partner": { path: "/new/partner", element: <NewPartnerTxnPage /> },
   "/new/driver-payment": { path: "/new/driver-payment", element: <NewDriverPaymentPage /> },
 };
