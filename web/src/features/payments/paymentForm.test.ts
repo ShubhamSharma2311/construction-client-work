@@ -59,7 +59,7 @@ describe("checking a payment", () => {
     };
 
     expect(checkPayment({ ...writeOff, chosen: [1] }, unpaid)["allocation"]).toContain(
-      "at least the amount written off",
+      "at least the discount",
     );
     expect(checkPayment({ ...writeOff, chosen: [1, 2] }, unpaid)).toEqual({});
   });

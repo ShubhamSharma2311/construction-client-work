@@ -113,7 +113,11 @@ describe("customer balance", () => {
   });
 
   it("is zero for a customer with no entries", async () => {
-    expect((await t.get(balanceUrl())).json()).toEqual({ balancePaise: 0, duePaise: 0, creditPaise: 0 });
+    expect((await t.get(balanceUrl())).json()).toEqual({
+      balancePaise: 0,
+      duePaise: 0,
+      creditPaise: 0,
+    });
   });
 
   it("answers 404 for an unknown customer", async () => {

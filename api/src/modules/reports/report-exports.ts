@@ -16,7 +16,7 @@ const rupees = paiseToRupeeString;
 export function pnlToCsv(pnl: Pnl): string {
   const lines: { item: string; amountPaise: number }[] = [
     { item: "Trip revenue", amountPaise: pnl.revenue.tripsPaise },
-    { item: "Less write-offs", amountPaise: -pnl.revenue.writeOffsPaise },
+    { item: "Less discounts", amountPaise: -pnl.revenue.writeOffsPaise },
     ...Object.entries(pnl.expenses.byCategory).map(([category, amountPaise]) => ({
       item: `Less ${category}`,
       amountPaise: -amountPaise,

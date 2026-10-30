@@ -120,7 +120,7 @@ async function assertWriteOffWithinBalance(
 /** A write-off forgives specific dues; it can never stand as credit. */
 function assertWriteOffCovered(input: PaymentCreateInput, lines: readonly AllocationLine[]): void {
   if (input.kind === "WRITE_OFF" && sumLines(lines) !== input.amount) {
-    throw new AppError("VALIDATION", "A write-off must be set in full against trips");
+    throw new AppError("VALIDATION", "A discount must be set in full against trips");
   }
 }
 
@@ -276,7 +276,7 @@ export async function updatePayment(
       before.kind === "WRITE_OFF" &&
       (input.mode !== undefined || input.reference !== undefined)
     ) {
-      throw new AppError("VALIDATION", "A write-off has no payment mode or reference");
+      throw new AppError("VALIDATION", "A discount has no payment mode or reference");
     }
     if (input.paidOn && before.deliveryTripId !== null) {
       throw new AppError(

@@ -119,7 +119,7 @@ function AccountActions({
     <div className={actions.actions}>
       <ButtonLink to={`/new/payment?${query}`}>Money from {customer.name}</ButtonLink>
       <ButtonLink variant="secondary" to={`/new/payment?${query}&kind=writeoff`}>
-        Write off
+        Give discount
       </ButtonLink>
       {canApplyCredit ? (
         <Button variant="secondary" onClick={opener("credit")}>

@@ -96,12 +96,20 @@ function toDto(row: LoanRow, today: IsoDate): LoanDto {
 function foreclosureOf(row: LoanRow): LoanDetail["foreclosure"] {
   const payment = row.payments.find((candidate) => candidate.emiMonth === null);
   return payment
-    ? { expenseId: payment.id, paidOn: fromDbDate(payment.spentOn), amountPaise: payment.amountPaise }
+    ? {
+        expenseId: payment.id,
+        paidOn: fromDbDate(payment.spentOn),
+        amountPaise: payment.amountPaise,
+      }
     : null;
 }
 
 function toDetail(row: LoanRow, today: IsoDate): LoanDetail {
-  return { ...toDto(row, today), schedule: scheduleOf(row, today), foreclosure: foreclosureOf(row) };
+  return {
+    ...toDto(row, today),
+    schedule: scheduleOf(row, today),
+    foreclosure: foreclosureOf(row),
+  };
 }
 
 async function readLoan(tx: Db | Tx, id: number): Promise<LoanRow> {

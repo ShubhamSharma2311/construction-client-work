@@ -115,15 +115,15 @@ describe("Money from customer", () => {
     const { api, sent } = paymentApi(() => json(saved({ kind: "WRITE_OFF", mode: null }), 201));
     const { user } = await renderApp(api, { path: "/new/payment?customer=7&kind=writeoff" });
 
-    expect(await screen.findByRole("heading", { name: "Write off" })).toBeInTheDocument();
-    await user.type(await screen.findByLabelText("Amount written off"), "200");
-    await user.click(screen.getByRole("button", { name: "Save write-off" }));
-    expect(screen.getByText(/Say why it is written off/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Give discount" })).toBeInTheDocument();
+    await user.type(await screen.findByLabelText("Discount amount"), "200");
+    await user.click(screen.getByRole("button", { name: "Save discount" }));
+    expect(screen.getByText(/Say why the discount was given/)).toBeInTheDocument();
     expect(screen.queryByText("Received as")).not.toBeInTheDocument();
     await user.type(screen.getByLabelText("Reason"), "Discount agreed");
-    await user.click(screen.getByRole("button", { name: "Save write-off" }));
+    await user.click(screen.getByRole("button", { name: "Save discount" }));
 
-    expect(await screen.findByText(/Write-off saved/)).toBeInTheDocument();
+    expect(await screen.findByText(/Discount saved/)).toBeInTheDocument();
     expect(sent[0]?.body).toEqual({
       kind: "WRITE_OFF",
       paidOn: "2026-10-28",

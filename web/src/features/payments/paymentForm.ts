@@ -58,18 +58,18 @@ export function checkPayment(
   const amount = rupeesToPaise(values.amount);
   if (amount === null || amount === 0) {
     problems["amount"] =
-      values.kind === "PAYMENT" ? "Enter the amount received" : "Enter the amount to write off";
+      values.kind === "PAYMENT" ? "Enter the amount received" : "Enter the discount amount";
   }
   if (values.allocation === "MANUAL" && values.chosen.length === 0) {
     problems["allocation"] = "Tick the trips this pays, or let it pay the oldest dues first";
   } else if (values.allocation === "MANUAL" && values.kind === "WRITE_OFF" && amount !== null) {
     // Forgiven money cannot become credit: the ticked trips must owe all of it.
     if (shareOver(amount, values.chosen, unpaid).leftPaise > 0) {
-      problems["allocation"] = "Tick trips that owe at least the amount written off";
+      problems["allocation"] = "Tick trips that owe at least the discount";
     }
   }
   if (values.kind === "WRITE_OFF" && values.notes.trim() === "") {
-    problems["notes"] = "Say why it is written off, e.g. discount agreed";
+    problems["notes"] = "Say why the discount was given, e.g. settled for less";
   }
   return problems;
 }

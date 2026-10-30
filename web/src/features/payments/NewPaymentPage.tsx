@@ -30,7 +30,7 @@ export function NewPaymentPage() {
   const [params] = useSearchParams();
   const writeOff = params.get("kind") === "writeoff";
   const customerId = parseId(params.get("customer"));
-  const title = writeOff ? "Write off" : "Money from customer";
+  const title = writeOff ? "Give discount" : "Money from customer";
 
   if (settings.data === null) {
     return (
@@ -90,7 +90,7 @@ const PAYMENT_FIELDS = ["paidOn", "amount", "mode", "reference", "notes"] as con
 
 const KINDS = [
   { value: "PAYMENT" as const, label: "Money received" },
-  { value: "WRITE_OFF" as const, label: "Write off" },
+  { value: "WRITE_OFF" as const, label: "Discount" },
 ];
 const ALLOCATIONS = [
   { value: "AUTO" as const, label: "Oldest dues first" },
@@ -141,7 +141,7 @@ function PaymentForm({
       { customerId: values.customer.id, body: paymentBody(values, unpaid.data ?? []), key },
       {
         onSuccess: ({ payment, customerBalance }) => {
-          const saved = payment.kind === "WRITE_OFF" ? "Write-off saved." : "Payment saved.";
+          const saved = payment.kind === "WRITE_OFF" ? "Discount saved." : "Payment saved.";
           const credit =
             payment.unallocatedPaise > 0
               ? ` ${formatRupees(payment.unallocatedPaise)} kept as credit.`
@@ -195,7 +195,7 @@ function PaymentForm({
         }}
       />
       <MoneyField
-        label={isPayment ? "Amount received" : "Amount written off"}
+        label={isPayment ? "Amount received" : "Discount amount"}
         large
         value={values.amount}
         error={problemOf("amount")}
@@ -259,7 +259,7 @@ function PaymentForm({
         </>
       ) : null}
       <Button type="submit" block disabled={record.isPending}>
-        {record.isPending ? "Saving…" : isPayment ? "Save payment" : "Save write-off"}
+        {record.isPending ? "Saving…" : isPayment ? "Save payment" : "Save discount"}
       </Button>
     </form>
   );

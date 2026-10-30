@@ -75,7 +75,7 @@ describe("A customer's account", () => {
       "href",
       "/new/payment?customer=7",
     );
-    expect(screen.getByRole("link", { name: "Write off" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Give discount" })).toHaveAttribute(
       "href",
       "/new/payment?customer=7&kind=writeoff",
     );

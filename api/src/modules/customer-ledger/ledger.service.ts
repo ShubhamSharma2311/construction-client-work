@@ -72,7 +72,7 @@ async function entriesIn(
     refId: payment.id,
     description:
       payment.kind === "WRITE_OFF"
-        ? "Written off"
+        ? "Discount"
         : `${payment.mode === "CASH" ? "Cash" : "Online"} payment${payment.reference ? ` (${payment.reference})` : ""}`,
     debitPaise: 0,
     creditPaise: payment.amountPaise,

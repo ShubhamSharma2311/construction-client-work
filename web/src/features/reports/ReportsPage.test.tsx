@@ -54,7 +54,7 @@ describe("Reports", () => {
     expect(total.closest("div")).toHaveTextContent("Profit₹1,42,300");
     const cameIn = screen.getByRole("list", { name: "Income" });
     expect(cameIn).toHaveTextContent("Trips₹3,15,000");
-    expect(cameIn).toHaveTextContent("Less written off");
+    expect(cameIn).toHaveTextContent("Less discounts");
     expect(cameIn).toHaveTextContent("Total income₹3,14,800");
     const wentOut = screen.getByRole("list", { name: "Expenses" });
     expect(wentOut).toHaveTextContent("Diesel₹98,500");

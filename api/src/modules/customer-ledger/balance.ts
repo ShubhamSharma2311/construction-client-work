@@ -34,7 +34,10 @@ export async function customerBalance(db: Db | Tx, customerId: number): Promise<
  * owe, so a customer in credit can be read only from here.
  */
 export async function balanceOfCustomer(db: Db, customerId: number): Promise<CustomerBalance> {
-  const customer = await db.customer.findUnique({ where: { id: customerId }, select: { id: true } });
+  const customer = await db.customer.findUnique({
+    where: { id: customerId },
+    select: { id: true },
+  });
   if (!customer) throw notFound("Customer", customerId);
   return customerBalance(db, customerId);
 }

@@ -298,7 +298,9 @@ describe("driver ledger", () => {
 
     const ledger = (await t.get(url("/ledger"))).json<DriverLedger>();
 
-    expect(ledger.entries.map(({ type, month, note, mode }) => ({ type, month, note, mode }))).toEqual([
+    expect(
+      ledger.entries.map(({ type, month, note, mode }) => ({ type, month, note, mode })),
+    ).toEqual([
       { type: "PAID_ADVANCE", month: null, note: "tyre", mode: "ONLINE" },
       { type: "EARNED_SALARY", month: "2026-08", note: null, mode: null },
       { type: "PAID_SALARY", month: "2026-08", note: null, mode: "CASH" },

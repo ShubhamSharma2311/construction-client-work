@@ -45,7 +45,7 @@ function PaymentDetails({ payment }: { payment: Payment }) {
   return (
     <>
       <PageHeader
-        title={writeOff ? "Write-off" : "Money received"}
+        title={writeOff ? "Discount" : "Money received"}
         actions={payment.deletedAt ? <Tag tone="quiet">Deleted</Tag> : null}
       />
       <DetailList>

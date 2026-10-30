@@ -28,8 +28,8 @@ export function ProfitReport({ range }: { range: DateRange }) {
         <RegisterRow label="Trips" amount={<Money paise={revenue.tripsPaise} />} />
         {revenue.writeOffsPaise > 0 ? (
           <RegisterRow
-            label="Less written off"
-            detail="Dues forgiven, such as discounts"
+            label="Less discounts"
+            detail="Money customers were let off paying"
             amount={<Money paise={-revenue.writeOffsPaise} />}
           />
         ) : null}
