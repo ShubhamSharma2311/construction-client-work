@@ -4,7 +4,16 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist/", "coverage/", "test-results/", "playwright-report/", "src/api/schema.gen.ts"],
+    // shadcn/ui components are copied in from its registry and kept as shadcn writes them.
+    ignores: [
+      "dist/",
+      "coverage/",
+      "test-results/",
+      "playwright-report/",
+      "src/api/schema.gen.ts",
+      "src/components/ui/",
+      "src/hooks/use-mobile.ts",
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,

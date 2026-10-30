@@ -1,3 +1,5 @@
+import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
@@ -6,7 +8,9 @@ import { defineConfig } from "vitest/config";
 const API_ORIGIN = process.env["API_ORIGIN"] ?? "http://localhost:3000";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  // shadcn/ui components import each other through "@/".
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
   server: {
     port: 5173,
     strictPort: true,
@@ -21,7 +25,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.test.{ts,tsx}", "src/api/schema.gen.ts", "src/main.tsx", "src/test/**"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/api/schema.gen.ts",
+        "src/main.tsx",
+        "src/test/**",
+        "src/components/ui/**",
+        "src/hooks/use-mobile.ts",
+      ],
       thresholds: { lines: 90 },
     },
   },
