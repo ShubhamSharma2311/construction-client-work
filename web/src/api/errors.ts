@@ -60,6 +60,11 @@ function issuesOf(details: unknown): Issue[] {
   return Array.isArray(details.issues) ? details.issues.filter(isIssue) : [];
 }
 
+/** fetch rejects with a TypeError when the request never got an answer (offline, DNS, CORS). */
+export function isNetworkError(error: unknown): boolean {
+  return error instanceof TypeError;
+}
+
 /** Builds an ApiError from whatever a failed response carried, keeping the backend's words. */
 export function toApiError(response: Response, body: unknown): ApiError {
   if (isErrorBody(body)) {
@@ -70,14 +75,15 @@ export function toApiError(response: Response, body: unknown): ApiError {
 }
 
 /**
- * The first problem for each body field, keyed the way forms name them: "body/amount" is
- * "amount" and "body/payment/paidAmount" is "payment.paidAmount".
+ * The first problem for each field, keyed the way forms name them: "body/amount" is
+ * "amount", "body/payment/paidAmount" is "payment.paidAmount", "query/from" is
+ * "query.from", and a problem with the whole body is "form".
  */
 export function fieldErrors(error: unknown): Record<string, string> {
   if (!(error instanceof ApiError)) return {};
   const byField: Record<string, string> = {};
   for (const issue of error.issues) {
-    const field = issue.path.replace(/^body\/?/, "").replaceAll("/", ".");
+    const field = issue.path.replace(/^body\/?/, "").replaceAll("/", ".") || "form";
     byField[field] ??= issue.message;
   }
   return byField;

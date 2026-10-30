@@ -6,7 +6,12 @@ const dayLabel = new Intl.DateTimeFormat("en-IN", {
   day: "numeric",
   month: "short",
 });
-const isoDay = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE });
+const istParts = new Intl.DateTimeFormat("en-GB", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 const shortDate = new Intl.DateTimeFormat("en-IN", {
   timeZone: "UTC",
   day: "numeric",
@@ -34,7 +39,24 @@ export function formatDayLabel(at: Date): string {
 
 /** Today's business date in India. */
 export function todayIso(at: Date): IsoDate {
-  return isoDay.format(at);
+  // Built from parts: a locale's own date pattern has changed between browser versions.
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    istParts.formatToParts(at).find((piece) => piece.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+/** Whether text is a real calendar date in the API's form; "2026-02-31" is not. */
+export function isIsoDate(text: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+  const date = utcDate(text);
+  // An impossible month makes an invalid Date; an impossible day rolls into the next month.
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+}
+
+/** "today", "1 day", "34 days": how long ago something fell due. */
+export function formatAge(days: number): string {
+  if (days <= 0) return "today";
+  return days === 1 ? "1 day" : `${String(days)} days`;
 }
 
 function utcDate(iso: IsoDate): Date {

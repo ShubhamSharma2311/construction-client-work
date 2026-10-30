@@ -47,6 +47,7 @@ describe("field errors", () => {
             { path: "body/amount", message: "second problem" },
             { path: "body/payment/paidAmount", message: "Too much" },
             { path: "query/from", message: "Bad date" },
+            { path: "body", message: "Body must be an object" },
             { nonsense: true },
           ],
         },
@@ -57,6 +58,7 @@ describe("field errors", () => {
       amount: "Amount must be more than zero",
       "payment.paidAmount": "Too much",
       "query.from": "Bad date",
+      form: "Body must be an object",
     });
   });
 

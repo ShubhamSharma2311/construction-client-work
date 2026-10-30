@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   addDays,
+  formatAge,
+  isIsoDate,
   daysBetween,
   formatDate,
   formatDayLabel,
@@ -29,6 +31,27 @@ describe("date labels", () => {
   it("writes full dates and months", () => {
     expect(formatFullDate("2026-10-28")).toBe("Wed, 28 Oct 2026");
     expect(formatMonth("2026-02")).toBe("Feb 2026");
+  });
+});
+
+describe("checking and wording dates", () => {
+  it.each([
+    ["2026-10-28", true],
+    ["2024-02-29", true],
+    ["2026-02-31", false],
+    ["2026-13-01", false],
+    ["28-10-2026", false],
+    ["", false],
+  ])("treats %j as a real date: %s", (text, real) => {
+    expect(isIsoDate(text)).toBe(real);
+  });
+
+  it.each([
+    [0, "today"],
+    [1, "1 day"],
+    [34, "34 days"],
+  ])("words an age of %i days as %s", (days, text) => {
+    expect(formatAge(days)).toBe(text);
   });
 });
 

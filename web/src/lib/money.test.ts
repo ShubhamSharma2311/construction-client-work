@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRupees, isRupeeInput } from "./money.ts";
+import { cleanRupeeInput, formatRupees, isRupeeInput } from "./money.ts";
 
 describe("formatRupees", () => {
   it.each([
@@ -19,6 +19,10 @@ describe("formatRupees", () => {
 it("leaves the symbol out where the screen draws it separately", () => {
   expect(formatRupees(4825000, { symbol: false })).toBe("48,250");
   expect(formatRupees(-150, { symbol: false })).toBe("−1.50");
+});
+
+it("cleans the symbol, commas and spaces from a pasted amount", () => {
+  expect(cleanRupeeInput("₹ 1,23,456.50")).toBe("123456.50");
 });
 
 describe("isRupeeInput", () => {

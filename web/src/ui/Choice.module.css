@@ -59,6 +59,11 @@
   outline-offset: -4px;
 }
 
+/* Arrow keys move focus and choice together, so the focused option is usually the blue one. */
+.option:has(.radio:checked:focus-visible) {
+  outline-color: var(--on-pen);
+}
+
 .error {
   font-size: var(--text-sm);
   color: var(--bahi);

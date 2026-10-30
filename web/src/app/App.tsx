@@ -5,6 +5,7 @@ import type { Session } from "../auth/session.ts";
 import type { createBrowserRouter } from "react-router";
 import type { Services } from "./services.ts";
 import { ServicesProvider } from "./ServicesContext.tsx";
+import { ToastProvider } from "./Toast.tsx";
 
 type Router = ReturnType<typeof createBrowserRouter>;
 
@@ -32,7 +33,9 @@ export function App({
   return (
     <ServicesProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </QueryClientProvider>
     </ServicesProvider>
   );

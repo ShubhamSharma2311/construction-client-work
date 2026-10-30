@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { isRupeeInput } from "../lib/money.ts";
+import { cleanRupeeInput, isRupeeInput } from "../lib/money.ts";
 import { Field } from "./Field.tsx";
 import fieldStyles from "./Field.module.css";
 import styles from "./MoneyField.module.css";
@@ -43,7 +43,8 @@ export function MoneyField({
             value={value}
             onChange={(event) => {
               // Refuse keystrokes that could never make an amount, instead of erroring later.
-              if (isRupeeInput(event.target.value)) onChange(event.target.value);
+              const cleaned = cleanRupeeInput(event.target.value);
+              if (isRupeeInput(cleaned)) onChange(cleaned);
             }}
           />
         </div>

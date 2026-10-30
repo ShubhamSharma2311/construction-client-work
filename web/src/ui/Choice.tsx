@@ -23,12 +23,13 @@ export function Choice<T extends string>({
   error,
 }: ChoiceProps<T>) {
   const name = useId();
+  const errorId = `${name}-error`;
   return (
-    <fieldset className={styles.fieldset} aria-invalid={error ? true : undefined}>
+    <fieldset className={styles.fieldset} aria-describedby={error ? errorId : undefined}>
       <legend className={styles.legend}>{label}</legend>
       <div
         className={styles.options}
-        style={{ gridTemplateColumns: `repeat(${String(options.length)}, 1fr)` }}
+        style={{ gridTemplateColumns: `repeat(${String(options.length)}, minmax(0, 1fr))` }}
       >
         {options.map((option) => (
           <label key={option.value} className={styles.option}>
@@ -37,6 +38,7 @@ export function Choice<T extends string>({
               name={name}
               value={option.value}
               checked={option.value === value}
+              aria-invalid={error ? true : undefined}
               onChange={() => {
                 onChange(option.value);
               }}
@@ -46,7 +48,11 @@ export function Choice<T extends string>({
           </label>
         ))}
       </div>
-      {error ? <span className={styles.error}>{error}</span> : null}
+      {error ? (
+        <span id={errorId} className={styles.error}>
+          {error}
+        </span>
+      ) : null}
     </fieldset>
   );
 }

@@ -1,10 +1,19 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiError, fakeApi, json } from "../../test/fake-api.ts";
 import { DASHBOARD, renderApp, signedInRoutes } from "../../test/render.tsx";
-import { todayIso } from "../../lib/dates.ts";
 
-const today = todayIso(new Date());
+// 12:00 IST on 28 Oct 2026, the fixture's own date, so the "today" wording is what shows.
+const today = "2026-10-28";
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-28T06:30:00Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("Today", () => {
   it("shows the money in hand, what customers owe and the day's entries", async () => {
@@ -14,10 +23,12 @@ describe("Today", () => {
     const pair = screen.getByText("Online balance").closest("dl");
     expect(pair).toHaveTextContent("₹1,12,400");
     expect(pair).toHaveTextContent("Customers owe₹86,700");
+    expect(screen.getByText("With every entry made so far today")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Entries today" })).toBeInTheDocument();
     const day = screen.getByRole("list", { name: "The day's entries" });
     expect(within(day).getByText("Trips").closest("li")).toHaveTextContent("9 trips₹31,500");
     expect(within(day).getByText("Collected from customers").closest("li")).toHaveTextContent(
-      "₹14,000 cash, ₹9,500 online, ₹6,000 of it old dues₹23,500",
+      "₹14,000 cash, ₹9,500 online, ₹6,000 of it old dues or advances₹23,500",
     );
     expect(within(day).getByText("Spent").closest("li")).toHaveTextContent(
       "Diesel ₹9,850, Labour ₹2,000₹11,850",
@@ -44,6 +55,7 @@ describe("Today", () => {
     const ramesh = within(dues).getByRole("link", { name: /Ramesh Bishnoi/ });
     expect(ramesh).toHaveAttribute("href", "/dues/7");
     expect(ramesh).toHaveTextContent("₹18,500");
+    expect(ramesh).toHaveTextContent("Oldest due 34 days");
     expect(screen.getByRole("link", { name: "All dues" })).toHaveAttribute("href", "/dues");
   });
 
@@ -100,11 +112,16 @@ describe("Today", () => {
 
     expect(await screen.findByRole("heading", { name: "Tue, 20 Oct 2026" })).toBeInTheDocument();
     expect(await screen.findByText(/At the end of 20 Oct/)).toBeInTheDocument();
+    expect(screen.getByText("Customers owe now")).toBeInTheDocument();
     expect(router.state.location.search).toBe("?date=2026-10-20");
     expect(asked.at(-1)).toBe("2026-10-20");
   });
 
-  it("ignores a day in the future and shows today instead", async () => {
+  it.each([
+    ["in the future", "2999-01-01"],
+    ["that does not exist", "2026-02-31"],
+    ["before the business started", "2026-03-31"],
+  ])("ignores a day %s and shows today instead", async (_label, date) => {
     const asked: (string | null)[] = [];
     const api = fakeApi({
       ...signedInRoutes,
@@ -114,7 +131,7 @@ describe("Today", () => {
       },
     });
 
-    await renderApp(api, { path: "/?date=2999-01-01" });
+    await renderApp(api, { path: `/?date=${date}` });
 
     await screen.findByText("48,250");
     expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();

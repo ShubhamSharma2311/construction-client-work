@@ -1,4 +1,4 @@
-import { ApiError } from "../api/errors.ts";
+import { ApiError, isNetworkError } from "../api/errors.ts";
 
 /** What to tell the person when sign in fails, in words that say what to do next. */
 export function loginErrorMessage(error: unknown): string {
@@ -8,5 +8,8 @@ export function loginErrorMessage(error: unknown): string {
     if (error.status === 400) return "Enter both your username and password.";
     return `The server could not sign you in (${error.code}). Try again in a minute.`;
   }
-  return "Cannot reach the server. Check the internet connection and try again.";
+  if (isNetworkError(error))
+    return "Cannot reach the server. Check the internet connection and try again.";
+  console.error(error);
+  return "Something went wrong while signing in. Try again in a minute.";
 }

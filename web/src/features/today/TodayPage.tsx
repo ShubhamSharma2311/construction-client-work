@@ -2,8 +2,10 @@ import { Link, useSearchParams } from "react-router";
 import type { Dashboard } from "../../api/types.ts";
 import {
   daysBetween,
+  formatAge,
   formatDate,
   formatFullDate,
+  isIsoDate,
   type IsoDate,
   todayIso,
 } from "../../lib/dates.ts";
@@ -18,8 +20,6 @@ import { SetupPrompt } from "../settings/SetupPrompt.tsx";
 import { useSettings } from "../settings/useSettings.ts";
 import styles from "./TodayPage.module.css";
 import { useDashboard } from "./useDashboard.ts";
-
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function TodayPage() {
   const settings = useSettings();
@@ -41,7 +41,8 @@ function DayView({ startDate }: { startDate: IsoDate }) {
   const today = todayIso(new Date());
   const [params, setParams] = useSearchParams();
   const asked = params.get("date") ?? "";
-  const day = ISO_DATE.test(asked) && asked <= today ? asked : today;
+  const inRange = (date: string) => isIsoDate(date) && date >= startDate && date <= today;
+  const day = inRange(asked) ? asked : today;
   const dashboard = useDashboard(day);
 
   return (
@@ -56,7 +57,10 @@ function DayView({ startDate }: { startDate: IsoDate }) {
               min={startDate}
               max={today}
               onChange={(next) => {
-                setParams(next === today || next === "" ? {} : { date: next });
+                // Typing a year passes through dates like 0002-10-28; skip those, and replace
+                // the address so Back leaves the screen instead of replaying each keystroke.
+                if (next !== "" && !inRange(next)) return;
+                setParams(next === today || next === "" ? {} : { date: next }, { replace: true });
               }}
             />
           </div>
@@ -105,11 +109,15 @@ function DayFigures({ data, today }: { data: Dashboard; today: IsoDate }) {
           <div>
             <dt>Online balance</dt>
             <dd>
-              <Money paise={data.onlineBalancePaise} />
+              <Money
+                paise={data.onlineBalancePaise}
+                tone={data.onlineBalancePaise < 0 ? "owed" : "plain"}
+              />
             </dd>
           </div>
           <div>
-            <dt>Customers owe</dt>
+            {/* The API gives dues as they stand now, whichever day is on screen. */}
+            <dt>{isToday ? "Customers owe" : "Customers owe now"}</dt>
             <dd>
               <Money
                 paise={data.totalDuesPaise}
@@ -130,7 +138,7 @@ function DayFigures({ data, today }: { data: Dashboard; today: IsoDate }) {
             label="Collected from customers"
             detail={`${formatRupees(day.cashInPaise)} cash, ${formatRupees(day.onlineInPaise)} online${
               day.duesRecoveredPaise > 0
-                ? `, ${formatRupees(day.duesRecoveredPaise)} of it old dues`
+                ? `, ${formatRupees(day.duesRecoveredPaise)} of it old dues or advances`
                 : ""
             }`}
             amount={<Money paise={collected} tone={collected > 0 ? "received" : "plain"} />}
@@ -185,7 +193,7 @@ function DayFigures({ data, today }: { data: Dashboard; today: IsoDate }) {
                 key={row.customer.id}
                 to={`/dues/${String(row.customer.id)}`}
                 label={row.customer.name}
-                detail={`Oldest due ${String(daysBetween(row.oldestDueDate, today))} days`}
+                detail={`Oldest due ${formatAge(daysBetween(row.oldestDueDate, today))}`}
                 amount={<Money paise={row.balancePaise} tone="owed" />}
               />
             ))

@@ -70,6 +70,13 @@
   overflow: hidden;
 }
 
+/* Very narrow phones: one figure per line, so a crore-sized amount is never cut off. */
+@media (max-width: 400px) {
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
 .pair > div {
   background: var(--sheet);
   padding: var(--space-3) var(--space-4);

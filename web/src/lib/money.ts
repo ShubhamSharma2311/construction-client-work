@@ -16,6 +16,11 @@ export function formatRupees(paise: number, { symbol = true }: { symbol?: boolea
 // and words that refusal itself, so the field only blocks what can never be an amount.
 const RUPEE_INPUT = /^\d{0,7}(\.\d{0,2})?$/;
 
+/** Drops what people paste along with an amount: "₹ 1,000" becomes "1000". */
+export function cleanRupeeInput(text: string): string {
+  return text.replace(/[₹,\s]/g, "");
+}
+
 /** Whether text typed into an amount field can still become a valid amount. */
 export function isRupeeInput(text: string): boolean {
   return RUPEE_INPUT.test(text);
