@@ -4,6 +4,35 @@ import { describe, expect, it, vi } from "vitest";
 import { MonthField } from "./MonthField.tsx";
 
 describe("MonthField", () => {
+  it("follows a new value from outside and shows a year outside its range", () => {
+    const { rerender } = render(
+      <MonthField label="Month" value="2026-09" onChange={vi.fn()} fromYear={2026} toYear={2026} />,
+    );
+
+    rerender(
+      <MonthField label="Month" value="2025-12" onChange={vi.fn()} fromYear={2026} toYear={2026} />,
+    );
+
+    expect(screen.getByLabelText("Month: month")).toHaveValue("12");
+    expect(screen.getByLabelText("Month: year")).toHaveValue("2025");
+  });
+
+  it("ties its error to both dropdowns", () => {
+    render(
+      <MonthField
+        label="Month"
+        value=""
+        onChange={vi.fn()}
+        fromYear={2026}
+        toYear={2026}
+        error="Pick a month"
+      />,
+    );
+
+    expect(screen.getByLabelText("Month: month")).toHaveAccessibleDescription("Pick a month");
+    expect(screen.getByLabelText("Month: year")).toHaveAccessibleDescription("Pick a month");
+  });
+
   it("gives a month only once both parts are picked", async () => {
     const changed = vi.fn();
     const user = userEvent.setup();

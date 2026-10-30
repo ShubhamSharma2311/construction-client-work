@@ -33,21 +33,26 @@ export function MonthField({
   error,
   hint,
 }: MonthFieldProps) {
-  const [year, setYear] = useState(value.slice(0, 4));
-  const [month, setMonth] = useState(value.slice(5, 7));
+  // Only a half-picked month lives here; a complete value always comes from the props.
+  const [partial, setPartial] = useState({ year: "", month: "" });
+  const complete = /^\d{4}-\d{2}$/.test(value);
+  const year = complete ? value.slice(0, 4) : partial.year;
+  const month = complete ? value.slice(5, 7) : partial.month;
   const id = useId();
   const messageId = `${id}-message`;
   const message = error ?? hint;
-  const years = Array.from({ length: toYear - fromYear + 1 }, (_, index) => String(toYear - index));
+  const range = Array.from({ length: toYear - fromYear + 1 }, (_, index) => String(toYear - index));
+  // A value outside the range (such as last December in January) still shows its year.
+  const years = year && !range.includes(year) ? [...range, year].sort().reverse() : range;
+  const describedBy = message ? messageId : undefined;
 
   const pick = (nextYear: string, nextMonth: string) => {
-    setYear(nextYear);
-    setMonth(nextMonth);
+    setPartial({ year: nextYear, month: nextMonth });
     onChange(nextYear && nextMonth ? `${nextYear}-${nextMonth}` : "");
   };
 
   return (
-    <fieldset className={styles.fieldset} aria-describedby={message ? messageId : undefined}>
+    <fieldset className={styles.fieldset}>
       <legend className={fieldStyles.label}>{label}</legend>
       <div className={styles.pair}>
         <select
@@ -55,6 +60,7 @@ export function MonthField({
           className={fieldStyles.control}
           value={month}
           aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
           onChange={(event) => {
             pick(year, event.target.value);
           }}
@@ -71,6 +77,7 @@ export function MonthField({
           className={fieldStyles.control}
           value={year}
           aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
           onChange={(event) => {
             pick(event.target.value, month);
           }}

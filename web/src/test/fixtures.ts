@@ -400,7 +400,7 @@ export const DRIVER: Ok<"/drivers/{id}", "get"> = {
   isActive: true,
   defaultTractor: { id: 3, regNumber: "RJ 21 RA 4412", label: "Mahindra 575" },
   currentMonthlyPaise: 1500000,
-  salaryRates: [{ id: 1, effectiveFrom: "2026-04-01", monthlyPaise: 1500000 }],
+  salaryRates: [{ id: 1, effectiveFrom: "2026-04", monthlyPaise: 1500000 }],
 };
 
 export const DRIVER_LEDGER: Ok<"/drivers/{id}/ledger", "get"> = {
@@ -413,7 +413,10 @@ export const DRIVER_LEDGER: Ok<"/drivers/{id}/ledger", "get"> = {
       date: "2026-09-30",
       type: "EARNED_SALARY",
       refId: 15,
-      description: "Salary for Sep 2026",
+      description: "Salary for 2026-09",
+      month: "2026-09",
+      note: null,
+      mode: null,
       earnedPaise: 1500000,
       paidPaise: 0,
       balancePaise: 1500000,
@@ -422,7 +425,10 @@ export const DRIVER_LEDGER: Ok<"/drivers/{id}/ledger", "get"> = {
       date: "2026-10-05",
       type: "PAID_ADVANCE",
       refId: 31,
-      description: "Advance",
+      description: "Advance paid (cash)",
+      month: null,
+      note: null,
+      mode: "CASH",
       earnedPaise: 0,
       paidPaise: 500000,
       balancePaise: 1000000,
@@ -463,4 +469,41 @@ export const DRIVER_PAYMENTS: Ok<"/driver-payments", "get"> = {
   page: 1,
   limit: 20,
   totals: { advancePaise: 500000, salaryPaise: 0, bonusPaise: 0 },
+};
+
+export const PARTNERS: Ok<"/partners", "get"> = {
+  items: [{ id: 1, name: "Manish", sharePercent: 50, notes: null, isActive: true }],
+  total: 1,
+  page: 1,
+  limit: 200,
+};
+
+export const PARTNER_LEDGER: Ok<"/partners/{id}/ledger", "get"> = {
+  partner: { id: 1, name: "Manish" },
+  from: "2026-10-01",
+  to: "2026-10-28",
+  openingNetPaidPaise: 0,
+  entries: [
+    {
+      date: "2026-10-12",
+      direction: "PAID_TO_PARTNER",
+      refId: 91,
+      amountPaise: 2000000,
+      mode: "ONLINE",
+      notes: null,
+      netPaidPaise: 2000000,
+    },
+  ],
+  totals: { paidToPartnerPaise: 2000000, receivedFromPartnerPaise: 0, netPaidPaise: 2000000 },
+  closingNetPaidPaise: 2000000,
+};
+
+export const PARTNER_SHARE: Ok<"/partners/{id}/share", "get"> = {
+  partner: { id: 1, name: "Manish", sharePercent: 50 },
+  from: "2026-10-01",
+  to: "2026-10-28",
+  profitPaise: 6400000,
+  shareDuePaise: 3200000,
+  netPaidPaise: 2000000,
+  balancePaise: 1200000,
 };

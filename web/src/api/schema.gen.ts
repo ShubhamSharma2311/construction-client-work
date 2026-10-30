@@ -4613,6 +4613,10 @@ export interface paths {
                                 type: "OPENING_BALANCE" | "EARNED_SALARY" | "EARNED_BONUS" | "PAID_ADVANCE" | "PAID_SALARY" | "PAID_BONUS";
                                 refId: number;
                                 description: string;
+                                month: string | null;
+                                note: string | null;
+                                /** @enum {string|null} */
+                                mode: "CASH" | "ONLINE" | null;
                                 earnedPaise: number;
                                 paidPaise: number;
                                 balancePaise: number;

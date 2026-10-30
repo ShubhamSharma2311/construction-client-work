@@ -37,28 +37,53 @@ export function useCreateDriver() {
   });
 }
 
+/**
+ * A driver's usual tractor shows on the tractors, and joining or leaving dates change what a
+ * month's salary works out to, so the account and its previews reload as well.
+ */
 export function useUpdateDriver(id: number) {
   const { api } = useServices();
   const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async (body: BodyOf<"/drivers/{id}", "patch">) =>
       unwrap(await api.PATCH("/drivers/{id}", { params: { path: { id } }, body })),
-    // A driver's usual tractor shows on the tractors too.
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: DRIVERS_KEY }),
         queryClient.invalidateQueries({ queryKey: ["tractors"] }),
+        refreshMoney(),
       ]),
   });
 }
 
+/** A new rate changes what open months work out to, so the salary previews reload too. */
 export function useAddSalaryRate(id: number) {
   const { api } = useServices();
   const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async (body: BodyOf<"/drivers/{id}/salary-rates", "post">) =>
       unwrap(await api.POST("/drivers/{id}/salary-rates", { params: { path: { id } }, body })),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: DRIVERS_KEY }),
+    onSuccess: () =>
+      Promise.all([queryClient.invalidateQueries({ queryKey: DRIVERS_KEY }), refreshMoney()]),
+  });
+}
+
+/** Removes a rate entered by mistake; the API refuses one a closed month already used. */
+export function useRemoveSalaryRate(id: number) {
+  const { api } = useServices();
+  const queryClient = useQueryClient();
+  const refreshMoney = useRefreshMoney();
+  return useMutation({
+    mutationFn: async (rateId: number) =>
+      unwrap(
+        await api.DELETE("/drivers/{id}/salary-rates/{rateId}", {
+          params: { path: { id, rateId } },
+        }),
+      ),
+    onSuccess: () =>
+      Promise.all([queryClient.invalidateQueries({ queryKey: DRIVERS_KEY }), refreshMoney()]),
   });
 }
 
@@ -130,21 +155,26 @@ export function useAddDriverOpening(id: number) {
   });
 }
 
-/** Pays an advance or salary once, however often it is retried with the same key. */
-export function usePayDriver(id: number) {
+/**
+ * Pays an advance or salary once, however often it is retried with the same key. The driver
+ * comes with each call, since the payment screen may not have one chosen yet.
+ */
+export function usePayDriver() {
   const { api } = useServices();
   const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async ({
+      driverId,
       body,
       key,
     }: {
+      driverId: number;
       body: BodyOf<"/drivers/{id}/payments", "post">;
       key: string;
     }) =>
       unwrap(
         await api.POST("/drivers/{id}/payments", {
-          params: { path: { id } },
+          params: { path: { id: driverId } },
           body,
           headers: { "Idempotency-Key": key },
         }),
@@ -153,21 +183,23 @@ export function usePayDriver(id: number) {
   });
 }
 
-/** A bonus is earned and paid at once, so it needs a reason. */
-export function usePayBonus(id: number) {
+/** A bonus is earned and paid at once, so it needs a reason. The driver comes with each call. */
+export function usePayBonus() {
   const { api } = useServices();
   const refreshMoney = useRefreshMoney();
   return useMutation({
     mutationFn: async ({
+      driverId,
       body,
       key,
     }: {
+      driverId: number;
       body: BodyOf<"/drivers/{id}/bonus", "post">;
       key: string;
     }) =>
       unwrap(
         await api.POST("/drivers/{id}/bonus", {
-          params: { path: { id } },
+          params: { path: { id: driverId } },
           body,
           headers: { "Idempotency-Key": key },
         }),
@@ -197,6 +229,17 @@ export function useDeleteDriverPayment() {
   return useMutation({
     mutationFn: async (id: number) =>
       unwrap(await api.DELETE("/driver-payments/{id}", { params: { path: { id } } })),
+    onSuccess: () => refreshMoney(),
+  });
+}
+
+/** Removes an old register balance entered wrongly, so the right one can be entered. */
+export function useRemoveDriverOpening(id: number) {
+  const { api } = useServices();
+  const refreshMoney = useRefreshMoney();
+  return useMutation({
+    mutationFn: async () =>
+      unwrap(await api.DELETE("/drivers/{id}/opening-balance", { params: { path: { id } } })),
     onSuccess: () => refreshMoney(),
   });
 }

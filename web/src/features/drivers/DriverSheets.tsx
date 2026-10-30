@@ -8,6 +8,7 @@ import { formatRupees, paiseToRupeeInput, rupeesToPaise } from "../../lib/money.
 import actions from "../../ui/Actions.module.css";
 import { Button } from "../../ui/Button.tsx";
 import { Choice } from "../../ui/Choice.tsx";
+import { ConfirmDialog } from "../../ui/ConfirmDialog.tsx";
 import { DateField } from "../../ui/DateField.tsx";
 import { FilterCheckbox } from "../../ui/FilterPanel.tsx";
 import { FormError } from "../../ui/FormError.tsx";
@@ -22,7 +23,7 @@ import { Sheet } from "../../ui/Sheet.tsx";
 import sheetStyles from "../../ui/Sheet.module.css";
 import { TextField } from "../../ui/TextField.tsx";
 import { pickerOptions, useTractors } from "../masters/useMasters.ts";
-import { driverStanding } from "./driverStanding.ts";
+import { driverStanding } from "./driverText.ts";
 import {
   type DriverDetail,
   useAddDriverOpening,
@@ -30,6 +31,8 @@ import {
   useCloseMonth,
   useMonthSalary,
   usePayBonus,
+  useRemoveDriverOpening,
+  useRemoveSalaryRate,
   useReopenMonth,
   useUpdateDriver,
 } from "./useDriver.ts";
@@ -59,7 +62,12 @@ export function CloseMonth({ driver, onClose }: { driver: DriverDetail; onClose:
           <LoadError error={salary.error} onRetry={() => void salary.refetch()} />
         ) : null}
         {salary.isPending && salary.fetchStatus !== "idle" ? <Loading what="the month" /> : null}
-        {salary.data ? (
+        {/* The API closes only a month that is over; say so before the person fills anything. */}
+        {month >= today.slice(0, 7) ? (
+          <p className={actions.text}>
+            {formatMonth(month)} is not over yet, so it cannot be closed.
+          </p>
+        ) : salary.data ? (
           salary.data.closed ? (
             <ReopenMonth
               driver={driver}
@@ -67,8 +75,10 @@ export function CloseMonth({ driver, onClose }: { driver: DriverDetail; onClose:
               closedPaise={salary.data.closed.amountPaise}
               onDone={onClose}
             />
-          ) : salary.data.suggestedPaise === null || salary.data.monthlyPaise === null ? (
-            // No rate covers the month: it is before the driver joined or after they left.
+          ) : salary.data.suggestedPaise === null ||
+            salary.data.monthlyPaise === null ||
+            salary.data.daysWorked === 0 ? (
+            // No day worked: the month is before the driver joined or after they left.
             <p className={actions.text}>
               {driver.name} was not working in {formatMonth(month)}, so there is no salary to close.
             </p>
@@ -203,7 +213,7 @@ export function Bonus({ driver, onClose }: { driver: DriverDetail; onClose: () =
   const [mode, setMode] = useState<"CASH" | "ONLINE">("CASH");
   const [note, setNote] = useState("");
   const { key, renew } = useIdempotencyKey();
-  const pay = usePayBonus(driver.id);
+  const pay = usePayBonus();
   const toast = useToast();
   const errors = fieldErrors(pay.error);
 
@@ -235,7 +245,7 @@ export function Bonus({ driver, onClose }: { driver: DriverDetail; onClose: () =
           disabled={pay.isPending || amount === "" || note.trim() === ""}
           onClick={() => {
             pay.mutate(
-              { body: { paidOn, amount, mode, note: note.trim() }, key },
+              { driverId: driver.id, body: { paidOn, amount, mode, note: note.trim() }, key },
               {
                 onSuccess: (result) => {
                   toast(
@@ -337,13 +347,23 @@ export function EditDriver({ driver, onClose }: { driver: DriverDetail; onClose:
           min={joinedOn}
           max={today}
           error={errors["leftOn"]}
+          hint={
+            leftOn && active
+              ? "Untick Active below so they stop showing when entering trips."
+              : undefined
+          }
           onChange={setLeftOn}
         />
         <SelectField
           label="Usual tractor"
           placeholder="None"
           value={tractorId}
-          options={pickerOptions(tractors.data, tractorId, (item) => item.regNumber)}
+          // A tractor is one driver's usual one; another driver's is named so the clash is clear.
+          options={pickerOptions(tractors.data, tractorId, (item) =>
+            item.defaultDriver && item.defaultDriver.id !== driver.id
+              ? `${item.regNumber} (${item.defaultDriver.name}'s)`
+              : item.regNumber,
+          )}
           error={errors["defaultTractorId"]}
           onChange={setTractorId}
         />
@@ -364,8 +384,10 @@ export function SalaryRates({ driver, onClose }: { driver: DriverDetail; onClose
   const [from, setFrom] = useState("");
   const [salary, setSalary] = useState("");
   const add = useAddSalaryRate(driver.id);
+  const remove = useRemoveSalaryRate(driver.id);
   const toast = useToast();
   const errors = fieldErrors(add.error);
+  const thisYear = Number(todayIso(new Date()).slice(0, 4));
   return (
     <Sheet open onClose={onClose} title="Salary">
       <div className={sheetStyles.body}>
@@ -375,9 +397,28 @@ export function SalaryRates({ driver, onClose }: { driver: DriverDetail; onClose
               key={rate.id}
               label={`From ${formatMonth(rate.effectiveFrom.slice(0, 7))}`}
               amount={<Money paise={rate.monthlyPaise} />}
+              action={
+                driver.salaryRates.length > 1 ? (
+                  <Button
+                    variant="quiet"
+                    disabled={remove.isPending}
+                    aria-label={`Remove the salary from ${formatMonth(rate.effectiveFrom.slice(0, 7))}`}
+                    onClick={() => {
+                      remove.mutate(rate.id, {
+                        onSuccess: () => {
+                          toast("Salary removed.");
+                        },
+                      });
+                    }}
+                  >
+                    Remove
+                  </Button>
+                ) : undefined
+              }
             />
           ))}
         </Register>
+        {remove.isError ? <ErrorNotice>{saveErrorMessage(remove.error)}</ErrorNotice> : null}
         <p className={actions.text}>
           A new salary counts from the month it starts; months already closed keep theirs.
         </p>
@@ -386,7 +427,7 @@ export function SalaryRates({ driver, onClose }: { driver: DriverDetail; onClose
           label="New salary from"
           value={from}
           fromYear={Number(driver.joinedOn.slice(0, 4))}
-          toYear={new Date().getFullYear() + 1}
+          toYear={thisYear + 1}
           error={errors["effectiveFrom"]}
           onChange={setFrom}
         />
@@ -488,4 +529,37 @@ export function DriverOpening({ driver, onClose }: { driver: DriverDetail; onClo
 export function serviceDates(driver: DriverDetail): string {
   const joined = `Joined ${formatFullDate(driver.joinedOn)}`;
   return driver.leftOn ? `${joined}, left ${formatFullDate(driver.leftOn)}` : joined;
+}
+
+export function RemoveDriverOpening({
+  driver,
+  onClose,
+}: {
+  driver: DriverDetail;
+  onClose: () => void;
+}) {
+  const remove = useRemoveDriverOpening(driver.id);
+  const toast = useToast();
+  return (
+    <ConfirmDialog
+      open
+      title="Remove the old register balance?"
+      confirmLabel="Remove old balance"
+      busy={remove.isPending}
+      error={remove.isError ? saveErrorMessage(remove.error) : null}
+      onClose={onClose}
+      onConfirm={() => {
+        remove.mutate(undefined, {
+          onSuccess: (result) => {
+            toast(`Old balance removed. ${driverStanding(driver.name, result.balancePaise).text}.`);
+            onClose();
+          },
+        });
+      }}
+    >
+      <p className={actions.text}>
+        For a balance entered wrongly; the right one can then be entered again.
+      </p>
+    </ConfirmDialog>
+  );
 }

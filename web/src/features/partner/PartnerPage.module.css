@@ -1,0 +1,24 @@
+.section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.standing {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--sheet);
+  max-width: 560px;
+  font: 600 var(--text-lg) / 1.3 var(--font-display);
+}
+
+/* Paid more than the share: money the partner would owe back. */
+.over {
+  background: var(--bahi-wash);
+  color: var(--bahi);
+}
+
+.subhead {
+  font-size: var(--text-md);
+  font-weight: 650;
+}

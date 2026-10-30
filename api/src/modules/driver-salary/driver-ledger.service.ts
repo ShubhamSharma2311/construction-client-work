@@ -37,6 +37,9 @@ async function entriesIn(
       row.kind === "MONTH_SALARY" && row.month
         ? `Salary for ${monthOf(fromDbDate(row.month))}${row.note ? ` (${row.note})` : ""}`
         : (row.note ?? (row.kind === "BONUS" ? "Bonus" : "Balance from the old register")),
+    month: row.month ? monthOf(fromDbDate(row.month)) : null,
+    note: row.note,
+    mode: null,
     earnedPaise: row.amountPaise,
     paidPaise: 0,
   }));
@@ -45,6 +48,9 @@ async function entriesIn(
     type: PAYMENT_TYPE[row.type],
     refId: row.id,
     description: `${row.type === "ADVANCE" ? "Advance" : row.type === "BONUS" ? "Bonus" : "Salary"} paid (${row.mode.toLowerCase()})${row.notes ? `: ${row.notes}` : ""}`,
+    month: row.forMonth ? monthOf(fromDbDate(row.forMonth)) : null,
+    note: row.notes,
+    mode: row.mode,
     earnedPaise: 0,
     paidPaise: row.amountPaise,
   }));

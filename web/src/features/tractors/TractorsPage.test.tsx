@@ -153,6 +153,28 @@ describe("A tractor", () => {
   });
 });
 
+describe("Editing a tractor", () => {
+  it("sends only what changed, including taking it out of use", async () => {
+    const sent: unknown[] = [];
+    const api = tractorsApi({
+      "PATCH /tractors/3": async (request) => {
+        sent.push(await request.json());
+        return json({ ...TRACTORS.items[0], label: "Mahindra 575 DI", isActive: false });
+      },
+    });
+    const { user } = await renderApp(api, { path: "/tractors/3" });
+
+    await user.click(await screen.findByRole("button", { name: "Edit details" }));
+    const sheet = screen.getByRole("dialog", { name: "Edit details" });
+    await user.type(within(sheet).getByLabelText("Name to know it by"), " DI");
+    await user.click(within(sheet).getByLabelText(/Active/));
+    await user.click(within(sheet).getByRole("button", { name: "Save details" }));
+
+    expect(await screen.findByText("Details saved.")).toBeInTheDocument();
+    expect(sent).toEqual([{ label: "Mahindra 575 DI", isActive: false }]);
+  });
+});
+
 describe("Tractor EMI from New entry", () => {
   it("lists running loans, each opening Pay EMI on the next month due", async () => {
     await renderApp(tractorsApi(), { path: "/new/emi" });

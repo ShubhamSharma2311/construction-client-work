@@ -291,6 +291,20 @@ describe("driver ledger", () => {
     expect(ledger.closingBalancePaise).toBe(0);
   });
 
+  it("gives each line's month, note and mode apart, so screens can word them", async () => {
+    await paid({ amount: 5000, paidOn: "2026-08-05", mode: "ONLINE", notes: "tyre" });
+    await closed("2026-08");
+    await paid({ type: "SALARY", amount: 11000, paidOn: "2026-09-02", forMonth: "2026-08" });
+
+    const ledger = (await t.get(url("/ledger"))).json<DriverLedger>();
+
+    expect(ledger.entries.map(({ type, month, note, mode }) => ({ type, month, note, mode }))).toEqual([
+      { type: "PAID_ADVANCE", month: null, note: "tyre", mode: "ONLINE" },
+      { type: "EARNED_SALARY", month: "2026-08", note: null, mode: null },
+      { type: "PAID_SALARY", month: "2026-08", note: null, mode: "CASH" },
+    ]);
+  });
+
   it("opens a date range with the balance carried into it", async () => {
     await paid({ amount: 5000, paidOn: "2026-08-05" });
     await closed("2026-08");

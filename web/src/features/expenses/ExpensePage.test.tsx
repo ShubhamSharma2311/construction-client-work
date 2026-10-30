@@ -46,6 +46,26 @@ describe("An expense", () => {
     expect(router.state.location.pathname).toBe("/expenses");
   });
 
+  it("restores a deleted expense", async () => {
+    let restored = false;
+    const api = expenseApi(
+      { ...EXPENSE, deletedAt: "2026-10-28T07:00:00Z" },
+      {
+        "POST /expenses/61/restore": () => {
+          restored = true;
+          return json(EXPENSE);
+        },
+      },
+    );
+    const { user } = await renderApp(api, { path: "/expenses/61" });
+
+    expect(await screen.findByText("Deleted")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Restore expense" }));
+
+    expect(await screen.findByText("Expense restored.")).toBeInTheDocument();
+    expect(restored).toBe(true);
+  });
+
   it("sends an EMI to its loan instead of offering edit or delete", async () => {
     const emi = {
       ...EXPENSE,

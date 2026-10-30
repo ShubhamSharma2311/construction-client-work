@@ -124,7 +124,13 @@ export const driverLedgerResponse = z.object({
         "PAID_BONUS",
       ]),
       refId: z.number().int(),
+      /** Ready-made wording, used by exports. Screens word lines from the fields below. */
       description: z.string(),
+      /** The salary month an earning or payment is for. */
+      month: z.string().nullable(),
+      note: z.string().nullable(),
+      /** How a payment was made; earnings have none. */
+      mode: z.enum(["CASH", "ONLINE"]).nullable(),
       earnedPaise: z.number().int(),
       paidPaise: z.number().int(),
       balancePaise,

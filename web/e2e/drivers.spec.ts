@@ -32,4 +32,16 @@ test("a driver's account takes an advance and shows the month to close", async (
   await expect(page.getByRole("dialog", { name: "Close a month" })).toBeVisible();
   await expectNoSidewaysScroll(page);
   await page.screenshot({ path: `test-results/evidence/${info.project.name}-close-month.png` });
+
+  // Leave the dev data as it was: undo the advance this test paid.
+  await page
+    .getByRole("dialog", { name: "Close a month" })
+    .getByRole("button", { name: "Close", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: /^Undo advance of ₹100 on / })
+    .first()
+    .click();
+  await page.getByRole("dialog").getByRole("button", { name: "Undo payment" }).click();
+  await expect(page.getByText(/^Payment undone\./)).toBeVisible();
 });

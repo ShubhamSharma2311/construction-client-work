@@ -24,10 +24,11 @@ import {
   CloseMonth,
   DriverOpening,
   EditDriver,
+  RemoveDriverOpening,
   SalaryRates,
   serviceDates,
 } from "./DriverSheets.tsx";
-import { driverStanding } from "./driverStanding.ts";
+import { driverStanding, entryChange, entryText } from "./driverText.ts";
 import {
   type DriverDetail,
   type DriverLedger,
@@ -51,7 +52,7 @@ export function DriverPage({ id }: { id: number }) {
   return <Driver driver={driver.data} />;
 }
 
-type SheetName = "close" | "bonus" | "edit" | "salary" | "opening";
+type SheetName = "close" | "bonus" | "edit" | "salary" | "opening" | "removeOpening";
 
 function Driver({ driver }: { driver: DriverDetail }) {
   const [sheet, setSheet] = useState<SheetName | null>(null);
@@ -108,7 +109,11 @@ function Driver({ driver }: { driver: DriverDetail }) {
         <Button variant="secondary" onClick={opener("edit")}>
           Edit details
         </Button>
-        {hasOpening ? null : (
+        {hasOpening ? (
+          <Button variant="secondary" onClick={opener("removeOpening")}>
+            Remove old balance
+          </Button>
+        ) : (
           <Button variant="secondary" onClick={opener("opening")}>
             Old register balance
           </Button>
@@ -123,6 +128,7 @@ function Driver({ driver }: { driver: DriverDetail }) {
       {sheet === "edit" ? <EditDriver driver={driver} onClose={close} /> : null}
       {sheet === "salary" ? <SalaryRates driver={driver} onClose={close} /> : null}
       {sheet === "opening" ? <DriverOpening driver={driver} onClose={close} /> : null}
+      {sheet === "removeOpening" ? <RemoveDriverOpening driver={driver} onClose={close} /> : null}
     </>
   );
 }
@@ -178,7 +184,7 @@ function Account({ driverId, startDate }: { driverId: number; startDate: IsoDate
       phone: "hidden",
       margin: true,
     },
-    { key: "entry", header: "Entry", cell: (entry) => entry.description, phone: "title" },
+    { key: "entry", header: "Entry", cell: entryText, phone: "title" },
     {
       key: "earned",
       header: "Earned",
@@ -196,12 +202,7 @@ function Account({ driverId, startDate }: { driverId: number; startDate: IsoDate
     {
       key: "change",
       header: "",
-      cell: (entry) =>
-        entry.earnedPaise
-          ? `+${formatRupees(entry.earnedPaise)}`
-          : entry.paidPaise
-            ? `−${formatRupees(entry.paidPaise)}`
-            : null,
+      cell: (entry) => entryChange(entry.earnedPaise, entry.paidPaise),
       phone: "amount",
       numeric: true,
       phoneOnly: true,
@@ -261,6 +262,7 @@ function Payments({ driver }: { driver: DriverDetail }) {
       {payments.isError ? (
         <LoadError error={payments.error} onRetry={() => void payments.refetch()} />
       ) : null}
+      {payments.isPending ? <Loading what="payments" /> : null}
       {payments.data ? (
         <Register label="Payments">
           {rows.length === 0 ? (
@@ -344,10 +346,16 @@ function UndoPayment({
         });
       }}
     >
-      <p className={actions.text}>
-        The {formatRupees(payment.amountPaise)} paid to {driver.name} is taken off the cash book and
-        the account.
-      </p>
+      <p className={actions.text}>{undoText(driver.name, payment)}</p>
     </ConfirmDialog>
   );
+}
+
+/** What undoing a payment does to the account depends on what it was. */
+function undoText(name: string, payment: DriverPayment): string {
+  const amount = formatRupees(payment.amountPaise);
+  if (payment.type === "BONUS") {
+    return `The ${amount} bonus is removed as earned and as paid, so what ${name} is owed stays the same.`;
+  }
+  return `The ${amount} comes off the cash book, and ${name} is owed ${amount} more.`;
 }

@@ -86,12 +86,29 @@ describe("A driver", () => {
     const months = await screen.findByRole("table", { name: "Month by month" });
     expect(within(months).getAllByRole("row")).toHaveLength(3);
     expect(screen.getByRole("table", { name: "Every entry" })).toHaveTextContent(
-      "Salary for Sep 2026",
+      /Salary for Sept? 2026/,
     );
     expect(screen.getByRole("link", { name: "Pay Suresh" })).toHaveAttribute(
       "href",
       "/new/driver-payment?driver=2",
     );
+  });
+
+  it("will not close a month that is not over, or one the driver did not work", async () => {
+    const api = driverApi({
+      "GET /drivers/2/salary": () => json({ ...MONTH_SALARY, daysWorked: 0, suggestedPaise: 0 }),
+    });
+    const { user } = await renderApp(api, { path: "/drivers/2" });
+
+    await user.click(await screen.findByRole("button", { name: "Close a month" }));
+    const sheet = screen.getByRole("dialog", { name: "Close a month" });
+    expect(
+      await within(sheet).findByText(/Suresh was not working in Sept? 2026/),
+    ).toBeInTheDocument();
+    await user.selectOptions(within(sheet).getByLabelText("Month: month"), "10");
+
+    expect(within(sheet).getByText(/Oct 2026 is not over yet/)).toBeInTheDocument();
+    expect(within(sheet).queryByRole("button", { name: /^Close / })).not.toBeInTheDocument();
   });
 
   it("closes a month at the salary worked out, sending no amount of its own", async () => {

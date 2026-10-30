@@ -16,7 +16,7 @@ import { Sheet } from "../../ui/Sheet.tsx";
 import sheetStyles from "../../ui/Sheet.module.css";
 import { TextField } from "../../ui/TextField.tsx";
 import { type Driver, pickerOptions, useDrivers, useTractors } from "../masters/useMasters.ts";
-import { driverStanding } from "./driverStanding.ts";
+import { driverStanding } from "./driverText.ts";
 import { useCreateDriver, useDriverLedger } from "./useDriver.ts";
 
 export function DriversPage() {
@@ -64,9 +64,12 @@ export function DriversPage() {
 /** One driver with where their account stands; a business has a handful, so each loads its own. */
 function DriverLine({ driver }: { driver: Driver }) {
   const ledger = useDriverLedger(driver.id, null);
+  // A balance that did not load says so; showing nothing would read as a settled account.
   const standing = ledger.data
     ? driverStanding(driver.name, ledger.data.closingBalancePaise).text
-    : null;
+    : ledger.isError
+      ? "balance did not load; open to retry"
+      : "loading balance";
   return (
     <RegisterLink
       to={`/drivers/${String(driver.id)}`}

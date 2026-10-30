@@ -7,6 +7,8 @@ import { DriverPage } from "../features/drivers/DriverPage.tsx";
 import { DriversPage } from "../features/drivers/DriversPage.tsx";
 import { NewDriverPaymentPage } from "../features/drivers/NewDriverPaymentPage.tsx";
 import { DuesPage } from "../features/dues/DuesPage.tsx";
+import { NewPartnerTxnPage } from "../features/partner/NewPartnerTxnPage.tsx";
+import { PartnerByIdPage, PartnersPage } from "../features/partner/PartnerPage.tsx";
 import { EditExpensePage, ExpensePage } from "../features/expenses/ExpensePage.tsx";
 import { ExpensesPage } from "../features/expenses/ExpensesPage.tsx";
 import {
@@ -46,6 +48,8 @@ const BUILT: Record<string, RouteObject> = {
   "/tractors": { path: "/tractors", element: <TractorsPage /> },
   "/new/emi": { path: "/new/emi", element: <NewEmiPage /> },
   "/drivers": { path: "/drivers", element: <DriversPage /> },
+  "/partner": { path: "/partner", element: <PartnersPage /> },
+  "/new/partner": { path: "/new/partner", element: <NewPartnerTxnPage /> },
   "/new/driver-payment": { path: "/new/driver-payment", element: <NewDriverPaymentPage /> },
 };
 
@@ -65,6 +69,7 @@ const DETAILS: RouteObject[] = [
   detail("/tractors/:id", (id) => <TractorPage key={id} id={id} />),
   detail("/loans/:id", (id) => <LoanPage key={id} id={id} />),
   detail("/drivers/:id", (id) => <DriverPage key={id} id={id} />),
+  detail("/partner/:id", (id) => <PartnerByIdPage key={id} id={id} />),
 ];
 
 function screenFor({ to, label }: Destination): RouteObject {
