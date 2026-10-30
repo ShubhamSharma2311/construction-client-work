@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanRupeeInput, formatRupees, isRupeeInput } from "./money.ts";
+import { cleanRupeeInput, formatRupees, isRupeeInput, rupeesToPaise } from "./money.ts";
 
 describe("formatRupees", () => {
   it.each([
@@ -35,5 +35,21 @@ describe("isRupeeInput", () => {
 
   it.each(["-5", "1,000", "3500.505", "abc", "10000000", " 5", "1e5"])("refuses %j", (text) => {
     expect(isRupeeInput(text)).toBe(false);
+  });
+});
+
+describe("rupeesToPaise", () => {
+  it.each([
+    ["3500", 350000],
+    ["3500.5", 350050],
+    ["3500.05", 350005],
+    ["3500.", 350000],
+    ["0.1", 10],
+  ])("reads %j as %i paise", (text, paise) => {
+    expect(rupeesToPaise(text)).toBe(paise);
+  });
+
+  it.each(["", ".", "abc", "1.234"])("has no amount for %j", (text) => {
+    expect(rupeesToPaise(text)).toBeNull();
   });
 });

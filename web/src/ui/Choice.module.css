@@ -39,13 +39,15 @@
   border-left: 0;
 }
 
-/* The radio stays in the page for keyboards and screen readers; the label is the target. */
+/* The radio stays in the page for keyboards and screen readers; the label is the tap
+   target, and a label ticks its radio natively in every browser. */
 .radio {
   position: absolute;
-  opacity: 0;
-  inset: 0;
+  width: 1px;
+  height: 1px;
   margin: 0;
-  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .option:has(.radio:checked) {

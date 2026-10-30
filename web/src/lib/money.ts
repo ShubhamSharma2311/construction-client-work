@@ -25,3 +25,11 @@ export function cleanRupeeInput(text: string): string {
 export function isRupeeInput(text: string): boolean {
   return RUPEE_INPUT.test(text);
 }
+
+/** Paise from an amount as typed ("3500", "3500.5"), or null when it is not one yet. */
+export function rupeesToPaise(text: string): number | null {
+  const match = /^(\d{1,7})(?:\.(\d{0,2}))?$/.exec(text);
+  if (!match) return null;
+  // Whole-number maths: 0.1 + 0.2 style float errors have no place in a ledger.
+  return Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0"));
+}

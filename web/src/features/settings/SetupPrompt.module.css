@@ -8,15 +8,3 @@
 .prompt p {
   margin: 0;
 }
-
-.link {
-  min-height: var(--tap);
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--space-5);
-  border-radius: var(--radius-field);
-  background: var(--pen);
-  color: var(--on-pen);
-  font-weight: 600;
-  text-decoration: none;
-}

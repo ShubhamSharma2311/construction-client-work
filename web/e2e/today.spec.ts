@@ -8,5 +8,8 @@ test("Today shows the money in hand and the day's entries", async ({ page }, inf
   await expect(page.getByRole("list", { name: "The day's entries" })).toBeVisible();
   await expect(page.getByRole("list", { name: "Customers who owe the most" })).toBeVisible();
   await expectNoSidewaysScroll(page);
-  await page.screenshot({ path: `test-results/evidence/${info.project.name}-today.png`, fullPage: true });
+  await page.screenshot({
+    path: `test-results/evidence/${info.project.name}-today.png`,
+    fullPage: true,
+  });
 });

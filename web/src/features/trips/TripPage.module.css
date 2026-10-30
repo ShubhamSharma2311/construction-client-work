@@ -1,0 +1,41 @@
+.details {
+  margin: 0;
+  display: grid;
+  max-width: 560px;
+  background: var(--sheet);
+  border-block: 1px solid var(--ruling);
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--ruling);
+}
+
+.detail:first-child {
+  border-top: 0;
+}
+
+.detail dt {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.confirmText {
+  margin: 0;
+}

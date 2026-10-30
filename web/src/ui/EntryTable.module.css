@@ -1,0 +1,163 @@
+.empty {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--sheet);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  padding: var(--space-3);
+  border-bottom: 2px solid var(--ruling);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--ruling);
+  vertical-align: baseline;
+}
+
+.row {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .row:hover td {
+    background: var(--pen-wash);
+  }
+}
+
+.numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* The register's double red rule down the date column. */
+.margin {
+  border-right: 3px double color-mix(in srgb, var(--bahi) 55%, transparent);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:focus-visible {
+  outline-offset: 4px;
+}
+
+/* Only phones show the summary line; larger screens have the columns themselves. */
+.table td.phoneMeta {
+  display: none;
+}
+
+/* Phones: each row becomes one register line, ruled, with the red margin on the left. */
+@media (max-width: 767px) {
+  .scroll {
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody {
+    display: block;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    position: relative;
+    padding-left: 40px;
+    border-block: 1px solid var(--ruling);
+  }
+
+  .table tbody::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 26px;
+    width: 5px;
+    border-inline: 1px solid var(--bahi);
+    opacity: 0.55;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "title amount"
+      "meta status";
+    column-gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-top: 1px solid var(--ruling);
+  }
+
+  .row:first-child {
+    border-top: 0;
+  }
+
+  .table td {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .title {
+    grid-area: title;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .table td.phoneMeta {
+    display: block;
+    grid-area: meta;
+    color: var(--ink-soft);
+    font-size: var(--text-xs);
+    min-width: 0;
+  }
+
+  .amount {
+    grid-area: amount;
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .status {
+    grid-area: status;
+    text-align: right;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .margin {
+    border: 0;
+  }
+}
