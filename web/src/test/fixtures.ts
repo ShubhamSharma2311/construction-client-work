@@ -390,3 +390,77 @@ export const SERVICES: Ok<"/tractors/{id}/services", "get"> = {
     },
   ],
 };
+
+export const DRIVER: Ok<"/drivers/{id}", "get"> = {
+  id: 2,
+  name: "Suresh",
+  phone: "9829012345",
+  joinedOn: "2026-04-01",
+  leftOn: null,
+  isActive: true,
+  defaultTractor: { id: 3, regNumber: "RJ 21 RA 4412", label: "Mahindra 575" },
+  currentMonthlyPaise: 1500000,
+  salaryRates: [{ id: 1, effectiveFrom: "2026-04-01", monthlyPaise: 1500000 }],
+};
+
+export const DRIVER_LEDGER: Ok<"/drivers/{id}/ledger", "get"> = {
+  driver: { id: 2, name: "Suresh" },
+  from: "2026-04-01",
+  to: "2026-10-28",
+  openingBalancePaise: 0,
+  entries: [
+    {
+      date: "2026-09-30",
+      type: "EARNED_SALARY",
+      refId: 15,
+      description: "Salary for Sep 2026",
+      earnedPaise: 1500000,
+      paidPaise: 0,
+      balancePaise: 1500000,
+    },
+    {
+      date: "2026-10-05",
+      type: "PAID_ADVANCE",
+      refId: 31,
+      description: "Advance",
+      earnedPaise: 0,
+      paidPaise: 500000,
+      balancePaise: 1000000,
+    },
+  ],
+  months: [
+    { month: "2026-09", earnedPaise: 1500000, paidPaise: 0, closingBalancePaise: 1500000 },
+    { month: "2026-10", earnedPaise: 0, paidPaise: 500000, closingBalancePaise: 1000000 },
+  ],
+  closingBalancePaise: 1000000,
+};
+
+export const MONTH_SALARY: Ok<"/drivers/{id}/salary", "get"> = {
+  month: "2026-09",
+  monthlyPaise: 1500000,
+  daysInMonth: 30,
+  daysWorked: 30,
+  suggestedPaise: 1500000,
+  closed: null,
+};
+
+export const DRIVER_PAYMENTS: Ok<"/driver-payments", "get"> = {
+  items: [
+    {
+      id: 31,
+      driver: { id: 2, name: "Suresh" },
+      paidOn: "2026-10-05",
+      type: "ADVANCE",
+      amountPaise: 500000,
+      mode: "CASH",
+      forMonth: null,
+      notes: null,
+      deletedAt: null,
+      createdAt: "2026-10-05T06:00:00.000Z",
+    },
+  ],
+  total: 1,
+  page: 1,
+  limit: 20,
+  totals: { advancePaise: 500000, salaryPaise: 0, bonusPaise: 0 },
+};

@@ -91,7 +91,7 @@ export function EntryTable<T>({
             return (
               <tr
                 key={rowKey(row)}
-                className={link ? styles.row : undefined}
+                className={`${styles.row} ${link ? styles.clickable : ""}`}
                 // The title cell's link is what keyboards, screen readers and new-tab clicks
                 // use; a plain click anywhere else on the row goes to the same place.
                 onClick={(event) => {

@@ -1,21 +1,12 @@
 import { useId, useState } from "react";
+import { formatMonth } from "../lib/dates.ts";
 import fieldStyles from "./Field.module.css";
 import styles from "./MonthField.module.css";
 
-const MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+// The same short names the rest of the app shows ("Sept" on some devices, "Sep" on others).
+const MONTH_NAMES = Array.from({ length: 12 }, (_, index) =>
+  formatMonth(`2000-${String(index + 1).padStart(2, "0")}`).replace(/ 2000$/, ""),
+);
 
 export interface MonthFieldProps {
   label: string;

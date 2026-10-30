@@ -39,12 +39,12 @@
   vertical-align: baseline;
 }
 
-.row {
+.clickable {
   cursor: pointer;
 }
 
 @media (hover: hover) {
-  .row:hover td {
+  .clickable:hover td {
     background: var(--pen-wash);
   }
 }
