@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "../components/ui/input-group.tsx";
 import { cleanRupeeInput, isRupeeInput } from "../lib/money.ts";
+import { cn } from "../lib/utils.ts";
 import { Field } from "./Field.tsx";
-import fieldStyles from "./Field.module.css";
-import styles from "./MoneyField.module.css";
 
 export interface MoneyFieldProps {
   label: string;
@@ -30,13 +35,13 @@ export function MoneyField({
   return (
     <Field label={label} error={error} hint={hint} id={id}>
       {(control) => (
-        <div className={`${styles.wrap} ${large ? styles.large : ""}`}>
-          <span className={styles.symbol} aria-hidden="true">
-            ₹
-          </span>
-          <input
+        <InputGroup className={large ? "h-12" : "h-10"}>
+          <InputGroupAddon aria-hidden="true">
+            <InputGroupText className={cn(large && "text-lg")}>₹</InputGroupText>
+          </InputGroupAddon>
+          <InputGroupInput
             {...control}
-            className={`${fieldStyles.control} ${styles.input}`}
+            className={cn("tabular-nums", large && "text-xl font-semibold")}
             inputMode="decimal"
             autoComplete="off"
             required={required}
@@ -47,7 +52,7 @@ export function MoneyField({
               if (isRupeeInput(cleaned)) onChange(cleaned);
             }}
           />
-        </div>
+        </InputGroup>
       )}
     </Field>
   );

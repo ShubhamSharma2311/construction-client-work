@@ -1,5 +1,6 @@
-import { type ReactNode, useEffect, useId, useRef } from "react";
-import styles from "./Sheet.module.css";
+import { type ReactNode, useRef } from "react";
+import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog.tsx";
+import { Button } from "./Button.tsx";
 
 export interface SheetProps {
   open: boolean;
@@ -9,46 +10,39 @@ export interface SheetProps {
 }
 
 /**
- * A modal on the native <dialog>: focus stays inside, Escape closes it, and on a phone it
- * rises from the bottom within reach of the thumb.
+ * shadcn's dialog: focus stays inside, Escape closes it, and on a phone it rises from the
+ * bottom within reach of the thumb.
  */
 export function Sheet({ open, onClose, title, children }: SheetProps) {
-  const dialog = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
-  const titleId = useId();
-
-  useEffect(() => {
-    const element = dialog.current;
-    if (!element) return;
-    if (open && !element.open) {
-      element.showModal();
-      // showModal focuses the first button, which Safari outlines as if tabbed to. The
-      // title reads the same to a screen reader and draws no box.
-      heading.current?.focus();
-    }
-    if (!open && element.open) element.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={dialog}
-      className={styles.dialog}
-      aria-labelledby={titleId}
-      onClose={onClose}
-      onClick={(event) => {
-        // A click on the backdrop lands on the dialog element itself.
-        if (event.target === event.currentTarget) onClose();
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
       }}
     >
-      <div className={styles.head}>
-        <h2 id={titleId} ref={heading} tabIndex={-1} className={styles.title}>
-          {title}
-        </h2>
-        <button type="button" className={styles.close} onClick={onClose}>
-          Close
-        </button>
-      </div>
-      {open ? children : null}
-    </dialog>
+      <DialogContent
+        showCloseButton={false}
+        aria-describedby={undefined}
+        className="max-h-[90dvh] overflow-y-auto sm:max-w-lg max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-b-none"
+        onOpenAutoFocus={(event) => {
+          // Radix would focus the first field, which on a phone opens the keyboard at once.
+          // The title reads the same to a screen reader and draws no box.
+          event.preventDefault();
+          heading.current?.focus();
+        }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <DialogTitle ref={heading} tabIndex={-1} className="text-lg outline-none">
+            {title}
+          </DialogTitle>
+          <Button variant="quiet" className="-mr-2" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+        {children}
+      </DialogContent>
+    </Dialog>
   );
 }

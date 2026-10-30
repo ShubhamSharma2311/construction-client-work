@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
+import { Input } from "../components/ui/input.tsx";
+import { cn } from "../lib/utils.ts";
 import { Field } from "./Field.tsx";
-import fieldStyles from "./Field.module.css";
 
 export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "id"> {
   label: string;
@@ -12,13 +13,7 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 export function TextField({ label, error, hint, id, className, ...rest }: TextFieldProps) {
   return (
     <Field label={label} error={error} hint={hint} id={id}>
-      {(control) => (
-        <input
-          {...control}
-          className={`${fieldStyles.control} ${className ?? ""}`.trim()}
-          {...rest}
-        />
-      )}
+      {(control) => <Input {...control} className={cn("h-10", className)} {...rest} />}
     </Field>
   );
 }

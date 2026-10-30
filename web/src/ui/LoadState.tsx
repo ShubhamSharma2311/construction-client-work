@@ -1,11 +1,10 @@
 import { ApiError, isNetworkError } from "../api/errors.ts";
 import { Button } from "./Button.tsx";
-import styles from "./LoadState.module.css";
 import { ErrorNotice } from "./Notice.tsx";
 
 export function Loading({ what }: { what: string }) {
   return (
-    <p className={styles.loading} aria-busy="true">
+    <p className="animate-pulse py-6 text-sm text-muted-foreground" aria-busy="true">
       Loading {what}…
     </p>
   );
@@ -23,7 +22,7 @@ export function LoadError({ error, onRetry }: { error: unknown; onRetry: () => v
   // Not the server's words and not the network: a bug here, so keep its details.
   if (!(error instanceof ApiError) && !isNetworkError(error)) console.error(error);
   return (
-    <div className={styles.error}>
+    <div className="flex flex-col items-start gap-3">
       <ErrorNotice>{loadErrorMessage(error)}</ErrorNotice>
       <Button variant="secondary" onClick={onRetry}>
         Try again

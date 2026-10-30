@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import { Input } from "../components/ui/input.tsx";
 import type { IsoDate } from "../lib/dates.ts";
 import { Field } from "./Field.tsx";
-import fieldStyles from "./Field.module.css";
 
 export interface DateFieldProps {
   label: string;
@@ -28,10 +28,10 @@ export function DateField({
   return (
     <Field label={label} error={error} hint={hint}>
       {(control) => (
-        <input
+        <Input
           {...control}
           type="date"
-          className={fieldStyles.control}
+          className="h-10"
           value={value}
           min={min}
           max={max}

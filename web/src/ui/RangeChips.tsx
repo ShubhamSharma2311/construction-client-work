@@ -8,7 +8,7 @@ import {
   RANGE_PRESETS,
 } from "../lib/ranges.ts";
 import { DateField } from "./DateField.tsx";
-import styles from "./RangeChips.module.css";
+import { SEGMENT, SEGMENTS, SEGMENTS_FRAME } from "./segmented.ts";
 
 export interface RangeChipsProps {
   value: DateRange | null;
@@ -24,13 +24,13 @@ export function RangeChips({ value, onChange, today, startDate }: RangeChipsProp
   const showDates = custom || picked === null;
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.chips} role="group" aria-label="Dates">
+    <div className={`flex flex-col gap-3 ${SEGMENTS_FRAME}`}>
+      <div className={SEGMENTS} role="group" aria-label="Dates">
         {RANGE_PRESETS.map((preset) => (
           <button
             key={preset}
             type="button"
-            className={styles.chip}
+            className={SEGMENT}
             aria-pressed={!showDates && picked === preset}
             onClick={() => {
               setCustom(false);
@@ -42,7 +42,7 @@ export function RangeChips({ value, onChange, today, startDate }: RangeChipsProp
         ))}
         <button
           type="button"
-          className={styles.chip}
+          className={SEGMENT}
           aria-pressed={showDates}
           onClick={() => {
             setCustom(true);
@@ -52,7 +52,7 @@ export function RangeChips({ value, onChange, today, startDate }: RangeChipsProp
         </button>
       </div>
       {showDates ? (
-        <div className={styles.dates}>
+        <div className="grid max-w-md grid-cols-2 gap-3">
           <DateField
             label="From"
             value={value?.from ?? startDate}

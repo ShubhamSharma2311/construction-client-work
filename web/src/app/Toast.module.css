@@ -16,12 +16,15 @@
   }
 }
 
+/* Drawn like shadcn's Sonner toast: a white card with a soft shadow. */
 .toast {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-field);
-  background: var(--chrome);
-  color: var(--chrome-fg);
+  padding: 12px 16px;
+  border: 1px solid var(--ruling);
+  border-radius: 10px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgb(15 23 42 / 0.12);
   font-size: var(--text-sm);
   font-weight: 500;
 }

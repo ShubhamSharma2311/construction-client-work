@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import { NativeSelect, NativeSelectOption } from "../components/ui/native-select.tsx";
 import { Field } from "./Field.tsx";
-import fieldStyles from "./Field.module.css";
 
 export interface SelectOption {
   value: string;
@@ -20,7 +20,7 @@ export interface SelectFieldProps {
   disabled?: boolean;
 }
 
-/** A native select: on phones it opens the system picker, which is easiest to tap. */
+/** shadcn's native select: on phones it opens the system picker, which is easiest to tap. */
 export function SelectField({
   label,
   value,
@@ -35,9 +35,9 @@ export function SelectField({
   return (
     <Field label={label} error={error} hint={hint}>
       {(control) => (
-        <select
+        <NativeSelect
           {...control}
-          className={fieldStyles.control}
+          className="w-full [&>select]:h-10"
           value={value}
           required={required}
           disabled={disabled}
@@ -45,13 +45,15 @@ export function SelectField({
             onChange(event.target.value);
           }}
         >
-          {placeholder === undefined ? null : <option value="">{placeholder}</option>}
+          {placeholder === undefined ? null : (
+            <NativeSelectOption value="">{placeholder}</NativeSelectOption>
+          )}
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <NativeSelectOption key={option.value} value={option.value}>
               {option.label}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
       )}
     </Field>
   );

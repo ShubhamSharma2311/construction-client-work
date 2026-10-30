@@ -1,8 +1,0 @@
-.error {
-  background: var(--bahi-wash);
-  color: var(--bahi);
-  border-radius: var(--radius-field);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}

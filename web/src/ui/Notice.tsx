@@ -1,11 +1,13 @@
+import { CircleAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import styles from "./Notice.module.css";
+import { Alert, AlertDescription } from "../components/ui/alert.tsx";
 
 /** A problem the person has to act on; screen readers announce it straight away. */
 export function ErrorNotice({ children }: { children: ReactNode }) {
   return (
-    <div role="alert" className={styles.error}>
-      {children}
-    </div>
+    <Alert variant="destructive" role="alert">
+      <CircleAlert aria-hidden="true" />
+      <AlertDescription>{children}</AlertDescription>
+    </Alert>
   );
 }

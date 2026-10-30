@@ -32,12 +32,14 @@ export function ConfirmDialog({
       <div className={sheetStyles.body}>
         {children}
         {error ? <ErrorNotice>{error}</ErrorNotice> : null}
-        <Button block onClick={onConfirm} disabled={busy}>
-          {busy ? "Working…" : confirmLabel}
-        </Button>
-        <Button block variant="secondary" onClick={onClose} disabled={busy}>
-          Keep it
-        </Button>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="secondary" onClick={onClose} disabled={busy}>
+            Keep it
+          </Button>
+          <Button onClick={onConfirm} disabled={busy}>
+            {busy ? "Working…" : confirmLabel}
+          </Button>
+        </div>
       </div>
     </Sheet>
   );

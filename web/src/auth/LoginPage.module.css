@@ -16,22 +16,20 @@
 
 .title {
   font-size: var(--text-3xl);
-  font-weight: 750;
-  font-stretch: 118%;
+  font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.01em;
 }
 
-/* A page of the register, with its red margin down the left. */
+/* The sign-in card, drawn like shadcn's Card. */
 .sheet {
-  composes: ruled from "../ui/registerMargin.module.css";
-  --margin-at: 24px;
   display: grid;
   gap: var(--space-4);
   background: var(--sheet);
   border: 1px solid var(--ruling);
-  border-radius: var(--radius-panel);
-  padding: var(--space-5) var(--space-5) var(--space-5) 44px;
+  border-radius: 14px;
+  padding: var(--space-6);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
 }
 
 .heading {

@@ -1,5 +1,7 @@
 import { Link, type LinkProps } from "react-router";
-import styles from "./Button.module.css";
+import { Button as ShadButton } from "../components/ui/button.tsx";
+import { cn } from "../lib/utils.ts";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "./Button.tsx";
 
 /** A link that moves to another screen but looks like a button, e.g. "New trip". */
 export function ButtonLink({
@@ -8,9 +10,13 @@ export function ButtonLink({
   ...rest
 }: LinkProps & { variant?: "primary" | "secondary" }) {
   return (
-    <Link
-      className={`${styles.button} ${styles[variant]} ${styles.link} ${className ?? ""}`.trim()}
-      {...rest}
-    />
+    <ShadButton
+      asChild
+      variant={BUTTON_VARIANT[variant]}
+      size="lg"
+      className={cn(BUTTON_SIZE, className)}
+    >
+      <Link {...rest} />
+    </ShadButton>
   );
 }

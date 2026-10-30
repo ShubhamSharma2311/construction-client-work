@@ -1,5 +1,4 @@
 import { Button } from "./Button.tsx";
-import styles from "./ShowMore.module.css";
 
 /** Under a long list: how much is showing, and a button for the next page. */
 export function ShowMore({
@@ -14,7 +13,7 @@ export function ShowMore({
   onMore: () => void;
 }) {
   return (
-    <div className={styles.more}>
+    <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
       <span>
         Showing {shown} of {total}
       </span>

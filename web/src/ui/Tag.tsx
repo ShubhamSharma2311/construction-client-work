@@ -1,9 +1,20 @@
 import type { ReactNode } from "react";
-import styles from "./Tag.module.css";
+import { Badge } from "../components/ui/badge.tsx";
 
-/** owed: red, like a due in the register. received: settled. partial: some came in. */
+/** owed: red, money still due. received: settled. partial: some came in. quiet: a plain note. */
 export type TagTone = "owed" | "received" | "partial" | "quiet";
 
+const TONES: Record<TagTone, string> = {
+  owed: "border-red-200 bg-red-50 text-red-700",
+  received: "border-green-200 bg-green-50 text-green-700",
+  partial: "border-amber-200 bg-amber-50 text-amber-700",
+  quiet: "text-muted-foreground",
+};
+
 export function Tag({ tone, children }: { tone: TagTone; children: ReactNode }) {
-  return <span className={`${styles.tag} ${styles[tone]}`}>{children}</span>;
+  return (
+    <Badge variant="outline" className={TONES[tone]}>
+      {children}
+    </Badge>
+  );
 }

@@ -1,5 +1,5 @@
 import { type ReactNode, useId } from "react";
-import styles from "./Field.module.css";
+import { Field as ShadField, FieldDescription, FieldLabel } from "../components/ui/field.tsx";
 
 export interface FieldControlProps {
   id: string;
@@ -23,20 +23,19 @@ export function Field({ label, error, hint, id, children }: FieldProps) {
   const messageId = `${controlId}-message`;
   const message = error ?? hint;
   return (
-    <div className={styles.field}>
-      <label htmlFor={controlId} className={styles.label}>
-        {label}
-      </label>
+    <ShadField data-invalid={error ? true : undefined} className="gap-2">
+      <FieldLabel htmlFor={controlId}>{label}</FieldLabel>
       {children({
         id: controlId,
         "aria-invalid": error ? true : undefined,
         "aria-describedby": message ? messageId : undefined,
       })}
       {message ? (
-        <span id={messageId} className={error ? styles.error : styles.hint}>
+        // Not FieldError: that one is a live alert, and the form's own notice already speaks up.
+        <FieldDescription id={messageId} className={error ? "text-destructive" : undefined}>
           {message}
-        </span>
+        </FieldDescription>
       ) : null}
-    </div>
+    </ShadField>
   );
 }

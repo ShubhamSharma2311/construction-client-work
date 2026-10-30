@@ -20,25 +20,35 @@
   color: var(--ink-soft);
 }
 
-/* Shared by every text-like control so they line up in a form. */
+/* Shared by the few custom controls (customer search, month picker) so they match shadcn's Input. */
 .control {
   width: 100%;
-  min-height: var(--tap);
-  padding: var(--space-2) var(--space-3);
+  height: 40px;
+  padding: 0 10px;
   background: var(--sheet);
   border: 1px solid var(--frame);
-  border-radius: var(--radius-field);
-  font-size: var(--text-md);
+  border-radius: 10px;
+  font-size: 16px;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+@media (min-width: 768px) {
+  .control {
+    font-size: 14px;
+  }
 }
 
 .control:focus-visible {
   outline: none;
   border-color: var(--pen);
-  box-shadow: 0 0 0 3px var(--pen-wash);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pen) 25%, transparent);
 }
 
 .control[aria-invalid="true"] {
   border-color: var(--bahi);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bahi) 15%, transparent);
 }
 
 .control:disabled {
