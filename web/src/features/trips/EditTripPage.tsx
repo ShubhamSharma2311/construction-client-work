@@ -3,6 +3,7 @@ import { useToast } from "../../app/Toast.tsx";
 import { todayIso } from "../../lib/dates.ts";
 import { Loading, LoadError } from "../../ui/LoadState.tsx";
 import { PageHeader } from "../../ui/PageHeader.tsx";
+import { SetupPrompt } from "../settings/SetupPrompt.tsx";
 import { useSettings } from "../settings/useSettings.ts";
 import { balanceText } from "./balanceText.ts";
 import { TripForm } from "./TripForm.tsx";
@@ -17,6 +18,7 @@ export function EditTripPage({ id }: { id: number }) {
   const navigate = useNavigate();
 
   if (trip.isError) return <LoadError error={trip.error} onRetry={() => void trip.refetch()} />;
+  if (settings.data === null) return <SetupPrompt />;
   if (!trip.data || !settings.data) return <Loading what="the trip" />;
   if (trip.data.kind === "OPENING_BALANCE" || trip.data.deletedAt) {
     return (

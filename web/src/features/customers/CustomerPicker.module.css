@@ -70,8 +70,8 @@
   font-weight: 500;
 }
 
-.empty {
-  padding: var(--space-3);
+.status {
+  margin: var(--space-1) 0 0;
   color: var(--ink-soft);
   font-size: var(--text-sm);
 }
@@ -87,14 +87,6 @@
 
 .addTitle {
   font-weight: 600;
-}
-
-/* Top-aligned, so a hint under one field does not stretch the box beside it. */
-.pair {
-  display: grid;
-  align-items: start;
-  gap: var(--space-3);
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 }
 
 .addActions {

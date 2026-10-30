@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 import styles from "./EntryTable.module.css";
 
@@ -31,6 +31,23 @@ export interface EntryTableProps<T> {
   /** The small line under the title on a phone, e.g. "28 Oct, Suresh, Ladnun road". */
   phoneMeta: (row: T) => ReactNode;
   empty: ReactNode;
+}
+
+/**
+ * A click meant to open the row: the main button, no modifier keys (those ask for a new tab
+ * or window, which the title link handles), not on a control inside the row, and not the
+ * end of selecting text to copy.
+ */
+export function isPlainRowClick(event: MouseEvent<HTMLElement>): boolean {
+  if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+    return false;
+  if (
+    event.target instanceof Element &&
+    event.target.closest("a, button, input, select, textarea, label, summary")
+  ) {
+    return false;
+  }
+  return window.getSelection()?.isCollapsed ?? true;
 }
 
 /** A table on tablets and computers; a ruled list of entries on a phone. */
@@ -68,12 +85,10 @@ export function EntryTable<T>({
             <tr
               key={rowKey(row)}
               className={styles.row}
-              // The title cell's link is what keyboards and screen readers use; a click
-              // anywhere else on the row goes to the same place.
+              // The title cell's link is what keyboards, screen readers and new-tab clicks
+              // use; a plain click anywhere else on the row goes to the same place.
               onClick={(event) => {
-                if (!(event.target instanceof Element) || !event.target.closest("a")) {
-                  void navigate(rowLink(row));
-                }
+                if (isPlainRowClick(event)) void navigate(rowLink(row));
               }}
             >
               {columns.map((column) => (

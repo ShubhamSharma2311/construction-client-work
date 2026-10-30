@@ -33,3 +33,9 @@ export function rupeesToPaise(text: string): number | null {
   // Whole-number maths: 0.1 + 0.2 style float errors have no place in a ledger.
   return Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0"));
 }
+
+/** Paise as an amount the API takes and a field shows: 150050 is "1500.50", 150000 is "1500". */
+export function paiseToRupeeInput(paise: number): string {
+  const rest = paise % 100;
+  return `${String(Math.floor(paise / 100))}${rest === 0 ? "" : `.${String(rest).padStart(2, "0")}`}`;
+}

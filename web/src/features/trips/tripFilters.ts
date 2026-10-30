@@ -1,5 +1,6 @@
 import type { Ok } from "../../api/types.ts";
 import { isIsoDate } from "../../lib/dates.ts";
+import { parseId } from "../../lib/ids.ts";
 import type { DateRange } from "../../lib/ranges.ts";
 
 export type TripItem = Ok<"/trips", "get">["items"][number];
@@ -27,11 +28,9 @@ function isStatus(text: string): text is TripStatus {
   return (TRIP_STATUSES as readonly string[]).includes(text);
 }
 
-const ID = /^\d{1,9}$/;
-
 function idParam(params: URLSearchParams, name: string): string {
-  const value = params.get(name) ?? "";
-  return ID.test(value) ? value : "";
+  const id = parseId(params.get(name));
+  return id === null ? "" : String(id);
 }
 
 /**

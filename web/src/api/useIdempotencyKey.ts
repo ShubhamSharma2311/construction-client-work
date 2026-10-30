@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { ApiError } from "./errors.ts";
 
 /**
  * One key per entry being made. Retrying the same entry (a double tap, a dropped
@@ -10,4 +11,12 @@ export function useIdempotencyKey(): { key: string; renew: () => void } {
     setKey(crypto.randomUUID());
   }, []);
   return { key, renew };
+}
+
+/**
+ * A mismatch means this entry was already saved before it was changed. The key is spent:
+ * a fresh one lets the person go on, and the message has told them the first one is saved.
+ */
+export function renewAfterMismatch(error: unknown, renew: () => void): void {
+  if (error instanceof ApiError && error.code === "IDEMPOTENCY_MISMATCH") renew();
 }

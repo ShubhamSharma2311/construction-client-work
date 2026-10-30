@@ -27,7 +27,7 @@ describe("trip filters in the address", () => {
   it.each([
     ["from=2026-10-30&to=2026-10-01", "a range that ends before it starts"],
     ["from=2026-02-31&to=2026-03-01", "a date that does not exist"],
-    ["driver=abc&status=LOST&khet=-1", "ids and statuses that are not real"],
+    ["driver=abc&status=LOST&khet=-1&tractor=0", "ids and statuses that are not real"],
   ])("drops %s (%s)", (query) => {
     const filters = readTripFilters(new URLSearchParams(query), week);
 

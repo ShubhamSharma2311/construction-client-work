@@ -4,7 +4,7 @@ import { ApiError, isNetworkError } from "./errors.ts";
 export function saveErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.code === "IDEMPOTENCY_MISMATCH") {
-      return "This entry was already saved with different details. Check the list before saving again.";
+      return "This entry was already saved before the change. Check the list: saving again adds a second entry.";
     }
     if (error.status === 400 && error.issues.length > 0)
       return "Some details need fixing. See the marked fields.";

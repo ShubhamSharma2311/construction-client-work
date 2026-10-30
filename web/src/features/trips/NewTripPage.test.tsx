@@ -108,6 +108,24 @@ describe("New trip", () => {
     expect(sent[2]?.key).not.toBe(sent[0]?.key);
   });
 
+  it("takes a fresh key after a mismatch, so the next save is not refused forever", async () => {
+    let first = true;
+    const { api, sent } = newTripApi(() => {
+      if (!first) return json(saved, 201);
+      first = false;
+      return apiError(422, "IDEMPOTENCY_MISMATCH", "This Idempotency-Key was already used for a different request");
+    });
+    const { user } = await renderApp(api, { path: "/new/trip" });
+    await fillTrip(user);
+
+    await user.click(screen.getByRole("button", { name: "Save trip" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("saving again adds a second entry");
+    await user.click(screen.getByRole("button", { name: "Save trip" }));
+
+    expect(await screen.findByText(/Trip saved/)).toBeInTheDocument();
+    expect(sent[1]?.key).not.toBe(sent[0]?.key);
+  });
+
   it("fills in the driver's usual tractor", async () => {
     const { api } = newTripApi();
     const { user } = await renderApp(api, { path: "/new/trip" });

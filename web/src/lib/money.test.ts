@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { cleanRupeeInput, formatRupees, isRupeeInput, rupeesToPaise } from "./money.ts";
+import {
+  cleanRupeeInput,
+  formatRupees,
+  isRupeeInput,
+  paiseToRupeeInput,
+  rupeesToPaise,
+} from "./money.ts";
 
 describe("formatRupees", () => {
   it.each([
@@ -52,4 +58,13 @@ describe("rupeesToPaise", () => {
   it.each(["", ".", "abc", "1.234"])("has no amount for %j", (text) => {
     expect(rupeesToPaise(text)).toBeNull();
   });
+});
+
+it.each([
+  [150000, "1500"],
+  [150050, "1500.50"],
+  [5, "0.05"],
+])("writes %i paise as %j for a field", (paise, text) => {
+  expect(paiseToRupeeInput(paise)).toBe(text);
+  expect(rupeesToPaise(text)).toBe(paise);
 });

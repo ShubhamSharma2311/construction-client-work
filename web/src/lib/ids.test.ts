@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseId } from "./WithId.tsx";
+import { parseId } from "./ids.ts";
 
 describe("parseId", () => {
   it.each([
@@ -9,7 +9,10 @@ describe("parseId", () => {
     expect(parseId(text)).toBe(id);
   });
 
-  it.each([undefined, "", "0", "-1", "abc", "1.5", "1234567890", "7 "])("refuses %j", (text) => {
-    expect(parseId(text)).toBeNull();
-  });
+  it.each([undefined, null, "", "0", "-1", "abc", "1.5", "1234567890", "7 "])(
+    "refuses %j",
+    (text) => {
+      expect(parseId(text)).toBeNull();
+    },
+  );
 });

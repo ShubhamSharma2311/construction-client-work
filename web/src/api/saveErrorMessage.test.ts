@@ -16,7 +16,7 @@ describe("saveErrorMessage", () => {
     ],
     [
       new ApiError(422, "IDEMPOTENCY_MISMATCH", "used"),
-      "This entry was already saved with different details. Check the list before saving again.",
+      "This entry was already saved before the change. Check the list: saving again adds a second entry.",
     ],
     [
       new TypeError("Failed to fetch"),

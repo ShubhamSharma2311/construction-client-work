@@ -1,11 +1,11 @@
 import { type SubmitEvent, useState } from "react";
 import { fieldErrors } from "../../api/errors.ts";
-import { saveErrorMessage } from "../../api/saveErrorMessage.ts";
 import type { IsoDate } from "../../lib/dates.ts";
 import { formatRupees, rupeesToPaise } from "../../lib/money.ts";
 import { Button } from "../../ui/Button.tsx";
 import { Choice } from "../../ui/Choice.tsx";
 import { DateField } from "../../ui/DateField.tsx";
+import { FormError } from "../../ui/FormError.tsx";
 import { MoneyField } from "../../ui/MoneyField.tsx";
 import { ErrorNotice } from "../../ui/Notice.tsx";
 import { SelectField } from "../../ui/SelectField.tsx";
@@ -20,6 +20,21 @@ import {
   SERVER_FIELDS,
   type TripValues,
 } from "./tripForm.ts";
+
+// Fields this form shows, by the API's names; problems with anything else go in the notice.
+const TRIP_FIELDS = [
+  "tripDate",
+  "customerId",
+  "driverId",
+  "tractorId",
+  "khetId",
+  "amount",
+  "quantityNote",
+  "notes",
+  "payment.paidAmount",
+  "payment.mode",
+  "payment.reference",
+] as const;
 
 const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
   { value: "CASH", label: "Cash" },
@@ -57,7 +72,9 @@ export function TripForm({
 }: TripFormProps) {
   const [values, setValues] = useState(initial);
   const [payment, setPayment] = useState(initialPayment);
-  const [problems, setProblems] = useState<Record<string, string>>({});
+  // Checked live once a save was tried, so each mark clears as soon as it is fixed.
+  const [tried, setTried] = useState(false);
+  const problems = tried ? checkTrip(values, payment) : {};
   const drivers = useDrivers();
   const tractors = useTractors();
   const khets = useKhets();
@@ -82,16 +99,13 @@ export function TripForm({
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const found = checkTrip(values, payment);
-    setProblems(found);
-    if (Object.keys(found).length === 0) onSubmit(values, payment);
+    setTried(true);
+    if (Object.keys(checkTrip(values, payment)).length === 0) onSubmit(values, payment);
   };
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
-      {error && Object.keys(serverProblems).length === 0 ? (
-        <ErrorNotice>{saveErrorMessage(error)}</ErrorNotice>
-      ) : null}
+      <FormError error={error} shownFields={TRIP_FIELDS} />
       {Object.keys(problems).length > 0 ? (
         <ErrorNotice>Some details are missing. See the marked fields.</ErrorNotice>
       ) : null}

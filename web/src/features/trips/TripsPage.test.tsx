@@ -117,6 +117,18 @@ describe("Trips list", () => {
     expect(router.state.location.pathname).toBe("/trips/41");
   });
 
+  it("leaves a ctrl-click to the browser instead of opening the trip in place", async () => {
+    const { api } = tripsApi(() => tripPage([TRIP]));
+    const { user, router } = await renderApp(api, { path: "/trips" });
+    const table = await screen.findByRole("table", { name: "Trips" });
+
+    await user.keyboard("{Control>}");
+    await user.click(within(table).getByText("Ladnun road"));
+    await user.keyboard("{/Control}");
+
+    expect(router.state.location.pathname).toBe("/trips");
+  });
+
   it("says when there are no trips", async () => {
     const { api } = tripsApi(() => tripPage([]));
 

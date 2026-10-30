@@ -14,7 +14,8 @@ import { PageHeader } from "../../ui/PageHeader.tsx";
 import { Tag } from "../../ui/Tag.tsx";
 import { balanceText } from "./balanceText.ts";
 import type { TripItem } from "./tripFilters.ts";
-import styles from "./TripPage.module.css";
+import { Detail, DetailList } from "../../ui/DetailList.tsx";
+import styles from "../../ui/Actions.module.css";
 import { TripStatusTag } from "./TripStatusTag.tsx";
 import { useDeleteTrip, useRestoreTrip, useTrip } from "./useTrips.ts";
 
@@ -36,7 +37,7 @@ function TripDetails({ trip }: { trip: TripItem }) {
           trip.deletedAt ? <Tag tone="quiet">Deleted</Tag> : <TripStatusTag status={trip.status} />
         }
       />
-      <dl className={styles.details}>
+      <DetailList>
         <Detail label="Customer">
           <Link to={`/dues/${String(trip.customer.id)}`}>{trip.customer.name}</Link>
         </Detail>
@@ -59,18 +60,9 @@ function TripDetails({ trip }: { trip: TripItem }) {
         <Detail label="Still due">
           <Money paise={trip.duePaise} tone={trip.duePaise > 0 ? "owed" : "plain"} />
         </Detail>
-      </dl>
+      </DetailList>
       {trip.deletedAt ? <RestoreTrip trip={trip} /> : <TripActions trip={trip} />}
     </>
-  );
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className={styles.detail}>
-      <dt>{label}</dt>
-      <dd>{children}</dd>
-    </div>
   );
 }
 
@@ -123,10 +115,10 @@ function TripActions({ trip }: { trip: TripItem }) {
           });
         }}
       >
-        <p className={styles.confirmText}>
+        <p className={styles.text}>
           {received
             ? `${formatRupees(trip.receivedPaise)} was received for this trip. Deleting it keeps that money as ${trip.customer.name}'s credit, to use on another trip.`
-            : `It can be restored later from the deleted entries.`}
+            : "It can be restored later from the deleted entries."}
         </p>
       </ConfirmDialog>
     </div>

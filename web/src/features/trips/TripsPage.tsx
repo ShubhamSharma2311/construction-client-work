@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useDownload } from "../../api/useDownload.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
@@ -132,7 +133,7 @@ function TripsList({ startDate }: { startDate: IsoDate }) {
               .filter(Boolean)
               .join(", ")
           }
-          empty={filters.deleted ? "No deleted trips in these dates." : "No trips in these dates."}
+          empty={emptyText(filters)}
         />
       ) : null}
       {list.hasNextPage ? (
@@ -215,12 +216,12 @@ function Filters({
   const set = (patch: Partial<TripFilters>) => {
     onChange({ ...filters, ...patch });
   };
-  const count =
-    [filters.driverId, filters.tractorId, filters.khetId, filters.status].filter(Boolean).length +
-    (filters.deleted ? 1 : 0);
+  // Open at first if any filter is set; after that the person opens and closes it.
+  const [initiallyOpen] = useState(() => countFilters(filters) > 0);
+  const count = countFilters(filters);
 
   return (
-    <details className={styles.filters} open={count > 0}>
+    <details className={styles.filters} open={initiallyOpen}>
       <summary>{count > 0 ? `Filters (${String(count)})` : "Filters"}</summary>
       <div className={styles.filterGrid}>
         <SelectField
@@ -275,4 +276,16 @@ function Filters({
       </div>
     </details>
   );
+}
+
+function countFilters(filters: TripFilters): number {
+  const set = [filters.driverId, filters.tractorId, filters.khetId, filters.status].filter(
+    Boolean,
+  ).length;
+  return set + (filters.deleted ? 1 : 0);
+}
+
+function emptyText(filters: TripFilters): string {
+  const what = filters.deleted ? "deleted trips" : "trips";
+  return filters.range ? `No ${what} in these dates.` : `No ${what} yet.`;
 }

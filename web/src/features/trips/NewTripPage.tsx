@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
+import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyKey.ts";
 import { useToast } from "../../app/Toast.tsx";
 import { type IsoDate, todayIso } from "../../lib/dates.ts";
 import { PageHeader } from "../../ui/PageHeader.tsx";
@@ -56,6 +56,9 @@ function NewTrip({ startDate }: { startDate: IsoDate }) {
               });
               setEntry((current) => current + 1);
               create.reset();
+            },
+            onError: (error) => {
+              renewAfterMismatch(error, renew);
             },
           },
         );

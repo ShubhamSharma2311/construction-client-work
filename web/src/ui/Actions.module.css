@@ -1,0 +1,11 @@
+/* A row of buttons under an entry; wraps on a phone. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.text {
+  margin: 0;
+}

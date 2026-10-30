@@ -1,4 +1,4 @@
-.details {
+.list {
   margin: 0;
   display: grid;
   max-width: 560px;
@@ -27,15 +27,4 @@
   margin: 0;
   overflow-wrap: anywhere;
   font-variant-numeric: tabular-nums;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.confirmText {
-  margin: 0;
 }

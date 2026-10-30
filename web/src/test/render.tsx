@@ -1,10 +1,14 @@
 import { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
+import type { ReactNode } from "react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, type InitialEntry } from "react-router";
 import { App } from "../app/App.tsx";
 import { routes } from "../app/routes.tsx";
 import { createServices } from "../app/services.ts";
+import { ServicesProvider } from "../app/ServicesContext.tsx";
+import { ToastProvider } from "../app/Toast.tsx";
 import { BASE_URL, type FakeApi, json, type Ok, SESSION } from "./fake-api.ts";
 
 export interface RenderOptions {
@@ -64,3 +68,19 @@ export const signedInRoutes = {
   "GET /settings": () => json(SETTINGS),
   "GET /dashboard": () => json(DASHBOARD),
 };
+
+/** One component on its own, with the services, cache and toasts it may use. */
+export async function renderPart(ui: ReactNode, api: FakeApi) {
+  const services = createServices({ baseUrl: BASE_URL, fetch: api.fetch });
+  await services.session.restore();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const user = userEvent.setup();
+  const view = render(
+    <ServicesProvider services={services}>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>{ui}</ToastProvider>
+      </QueryClientProvider>
+    </ServicesProvider>,
+  );
+  return { ...view, user, queryClient };
+}
