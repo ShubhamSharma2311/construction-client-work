@@ -1,7 +1,5 @@
 .form {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 560px;
+  composes: card from "../../ui/Form.module.css";
 }
 
 .explain {
@@ -13,14 +11,15 @@
 .trips {
   margin: 0;
   padding: 0;
-  border: 0;
   display: grid;
+  overflow: hidden;
   background: var(--sheet);
-  border-block: 1px solid var(--ruling);
+  border: 1px solid var(--ruling);
+  border-radius: 12px;
 }
 
 .tripsLegend {
-  padding: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--ink-soft);
@@ -38,9 +37,13 @@
 }
 
 .trip input {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--pen);
+}
+
+.trip:has(input:checked) {
+  background: color-mix(in srgb, var(--pen) 6%, transparent);
 }
 
 .tripText {

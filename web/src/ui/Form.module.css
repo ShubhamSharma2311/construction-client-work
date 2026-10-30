@@ -1,0 +1,18 @@
+/* A form on its own screen: a shadcn-style card, wide enough for two fields side by side. */
+.card {
+  display: grid;
+  gap: 20px;
+  max-width: 720px;
+  padding: 24px;
+  background: var(--sheet);
+  border: 1px solid var(--ruling);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+}

@@ -36,3 +36,13 @@ if (typeof window.matchMedia !== "function") {
     dispatchEvent: () => false,
   });
 }
+
+// jsdom has no ResizeObserver; Radix positions tooltips and menus with it. Tests never need
+// the measurements, only for opening one not to crash the screen.
+if (typeof globalThis.ResizeObserver !== "function") {
+  globalThis.ResizeObserver = class {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  };
+}

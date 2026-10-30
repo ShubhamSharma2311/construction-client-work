@@ -40,6 +40,11 @@
     color: inherit;
   }
 
+  /* A link drawn as a button takes the button's text colour, not the link blue. */
+  a[data-slot="button"] {
+    color: inherit;
+  }
+
   :focus-visible {
     outline: 2px solid var(--pen);
     outline-offset: 2px;

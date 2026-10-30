@@ -1,5 +1,3 @@
 .form {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 560px;
+  composes: card from "../../ui/Form.module.css";
 }
