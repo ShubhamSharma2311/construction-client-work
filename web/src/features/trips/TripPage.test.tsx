@@ -55,6 +55,23 @@ describe("A trip", () => {
     expect(screen.getByText("Part paid")).toBeInTheDocument();
   });
 
+  it("offers to record the money still due on the trip", async () => {
+    await renderApp(tripApi(partPaid), { path: "/trips/41" });
+
+    expect(await screen.findByRole("link", { name: "Mark money received" })).toHaveAttribute(
+      "href",
+      "/new/payment?trip=41",
+    );
+  });
+
+  it("does not offer to record money once the trip is paid", async () => {
+    const paid = { ...TRIP, receivedPaise: 350000, duePaise: 0, status: "PAID" as const };
+    await renderApp(tripApi(paid), { path: "/trips/41" });
+
+    expect(await screen.findByRole("link", { name: "Edit trip" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Mark money received" })).not.toBeInTheDocument();
+  });
+
   it("deletes a trip with nothing received after asking", async () => {
     let deleted: URL | undefined;
     const api = tripApi(TRIP, {

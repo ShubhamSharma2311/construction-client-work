@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Ok } from "../../api/types.ts";
-import { fakeApi, json } from "../../test/fake-api.ts";
+import { apiError, fakeApi, json } from "../../test/fake-api.ts";
 import {
   CUSTOMERS,
   DUES,
@@ -40,7 +40,10 @@ function saved(
   };
 }
 
-function paymentApi(answer = () => json(saved(), 201)) {
+function paymentApi(
+  answer = () => json(saved(), 201),
+  extra: Record<string, (request: Request) => Response> = {},
+) {
   const sent: { body: unknown; key: string | null }[] = [];
   const api = fakeApi({
     ...signedInRoutes,
@@ -59,6 +62,7 @@ function paymentApi(answer = () => json(saved(), 201)) {
       sent.push({ body: await request.json(), key: request.headers.get("idempotency-key") });
       return answer();
     },
+    ...extra,
   });
   return { api, sent };
 }
@@ -131,6 +135,39 @@ describe("Money from customer", () => {
       notes: "Discount agreed",
       allocation: { strategy: "AUTO" },
     });
+  });
+
+  it("opened from a trip, pays what that trip still owes and returns to it", async () => {
+    const { api, sent } = paymentApi(undefined, { "GET /trips/41": () => json(newer) });
+    const { user, router } = await renderApp(api, { path: "/new/payment?trip=41" });
+
+    expect(await screen.findByLabelText("Amount received")).toHaveValue("3500");
+    expect(screen.getByText("Ramesh Bishnoi")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Choose trips" })).toBeChecked();
+    expect(await screen.findByRole("checkbox", { name: /Trip on 26 Oct/ })).toBeChecked();
+    await user.click(screen.getByRole("button", { name: "Save payment" }));
+
+    expect(await screen.findByText(/Payment saved/)).toBeInTheDocument();
+    expect(sent[0]?.body).toMatchObject({
+      allocation: { strategy: "MANUAL", items: [{ tripId: 41, amount: "3500" }] },
+    });
+    expect(router.state.location.pathname).toBe("/trips/41");
+  });
+
+  it("says so when the trip it was opened from cannot be loaded", async () => {
+    let failing = true;
+    const { api } = paymentApi(undefined, {
+      "GET /trips/41": () =>
+        failing ? apiError(500, "INTERNAL", "Something went wrong") : json(newer),
+    });
+    const { user } = await renderApp(api, { path: "/new/payment?trip=41" });
+
+    const retry = await screen.findByRole("button", { name: "Try again" });
+    expect(screen.queryByLabelText("Amount received")).not.toBeInTheDocument();
+    failing = false;
+    await user.click(retry);
+
+    expect(await screen.findByLabelText("Amount received")).toHaveValue("3500");
   });
 
   it("lets the customer be picked when the entry starts from New entry", async () => {

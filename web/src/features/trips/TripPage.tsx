@@ -76,8 +76,16 @@ function TripActions({ trip }: { trip: TripItem }) {
 
   return (
     <div className={styles.actions}>
+      {trip.duePaise > 0 ? (
+        <ButtonLink to={`/new/payment?trip=${String(trip.id)}`}>Mark money received</ButtonLink>
+      ) : null}
       {trip.kind === "TRIP" ? (
-        <ButtonLink to={`/trips/${String(trip.id)}/edit`}>Edit trip</ButtonLink>
+        <ButtonLink
+          variant={trip.duePaise > 0 ? "secondary" : "primary"}
+          to={`/trips/${String(trip.id)}/edit`}
+        >
+          Edit trip
+        </ButtonLink>
       ) : null}
       <Button
         variant="secondary"

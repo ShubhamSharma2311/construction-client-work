@@ -5,7 +5,7 @@ import { renewAfterMismatch, useIdempotencyKey } from "../../api/useIdempotencyK
 import { useToast } from "../../app/Toast.tsx";
 import { parseId } from "../../lib/ids.ts";
 import { formatDate, type IsoDate, todayIso } from "../../lib/dates.ts";
-import { formatRupees, rupeesToPaise } from "../../lib/money.ts";
+import { formatRupees, paiseToRupeeInput, rupeesToPaise } from "../../lib/money.ts";
 import { Button } from "../../ui/Button.tsx";
 import { Choice } from "../../ui/Choice.tsx";
 import { DateField } from "../../ui/DateField.tsx";
@@ -20,6 +20,8 @@ import { useCustomer } from "../customers/useCustomers.ts";
 import { SetupPrompt } from "../settings/SetupPrompt.tsx";
 import { useSettings } from "../settings/useSettings.ts";
 import { balanceText } from "../trips/balanceText.ts";
+import type { TripItem } from "../trips/tripFilters.ts";
+import { useTrip } from "../trips/useTrips.ts";
 import styles from "./NewPaymentPage.module.css";
 import { checkPayment, type PaymentFormValues, paymentBody, shareOver } from "./paymentForm.ts";
 import { useRecordPayment, useUnpaidTrips } from "./usePayments.ts";
@@ -30,6 +32,7 @@ export function NewPaymentPage() {
   const [params] = useSearchParams();
   const writeOff = params.get("kind") === "writeoff";
   const customerId = parseId(params.get("customer"));
+  const tripId = parseId(params.get("trip"));
   const title = writeOff ? "Give discount" : "Money from customer";
 
   if (settings.data === null) {
@@ -52,7 +55,9 @@ export function NewPaymentPage() {
   return (
     <>
       <PageHeader title={title} />
-      {customerId === null ? (
+      {tripId !== null ? (
+        <ForTrip id={tripId} startDate={settings.data.businessStartDate} writeOff={writeOff} />
+      ) : customerId === null ? (
         <PaymentForm
           startDate={settings.data.businessStartDate}
           customer={null}
@@ -85,6 +90,31 @@ function WithCustomer({
   return <PaymentForm startDate={startDate} customer={customer.data ?? null} writeOff={writeOff} />;
 }
 
+/** Opened from a trip: that trip's customer, what it still owes, and the trip ticked. */
+function ForTrip({
+  id,
+  startDate,
+  writeOff,
+}: {
+  id: number;
+  startDate: IsoDate;
+  writeOff: boolean;
+}) {
+  const trip = useTrip(id);
+  if (trip.isPending) return <Loading what="the trip" />;
+  if (trip.isError) return <LoadError error={trip.error} onRetry={() => void trip.refetch()} />;
+  const owing = trip.data.deletedAt === null && trip.data.duePaise > 0;
+  // A trip paid or deleted since the link was opened: the entry is still made for its customer.
+  return (
+    <PaymentForm
+      startDate={startDate}
+      customer={trip.data.customer}
+      writeOff={writeOff}
+      forTrip={owing ? trip.data : undefined}
+    />
+  );
+}
+
 // Fields this form shows, by the API's names; problems with anything else go in the notice.
 const PAYMENT_FIELDS = ["paidOn", "amount", "mode", "reference", "notes"] as const;
 
@@ -101,22 +131,25 @@ function PaymentForm({
   startDate,
   customer,
   writeOff,
+  forTrip,
 }: {
   startDate: IsoDate;
   customer: PickedCustomer | null;
   writeOff: boolean;
+  /** The trip this money is for: its due is filled in, and saving returns to it. */
+  forTrip?: TripItem | undefined;
 }) {
   const today = todayIso(new Date());
   const [values, setValues] = useState<PaymentFormValues>({
     customer,
     kind: writeOff ? "WRITE_OFF" : "PAYMENT",
     paidOn: today,
-    amount: "",
+    amount: forTrip ? paiseToRupeeInput(forTrip.duePaise) : "",
     mode: "CASH",
     reference: "",
     notes: "",
-    allocation: "AUTO",
-    chosen: [],
+    allocation: forTrip ? "MANUAL" : "AUTO",
+    chosen: forTrip ? [forTrip.id] : [],
   });
   const unpaid = useUnpaidTrips(values.customer?.id ?? null);
   // Checked live once a save was tried, so each mark clears as soon as it is fixed.
@@ -136,6 +169,8 @@ function PaymentForm({
     event.preventDefault();
     setTried(true);
     if (Object.keys(checkPayment(values, unpaid.data ?? [])).length > 0 || !values.customer) return;
+    // Ticked trips are shared out from the unpaid list; the list shows its own loading or error.
+    if (values.allocation === "MANUAL" && !unpaid.data) return;
     const name = values.customer.name;
     record.mutate(
       { customerId: values.customer.id, body: paymentBody(values, unpaid.data ?? []), key },
@@ -147,7 +182,10 @@ function PaymentForm({
               ? ` ${formatRupees(payment.unallocatedPaise)} kept as credit.`
               : "";
           toast(`${saved}${credit} ${balanceText(name, customerBalance)}`);
-          void navigate(`/dues/${String(payment.customer.id)}`);
+          const paidTrip = forTrip && values.chosen.includes(forTrip.id);
+          void navigate(
+            paidTrip ? `/trips/${String(forTrip.id)}` : `/dues/${String(payment.customer.id)}`,
+          );
         },
         onError: (error) => {
           renewAfterMismatch(error, renew);
