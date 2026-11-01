@@ -13,7 +13,6 @@ import {
 } from "fastify-type-provider-zod";
 import type { AppContext } from "./app-context.ts";
 import { oneRequestAtATime } from "./lib/one-at-a-time.ts";
-import { requireProxySecret } from "./lib/proxy-guard.ts";
 import type { Env } from "./config/env.ts";
 import { AppError, type ErrorBody } from "./lib/errors.ts";
 import { fromPrismaError } from "./lib/prisma-errors.ts";
@@ -43,8 +42,6 @@ export interface AppDeps extends AppContext {
   logLevel: Env["LOG_LEVEL"];
   corsOrigins: string[];
   trustProxyHops: number;
-  /** Set in production: only requests carrying it (sent by the website's Worker) are served. */
-  proxySecret?: string | undefined;
 }
 
 export type App = FastifyInstance<
@@ -66,8 +63,6 @@ export function buildApp(deps: AppDeps): App {
     trustProxy: trustFirstHops(deps.trustProxyHops),
   }).withTypeProvider<ZodTypeProvider>();
 
-  if (deps.proxySecret !== undefined)
-    app.addHook("onRequest", requireProxySecret(deps.proxySecret));
   oneRequestAtATime(app);
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -99,6 +94,7 @@ export function buildApp(deps: AppDeps): App {
     secureCookies: deps.secureCookies,
     mailer: deps.mailer,
     appUrl: deps.appUrl,
+    setupToken: deps.setupToken,
   };
 
   app.register(cors, {

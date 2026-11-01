@@ -12,4 +12,6 @@ export interface AppContext {
   mailer: Mailer;
   /** The app's public address, without a trailing slash; emailed links start with it. */
   appUrl: string;
+  /** Set only until the owner exists on a new install; enables POST /auth/setup-owner. */
+  setupToken?: string | undefined;
 }

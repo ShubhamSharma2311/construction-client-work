@@ -39,6 +39,13 @@ export const browserSessionResponse = sessionResponse.pick({
 });
 export type BrowserSession = z.infer<typeof browserSessionResponse>;
 
+export const setupOwnerBody = z.object({
+  setupToken: z.string().min(1).max(200),
+  username: z.string().min(1).max(50),
+  password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+});
+export type SetupOwnerInput = z.infer<typeof setupOwnerBody>;
+
 export const forgotPasswordBody = z.object({ username: loginBody.shape.username });
 
 export const resetPasswordBody = z.object({

@@ -13,7 +13,6 @@ const app = buildApp({
   logLevel: env.LOG_LEVEL,
   corsOrigins: env.CORS_ORIGINS,
   trustProxyHops: env.TRUST_PROXY_HOPS,
-  proxySecret: env.PROXY_SECRET,
   secureCookies: env.NODE_ENV === "production",
   // loadEnv guarantees a key in production; printing is for development only.
   mailer: env.RESEND_API_KEY ? resendMailer(env.RESEND_API_KEY, env.MAIL_FROM) : printMailer(),

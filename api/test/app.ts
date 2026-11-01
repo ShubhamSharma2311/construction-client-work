@@ -28,6 +28,8 @@ export interface TestAppOptions {
   secureCookies?: boolean;
   /** Defaults to one that fails the test, since only email tests should send any. */
   mailer?: Mailer;
+  /** Enables the one-time owner setup route. */
+  setupToken?: string;
 }
 
 export const TEST_APP_URL = "http://ledger.test";
@@ -49,6 +51,7 @@ export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): Ap
     secureCookies: options.secureCookies ?? false,
     mailer: options.mailer ?? noMail,
     appUrl: TEST_APP_URL,
+    setupToken: options.setupToken,
   };
 }
 

@@ -12,8 +12,16 @@ import {
   resetPasswordBody,
   type Session,
   setEmailBody,
+  setupOwnerBody,
 } from "./auth.schema.ts";
-import { changePassword, getMe, login, logout, refreshSession } from "./auth.service.ts";
+import {
+  changePassword,
+  getMe,
+  login,
+  logout,
+  refreshSession,
+  setupOwner,
+} from "./auth.service.ts";
 import { requestPasswordReset, resetPassword, setOwnerEmail } from "./password-reset.service.ts";
 import { clearRefreshCookie, readRefreshCookie, setRefreshCookie } from "./refresh-cookie.ts";
 
@@ -49,6 +57,18 @@ export const authPublicRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx,
     clearRefreshCookie(reply, ctx.secureCookies);
     return reply.status(204).send(null);
   });
+
+  const { setupToken } = ctx;
+  if (setupToken !== undefined) {
+    app.post(
+      "/auth/setup-owner",
+      { schema: { body: setupOwnerBody, response: { 201: meResponse } } },
+      async (request, reply) => {
+        const owner = await setupOwner(ctx.db, request.body, setupToken);
+        return reply.status(201).send(owner);
+      },
+    );
+  }
 
   app.post(
     "/auth/forgot-password",

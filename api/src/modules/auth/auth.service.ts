@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 import { writeAudit } from "../../lib/audit.ts";
 import { AppError } from "../../lib/errors.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
+import { sameSecret } from "../../lib/same-secret.ts";
 import { parseOrThrow } from "../../lib/validation.ts";
 import {
   newPasswordSchema,
   usernameSchema,
   type ChangePasswordInput,
   type LoginInput,
+  type SetupOwnerInput,
   type Me,
   type Session,
 } from "./auth.schema.ts";
@@ -59,6 +61,17 @@ export async function createOwner(db: Db, input: OwnerCredentials): Promise<Me> 
     });
     return { id: user.id, username: user.username, email: user.email };
   });
+}
+
+/**
+ * Creates the owner on a new install from the app itself: the live database is inside a
+ * Durable Object, so there is no shell to run the create-owner CLI against.
+ */
+export async function setupOwner(db: Db, input: SetupOwnerInput, setupToken: string): Promise<Me> {
+  if (!sameSecret(input.setupToken, setupToken)) {
+    throw new AppError("UNAUTHORIZED", "Wrong setup token");
+  }
+  return createOwner(db, { username: input.username, password: input.password });
 }
 
 /** Sets a new password for the owner and signs out every session. */
