@@ -28,7 +28,7 @@ export function todayIST(now: Date = new Date()): IsoDate {
   return istDayFormat.format(now) as IsoDate;
 }
 
-/** Postgres DATE columns come back from Prisma as UTC-midnight Dates. */
+/** Business dates are stored as UTC midnight (ISO text in SQLite) and come back as such Dates. */
 export function toDbDate(date: IsoDate): Date {
   return new Date(`${date}T00:00:00.000Z`);
 }

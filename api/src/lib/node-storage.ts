@@ -35,7 +35,8 @@ export function nodeStorage(path: string): LedgerStorage {
         db.exec("COMMIT");
         return result;
       } catch (error) {
-        db.exec("ROLLBACK");
+        // SQLite may already have rolled back (a failed COMMIT); the original error is the news.
+        if (db.inTransaction) db.exec("ROLLBACK");
         throw error;
       }
     },

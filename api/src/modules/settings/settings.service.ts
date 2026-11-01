@@ -131,8 +131,8 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
 }
 
 /**
- * The date window every dated entry must fall in. Fails until settings exist. Inside a
- * transaction the share lock keeps the start date fixed until the entry is saved.
+ * The date window every dated entry must fall in. Fails until settings exist. Requests run
+ * one at a time, so the start date cannot change before the entry is saved.
  */
 export async function getBusinessBounds(db: Db | Tx, now: Date): Promise<BusinessDateBounds> {
   const [row] = await db.$queryRaw<{ businessStartDate: Date }[]>`

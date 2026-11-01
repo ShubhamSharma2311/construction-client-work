@@ -73,7 +73,7 @@ async function openDues(tx: Tx, customerId: number): Promise<DueTrip[]> {
     orderBy: [{ tripDate: "asc" }, { id: "asc" }],
     select: { id: true, kind: true, amountPaise: true, receivedPaise: true },
   });
-  // Postgres sorts enums by declaration order (TRIP first), so put the register due first here.
+  // Trips come in date order; the old-register balance is paid first whatever its date.
   const registerFirst = [
     ...trips.filter((trip) => trip.kind === "OPENING_BALANCE"),
     ...trips.filter((trip) => trip.kind === "TRIP"),

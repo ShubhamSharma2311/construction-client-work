@@ -32,8 +32,11 @@ const NAME = "ledger-storage";
 /**
  * Prisma's driver for the ledger's SQLite storage. Column types are inferred from the values,
  * as Prisma's D1 adapter does, because the storage does not report declared types.
- * Transactions are real (unlike D1's adapter, which ignores them); they rely on the API
- * serving one request at a time (one-at-a-time.ts), so no other query can join one.
+ * Transactions are real (unlike D1's adapter, which ignores them). While one is open, every
+ * query on the storage joins it, so they rely on the API serving one request at a time
+ * (one-at-a-time.ts). Two consequences: any new way into the Durable Object (an alarm, an
+ * RPC method) must take the same turn, and a $transaction must not open inside another,
+ * as it would wait for the outer one to finish and time out.
  */
 export class LedgerStorageAdapterFactory implements SqlDriverAdapterFactory {
   readonly provider = "sqlite";
@@ -168,7 +171,7 @@ const SQLITE_ERROR_CODE = /\bSQLITE_[A-Z_]+\b/;
 
 /** The driver error for Prisma, keeping SQLite's code and message for prisma-errors.ts. */
 function driverError(error: Error): ConstructorParameters<typeof DriverAdapterError>[0] {
-  const message = error.message.replace(/^(\w+Error: )+/, "").replace(/: SQLITE_[A-Z_]+$/, "");
+  const message = error.message.replace(/^(\w*Error: )+/, "").replace(/: SQLITE_[A-Z_]+$/, "");
   const reportedCode = (error as { code?: unknown }).code;
   const originalCode =
     typeof reportedCode === "string" ? reportedCode : constraintCode(message, error.message);

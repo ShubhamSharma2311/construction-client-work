@@ -10,15 +10,23 @@ export interface Mailer {
 }
 
 const RESEND_URL = "https://api.resend.com/emails";
+// The API serves one request at a time, so a hung email would hold up every other request.
+const RESEND_TIMEOUT_MS = 10_000;
 
 /** Sends through Resend's HTTP API. */
-export function resendMailer(apiKey: string, from: string, fetchFn: typeof fetch = fetch): Mailer {
+export function resendMailer(
+  apiKey: string,
+  from: string,
+  fetchFn: typeof fetch = fetch,
+  timeoutMs = RESEND_TIMEOUT_MS,
+): Mailer {
   return {
     async send(email) {
       const response = await fetchFn(RESEND_URL, {
         method: "POST",
         headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
         body: JSON.stringify({ from, to: [email.to], subject: email.subject, text: email.text }),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!response.ok) {
         throw new Error(

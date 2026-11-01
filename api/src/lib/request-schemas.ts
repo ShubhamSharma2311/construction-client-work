@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Postgres INT is 32-bit; a larger id can never exist and must be a 400, not a 500. */
+/** Ids count up from 1 and never near 2^31; a larger one is a typo, so a 400, not a 500. */
 export const MAX_DB_ID = 2_147_483_647;
 
 export const dbIdSchema = z.coerce.number().int().positive().max(MAX_DB_ID);

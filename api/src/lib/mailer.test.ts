@@ -41,3 +41,21 @@ describe("printMailer", () => {
     expect(lines.join("")).toContain("To owner@example.com: Hello\nBody");
   });
 });
+
+describe("resendMailer when Resend does not answer", () => {
+  it("gives up after its time limit instead of holding every other request", async () => {
+    const mailer = resendMailer(
+      "re_test_key",
+      "Ledger <onboarding@resend.dev>",
+      (_input, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject(init.signal?.reason as Error);
+          });
+        }),
+      20,
+    );
+
+    await expect(mailer.send(EMAIL)).rejects.toThrow(/timed out|aborted/i);
+  });
+});

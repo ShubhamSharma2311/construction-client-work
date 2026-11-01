@@ -15,7 +15,7 @@ export type CustomerBalance = z.infer<typeof customerBalanceDto>;
 /**
  * A customer's standing from live (not deleted) rows, read from the CustomerTotals view that
  * the dues list also uses. balance = due - credit holds because a live write-off is always
- * fully set against trips (a deferred database trigger refuses anything else at commit).
+ * fully set against trips (the payments and trips services refuse anything else).
  */
 export async function customerBalance(db: Db | Tx, customerId: number): Promise<CustomerBalance> {
   const [row] = await db.$queryRaw<{ balance: bigint; due: bigint; credit: bigint }[]>`

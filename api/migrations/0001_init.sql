@@ -1,5 +1,6 @@
 -- SQLite schema for the ledger's Durable Object; generated from prisma/schema.prisma,
 -- plus the rules Prisma cannot express (CHECKs, partial indexes, triggers, the totals view).
+-- Columns that were Postgres enums get a *_values CHECK, so SQLite refuses unknown values too.
 -- CreateTable
 CREATE TABLE "AuditLog" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -8,7 +9,8 @@ CREATE TABLE "AuditLog" (
     "action" TEXT NOT NULL,
     "before" JSONB,
     "after" JSONB,
-    "at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "AuditLog_action_values" CHECK ("action" IN ('CREATE', 'UPDATE', 'DELETE', 'RESTORE'))
 );
 
 -- CreateTable
@@ -181,7 +183,8 @@ CREATE TABLE "Trip" (
     CONSTRAINT "Trip_khetId_fkey" FOREIGN KEY ("khetId") REFERENCES "Khet" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Trip_amount_positive" CHECK ("amountPaise" > 0),
     CONSTRAINT "Trip_received_within_amount" CHECK ("receivedPaise" >= 0 AND "receivedPaise" <= "amountPaise"),
-    CONSTRAINT "Trip_kind_fields" CHECK ( ("kind" = 'TRIP' AND "driverId" IS NOT NULL AND "tractorId" IS NOT NULL AND "khetId" IS NOT NULL) OR ("kind" = 'OPENING_BALANCE' AND "driverId" IS NULL AND "tractorId" IS NULL AND "khetId" IS NULL) )
+    CONSTRAINT "Trip_kind_fields" CHECK ( ("kind" = 'TRIP' AND "driverId" IS NOT NULL AND "tractorId" IS NOT NULL AND "khetId" IS NOT NULL) OR ("kind" = 'OPENING_BALANCE' AND "driverId" IS NULL AND "tractorId" IS NULL AND "khetId" IS NULL) ),
+    CONSTRAINT "Trip_kind_values" CHECK ("kind" IN ('TRIP', 'OPENING_BALANCE'))
 );
 
 -- CreateTable
@@ -203,7 +206,9 @@ CREATE TABLE "CustomerPayment" (
     CONSTRAINT "CustomerPayment_deliveryTripId_fkey" FOREIGN KEY ("deliveryTripId") REFERENCES "Trip" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "CustomerPayment_amount_positive" CHECK ("amountPaise" > 0),
     CONSTRAINT "CustomerPayment_allocated_within_amount" CHECK ("allocatedPaise" >= 0 AND "allocatedPaise" <= "amountPaise"),
-    CONSTRAINT "CustomerPayment_mode_matches_kind" CHECK (("kind" = 'WRITE_OFF') = ("mode" IS NULL))
+    CONSTRAINT "CustomerPayment_mode_matches_kind" CHECK (("kind" = 'WRITE_OFF') = ("mode" IS NULL)),
+    CONSTRAINT "CustomerPayment_kind_values" CHECK ("kind" IN ('PAYMENT', 'WRITE_OFF')),
+    CONSTRAINT "CustomerPayment_mode_values" CHECK ("mode" IN ('CASH', 'ONLINE'))
 );
 
 -- CreateTable
@@ -249,7 +254,10 @@ CREATE TABLE "Expense" (
     CONSTRAINT "Expense_diesel_fields" CHECK (("category" = 'DIESEL') = ("dieselMl" IS NOT NULL) AND ("category" <> 'DIESEL' OR ("tractorId" IS NOT NULL AND "driverId" IS NOT NULL AND "dieselMl" > 0))),
     CONSTRAINT "Expense_notes_required" CHECK ("category" NOT IN ('POLICE', 'OTHER', 'EMERGENCY', 'TRACTOR_SERVICE') OR length(trim(coalesce("notes", ''))) > 0),
     CONSTRAINT "Expense_service_fields" CHECK (("category" = 'TRACTOR_SERVICE' OR "hourMeter" IS NULL) AND ("category" <> 'TRACTOR_SERVICE' OR "tractorId" IS NOT NULL)),
-    CONSTRAINT "Expense_emi_fields" CHECK ((("category" = 'TRACTOR_EMI') = ("tractorLoanId" IS NOT NULL)) AND ("category" <> 'TRACTOR_EMI' OR "tractorId" IS NOT NULL) AND ("category" = 'TRACTOR_EMI' OR ("emiMonth" IS NULL AND "lateFeePaise" IS NULL)) AND ("emiMonth" IS NULL OR strftime('%d', "emiMonth") = '01') AND ("lateFeePaise" IS NULL OR ("lateFeePaise" >= 0 AND "lateFeePaise" < "amountPaise")))
+    CONSTRAINT "Expense_emi_fields" CHECK ((("category" = 'TRACTOR_EMI') = ("tractorLoanId" IS NOT NULL)) AND ("category" <> 'TRACTOR_EMI' OR "tractorId" IS NOT NULL) AND ("category" = 'TRACTOR_EMI' OR ("emiMonth" IS NULL AND "lateFeePaise" IS NULL)) AND ("emiMonth" IS NULL OR strftime('%d', "emiMonth") = '01') AND ("lateFeePaise" IS NULL OR ("lateFeePaise" >= 0 AND "lateFeePaise" < "amountPaise"))),
+    CONSTRAINT "Expense_royalty_period" CHECK (("category" = 'ROYALTY' OR ("periodFrom" IS NULL AND "periodTo" IS NULL)) AND (("periodFrom" IS NULL) = ("periodTo" IS NULL)) AND ("periodFrom" IS NULL OR "periodFrom" <= "periodTo")),
+    CONSTRAINT "Expense_category_values" CHECK ("category" IN ('LABOUR', 'DIESEL', 'ROYALTY', 'POLICE', 'OTHER', 'EMERGENCY', 'TRACTOR_SERVICE', 'TRACTOR_EMI')),
+    CONSTRAINT "Expense_mode_values" CHECK ("mode" IN ('CASH', 'ONLINE'))
 );
 
 -- CreateTable
@@ -268,7 +276,8 @@ CREATE TABLE "TractorLoan" (
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "TractorLoan_tractorId_fkey" FOREIGN KEY ("tractorId") REFERENCES "Tractor" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "TractorLoan_values" CHECK ("emiPaise" > 0 AND "emiDay" BETWEEN 1 AND 28 AND "totalInstallments" BETWEEN 1 AND 120 AND strftime('%d', "firstEmiMonth") = '01'),
-    CONSTRAINT "TractorLoan_closure_pair" CHECK (("closedOn" IS NULL) = ("closedReason" IS NULL))
+    CONSTRAINT "TractorLoan_closure_pair" CHECK (("closedOn" IS NULL) = ("closedReason" IS NULL)),
+    CONSTRAINT "TractorLoan_closedReason_values" CHECK ("closedReason" IN ('PAID_OFF', 'FORECLOSED'))
 );
 
 -- CreateTable
@@ -284,7 +293,8 @@ CREATE TABLE "DriverAccrual" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "DriverAccrual_driverId_fkey" FOREIGN KEY ("driverId") REFERENCES "Driver" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "DriverAccrual_kind_rules" CHECK ( ("kind" = 'MONTH_SALARY' AND "month" IS NOT NULL AND strftime('%d', "month") = '01' AND "amountPaise" >= 0) OR ("kind" = 'BONUS' AND "month" IS NULL AND "amountPaise" > 0) OR ("kind" = 'OPENING_BALANCE' AND "month" IS NULL AND "amountPaise" <> 0) )
+    CONSTRAINT "DriverAccrual_kind_rules" CHECK ( ("kind" = 'MONTH_SALARY' AND "month" IS NOT NULL AND strftime('%d', "month") = '01' AND "amountPaise" >= 0) OR ("kind" = 'BONUS' AND "month" IS NULL AND "amountPaise" > 0) OR ("kind" = 'OPENING_BALANCE' AND "month" IS NULL AND "amountPaise" <> 0) ),
+    CONSTRAINT "DriverAccrual_kind_values" CHECK ("kind" IN ('MONTH_SALARY', 'BONUS', 'OPENING_BALANCE'))
 );
 
 -- CreateTable
@@ -303,7 +313,9 @@ CREATE TABLE "DriverPayment" (
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "DriverPayment_driverId_fkey" FOREIGN KEY ("driverId") REFERENCES "Driver" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "DriverPayment_bonusAccrualId_fkey" FOREIGN KEY ("bonusAccrualId") REFERENCES "DriverAccrual" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "DriverPayment_rules" CHECK ( "amountPaise" > 0 AND (("type" = 'BONUS') = ("bonusAccrualId" IS NOT NULL)) AND ("forMonth" IS NULL OR strftime('%d', "forMonth") = '01') )
+    CONSTRAINT "DriverPayment_rules" CHECK ( "amountPaise" > 0 AND (("type" = 'BONUS') = ("bonusAccrualId" IS NOT NULL)) AND ("forMonth" IS NULL OR strftime('%d', "forMonth") = '01') ),
+    CONSTRAINT "DriverPayment_type_values" CHECK ("type" IN ('ADVANCE', 'SALARY', 'BONUS')),
+    CONSTRAINT "DriverPayment_mode_values" CHECK ("mode" IN ('CASH', 'ONLINE'))
 );
 
 -- CreateTable
@@ -319,7 +331,9 @@ CREATE TABLE "PartnerTxn" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "PartnerTxn_partnerId_fkey" FOREIGN KEY ("partnerId") REFERENCES "Partner" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "PartnerTxn_amount_positive" CHECK ("amountPaise" > 0)
+    CONSTRAINT "PartnerTxn_amount_positive" CHECK ("amountPaise" > 0),
+    CONSTRAINT "PartnerTxn_direction_values" CHECK ("direction" IN ('PAID_TO_PARTNER', 'RECEIVED_FROM_PARTNER')),
+    CONSTRAINT "PartnerTxn_mode_values" CHECK ("mode" IN ('CASH', 'ONLINE'))
 );
 
 -- CreateIndex

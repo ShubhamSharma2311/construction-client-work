@@ -45,8 +45,8 @@ export interface IdempotentResult<T extends Prisma.InputJsonValue> extends WorkR
 
 /**
  * Runs `work` at most once per key. The key is claimed in the same transaction as the
- * work, so a record and its key always commit or roll back together. A concurrent request
- * with the same key waits on the claim, then replays the stored response.
+ * work, so a record and its key always commit or roll back together. A repeated request
+ * with the same key, which runs after the first (one request at a time), replays its response.
  * Failed work stores nothing, so the client may retry with the same key.
  */
 export async function runIdempotent<T extends Prisma.InputJsonValue>(
@@ -85,8 +85,8 @@ export async function runIdempotent<T extends Prisma.InputJsonValue>(
   }, TRANSACTION_LIMITS);
 }
 
-// A duplicate request holds a pooled connection while it waits for the first one's claim,
-// so both limits are explicit rather than Prisma's silent 2s/5s defaults.
+// A transaction may wait for the one before it to finish, so both limits are explicit
+// rather than Prisma's silent 2s/5s defaults.
 const TRANSACTION_LIMITS = { maxWait: 5_000, timeout: 10_000 } as const;
 
 function hashRequest(route: string, body: unknown): string {

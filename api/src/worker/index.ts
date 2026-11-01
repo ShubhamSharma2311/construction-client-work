@@ -21,7 +21,8 @@ interface Env {
 
 /**
  * The whole ledger: one Durable Object, so one SQLite database that only this Worker can
- * reach, serving the API one request at a time.
+ * reach, serving the API one request at a time. Any other entry point added here (an alarm,
+ * an RPC method) must go through the app too, or it could run inside a request's transaction.
  */
 export class Ledger extends DurableObject<Env> {
   private readonly app: App;

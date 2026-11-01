@@ -1,6 +1,6 @@
 import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "node:crypto";
 
-// Node's built-in scrypt: a memory-hard KDF with no native dependency to build on Cloud Run.
+// Node's built-in scrypt: a memory-hard KDF with no native dependency, so Workers run it too.
 const PARAMS = { N: 16_384, r: 8, p: 1 } as const;
 const KEY_LENGTH = 64;
 const SALT_BYTES = 16;
