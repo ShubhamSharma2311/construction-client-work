@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import type { RouteObject } from "react-router";
 import { LoginPage } from "../auth/LoginPage.tsx";
+import { ForgotPasswordPage } from "../auth/ForgotPasswordPage.tsx";
+import { ResetPasswordPage } from "../auth/ResetPasswordPage.tsx";
 import { RequireAuth } from "../auth/RequireAuth.tsx";
 import { CustomerAccountPage } from "../features/customers/CustomerAccountPage.tsx";
 import { DriverPage } from "../features/drivers/DriverPage.tsx";
@@ -86,6 +88,8 @@ function screenFor({ to }: Destination): RouteObject {
 
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/reset-password", element: <ResetPasswordPage /> },
   {
     element: <RequireAuth />,
     children: [

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { type SubmitEvent, useState } from "react";
-import { Navigate, useLocation } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 import { useServices, useSessionStatus } from "../app/ServicesContext.tsx";
 import { APP_NAME } from "../lib/appName.ts";
 import { Button } from "../ui/Button.tsx";
@@ -66,6 +66,9 @@ export function LoginPage() {
           <Button type="submit" block disabled={signIn.isPending}>
             {signIn.isPending ? "Signing in…" : "Sign in"}
           </Button>
+          <Link className={styles.help} to="/forgot-password">
+            Forgot password?
+          </Link>
         </form>
       </div>
     </div>

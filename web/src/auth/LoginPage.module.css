@@ -36,3 +36,15 @@
   font-size: var(--text-lg);
   font-weight: 650;
 }
+
+.note {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+/* Links under a card, such as "Forgot password?": small and left-aligned, not buttons. */
+.help {
+  justify-self: start;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}

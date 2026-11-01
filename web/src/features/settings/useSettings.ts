@@ -67,3 +67,29 @@ export function useChangePassword(): UseMutationResult<void, Error, PasswordBody
     },
   });
 }
+
+const ACCOUNT_KEY = ["account"] as const;
+
+export type Account = Ok<"/auth/me", "get">;
+
+/** The signed-in owner, including the email that password reset links go to. */
+export function useAccount(): UseQueryResult<Account> {
+  const { api } = useServices();
+  return useQuery({
+    queryKey: ACCOUNT_KEY,
+    queryFn: async () => unwrap(await api.GET("/auth/me")),
+  });
+}
+
+type EmailBody = BodyOf<"/auth/email", "put">;
+
+export function useSetResetEmail(): UseMutationResult<Account, Error, EmailBody> {
+  const { api } = useServices();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: EmailBody) => unwrap(await api.PUT("/auth/email", { body })),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(ACCOUNT_KEY, saved);
+    },
+  });
+}

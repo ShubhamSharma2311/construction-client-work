@@ -2,19 +2,10 @@ import { type SubmitEvent, useState } from "react";
 import { fieldErrors } from "../../api/errors.ts";
 import { Button } from "../../ui/Button.tsx";
 import { FormError } from "../../ui/FormError.tsx";
+import { newPasswordProblems } from "../../auth/newPassword.ts";
 import { TextField } from "../../ui/TextField.tsx";
 import styles from "./SettingsPage.module.css";
 import { useChangePassword } from "./useSettings.ts";
-
-// The API's own minimum; checked here too so the owner hears it before sending.
-const MIN_LENGTH = 10;
-
-function problemsOf(next: string, repeat: string): { newPassword?: string; repeat?: string } {
-  if (next.length < MIN_LENGTH)
-    return { newPassword: `Use at least ${String(MIN_LENGTH)} characters` };
-  if (next !== repeat) return { repeat: "The two new passwords are not the same" };
-  return {};
-}
 
 export function PasswordForm() {
   const [current, setCurrent] = useState("");
@@ -22,13 +13,13 @@ export function PasswordForm() {
   const [repeat, setRepeat] = useState("");
   const [tried, setTried] = useState(false);
   const change = useChangePassword();
-  const problems = tried ? problemsOf(next, repeat) : {};
+  const problems = tried ? newPasswordProblems(next, repeat) : {};
   const server = fieldErrors(change.error);
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTried(true);
-    if (current === "" || Object.keys(problemsOf(next, repeat)).length > 0) return;
+    if (current === "" || Object.keys(newPasswordProblems(next, repeat)).length > 0) return;
     change.mutate({ currentPassword: current, newPassword: next });
   };
 

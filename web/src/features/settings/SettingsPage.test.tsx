@@ -17,7 +17,11 @@ type Handler = (request: Request) => Response | Promise<Response>;
 const NO_HISTORY = { items: [], total: 0, page: 1, limit: 30 };
 
 function settingsApi(extra: Record<string, Handler> = {}) {
-  return fakeApi({ ...signedInRoutes, ...extra });
+  return fakeApi({
+    ...signedInRoutes,
+    "GET /auth/me": () => json({ id: 1, username: "owner", email: "owner@example.com" }),
+    ...extra,
+  });
 }
 
 describe("Business settings", () => {
@@ -235,5 +239,30 @@ describe("Deleted entries and history", () => {
       "href",
       "/loans/5",
     );
+  });
+});
+
+describe("Email for a forgotten password", () => {
+  it("shows where reset links go and saves a new email with the password", async () => {
+    const sent: unknown[] = [];
+    const api = settingsApi({
+      "GET /auth/me": () => json({ id: 1, username: "owner", email: null }),
+      "PUT /auth/email": async (request) => {
+        sent.push(await request.json());
+        return json({ id: 1, username: "owner", email: "owner@example.com" });
+      },
+    });
+    const { user } = await renderApp(api, { path: "/settings?view=password" });
+
+    const form = await screen.findByRole("form", { name: "Reset email" });
+    expect(await within(form).findByText(/No email is set/)).toBeInTheDocument();
+    await user.type(within(form).getByLabelText("Email"), "owner@example.com");
+    await user.type(within(form).getByLabelText("Current password"), "owner-password-1");
+    await user.click(within(form).getByRole("button", { name: "Save email" }));
+
+    expect(
+      await within(form).findByText("Reset links go to owner@example.com."),
+    ).toBeInTheDocument();
+    expect(sent).toEqual([{ email: "owner@example.com", currentPassword: "owner-password-1" }]);
   });
 });

@@ -20,3 +20,15 @@
   display: grid;
   gap: var(--space-3);
 }
+
+.heading {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+/* The password view holds two forms, one under the other. */
+.stack {
+  display: grid;
+  gap: var(--space-6);
+}

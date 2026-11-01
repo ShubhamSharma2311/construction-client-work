@@ -9,6 +9,7 @@ import { HISTORY_KINDS } from "../history/historyKinds.ts";
 import { HistoryView } from "../history/HistoryView.tsx";
 import { BusinessForm } from "./BusinessForm.tsx";
 import { PasswordForm } from "./PasswordForm.tsx";
+import { ResetEmailForm } from "./ResetEmailForm.tsx";
 import styles from "./SettingsPage.module.css";
 import { useSettings } from "./useSettings.ts";
 
@@ -62,7 +63,12 @@ export function SettingsPage() {
         }}
       />
       {view === "business" ? <BusinessForm settings={settings.data} /> : null}
-      {view === "password" ? <PasswordForm /> : null}
+      {view === "password" ? (
+        <div className={styles.stack}>
+          <PasswordForm />
+          <ResetEmailForm />
+        </div>
+      ) : null}
       {view === "deleted" ? <DeletedEntries /> : null}
       {view === "history" ? (
         <section className={styles.section} aria-label="History">
