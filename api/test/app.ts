@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach } from "vitest";
 import { buildApp, type App, type AppDeps } from "../src/app.ts";
 import type { Clock } from "../src/lib/clock.ts";
 import type { ErrorBody } from "../src/lib/errors.ts";
+import type { Mailer } from "../src/lib/mailer.ts";
 import type { Db } from "../src/lib/prisma.ts";
 import { hashPassword } from "../src/modules/auth/password.ts";
 import { signAccessToken } from "../src/modules/auth/tokens.ts";
@@ -25,7 +26,17 @@ export interface TestAppOptions {
   trustProxyHops?: number;
   /** Mark the refresh cookie Secure, as production over HTTPS does. */
   secureCookies?: boolean;
+  /** Defaults to one that fails the test, since only email tests should send any. */
+  mailer?: Mailer;
 }
+
+export const TEST_APP_URL = "http://ledger.test";
+
+const noMail: Mailer = {
+  send(email) {
+    return Promise.reject(new Error(`unexpected email to ${email.to}: ${email.subject}`));
+  },
+};
 
 export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): AppDeps {
   return {
@@ -36,6 +47,8 @@ export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): Ap
     corsOrigins: [ALLOWED_ORIGIN],
     trustProxyHops: options.trustProxyHops ?? 0,
     secureCookies: options.secureCookies ?? false,
+    mailer: options.mailer ?? noMail,
+    appUrl: TEST_APP_URL,
   };
 }
 

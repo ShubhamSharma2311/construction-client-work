@@ -5,6 +5,7 @@ export const ERROR_STATUS = {
   CONFLICT: 409,
   IDEMPOTENCY_MISMATCH: 422,
   RATE_LIMITED: 429,
+  UNAVAILABLE: 503,
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_STATUS;
@@ -16,8 +17,8 @@ export class AppError extends Error {
   readonly httpStatus: number;
   readonly details: ErrorDetails | undefined;
 
-  constructor(code: ErrorCode, message: string, details?: ErrorDetails) {
-    super(message);
+  constructor(code: ErrorCode, message: string, details?: ErrorDetails, options?: ErrorOptions) {
+    super(message, options);
     this.name = "AppError";
     this.code = code;
     this.httpStatus = ERROR_STATUS[code];

@@ -36,12 +36,28 @@ model IdempotencyKey {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  username      String         @unique
-  passwordHash  String
-  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
-  refreshTokens RefreshToken[]
+  id             Int             @id @default(autoincrement())
+  username       String          @unique
+  passwordHash   String
+  /// Where "forgot password" sends the reset link; none set means no reset by email.
+  email          String?
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  refreshTokens  RefreshToken[]
+  passwordResets PasswordReset[]
+}
+
+/// A "forgot password" link: only the token's SHA-256 is stored, and it works once.
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz(3)
+  usedAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @db.Timestamptz(3)
+
+  @@index([userId, createdAt])
 }
 
 /// One row per issued refresh token; a login and all its rotations share a familyId.

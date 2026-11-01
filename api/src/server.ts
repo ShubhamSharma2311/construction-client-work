@@ -1,6 +1,7 @@
 import { buildApp } from "./app.ts";
 import { loadEnv } from "./config/env.ts";
 import { systemClock } from "./lib/clock.ts";
+import { printMailer, resendMailer } from "./lib/mailer.ts";
 import { createPrisma } from "./lib/prisma.ts";
 
 const env = loadEnv();
@@ -13,6 +14,9 @@ const app = buildApp({
   corsOrigins: env.CORS_ORIGINS,
   trustProxyHops: env.TRUST_PROXY_HOPS,
   secureCookies: env.NODE_ENV === "production",
+  // loadEnv guarantees a key in production; printing is for development only.
+  mailer: env.RESEND_API_KEY ? resendMailer(env.RESEND_API_KEY, env.MAIL_FROM) : printMailer(),
+  appUrl: env.APP_URL,
 });
 
 app.addHook("onClose", async () => {

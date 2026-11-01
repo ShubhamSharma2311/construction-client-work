@@ -11,6 +11,8 @@ const PUBLIC_ROUTES = new Set([
   "POST /auth/login",
   "POST /auth/refresh",
   "POST /auth/logout",
+  "POST /auth/forgot-password",
+  "POST /auth/reset-password",
   "OPTIONS *",
 ]);
 

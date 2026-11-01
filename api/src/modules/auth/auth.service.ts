@@ -59,7 +59,7 @@ export async function createOwner(db: Db, input: OwnerCredentials): Promise<Me> 
       action: "CREATE",
       after: { username },
     });
-    return { id: user.id, username: user.username };
+    return { id: user.id, username: user.username, email: user.email };
   });
 }
 
@@ -79,7 +79,7 @@ export async function resetOwnerPassword(db: Db, input: OwnerCredentials, now: D
       action: "UPDATE",
       after: { passwordReset: now },
     });
-    return { id: user.id, username: user.username };
+    return { id: user.id, username: user.username, email: user.email };
   });
 }
 
@@ -174,7 +174,7 @@ export async function refreshSession(
   throw invalidSession();
 }
 
-function accountGone(): AppError {
+export function accountGone(): AppError {
   return new AppError("UNAUTHORIZED", "Account no longer exists; log in again");
 }
 
@@ -223,7 +223,7 @@ export async function changePassword(
 export async function getMe(db: Db, userId: number): Promise<Me> {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) throw accountGone();
-  return { id: user.id, username: user.username };
+  return { id: user.id, username: user.username, email: user.email };
 }
 
 async function issueSession(
@@ -254,7 +254,7 @@ async function revokeFamily(db: Db | Tx, familyId: string, now: Date): Promise<v
   });
 }
 
-async function revokeAllForUser(tx: Tx, userId: number, now: Date): Promise<void> {
+export async function revokeAllForUser(tx: Tx, userId: number, now: Date): Promise<void> {
   await tx.refreshToken.updateMany({
     where: { userId, revokedAt: null },
     data: { revokedAt: now },

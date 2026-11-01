@@ -6,11 +6,15 @@ import {
   type BrowserSession,
   browserSessionResponse,
   changePasswordBody,
+  forgotPasswordBody,
   loginBody,
   meResponse,
+  resetPasswordBody,
   type Session,
+  setEmailBody,
 } from "./auth.schema.ts";
 import { changePassword, getMe, login, logout, refreshSession } from "./auth.service.ts";
+import { requestPasswordReset, resetPassword, setOwnerEmail } from "./password-reset.service.ts";
 import { clearRefreshCookie, readRefreshCookie, setRefreshCookie } from "./refresh-cookie.ts";
 
 function sendSession(reply: FastifyReply, session: Session, secure: boolean): BrowserSession {
@@ -45,6 +49,27 @@ export const authPublicRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx,
     clearRefreshCookie(reply, ctx.secureCookies);
     return reply.status(204).send(null);
   });
+
+  app.post(
+    "/auth/forgot-password",
+    { schema: { body: forgotPasswordBody, response: { 204: z.null() } } },
+    async (request, reply) => {
+      const resetRequest = { username: request.body.username, appUrl: ctx.appUrl };
+      await requestPasswordReset(ctx.db, ctx.mailer, resetRequest, ctx.clock());
+      return reply.status(204).send(null);
+    },
+  );
+
+  app.post(
+    "/auth/reset-password",
+    { schema: { body: resetPasswordBody, response: { 204: z.null() } } },
+    async (request, reply) => {
+      await resetPassword(ctx.db, request.body, ctx.clock());
+      // Every login was just signed out, this browser's included.
+      clearRefreshCookie(reply, ctx.secureCookies);
+      return reply.status(204).send(null);
+    },
+  );
   done();
 };
 
@@ -52,6 +77,12 @@ export const authPublicRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx,
 export const authPrivateRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
   app.get("/auth/me", { schema: { response: { 200: meResponse } } }, (request) =>
     getMe(ctx.db, request.userId),
+  );
+
+  app.put(
+    "/auth/email",
+    { schema: { body: setEmailBody, response: { 200: meResponse } } },
+    (request) => setOwnerEmail(ctx.db, request.userId, request.body),
   );
 
   app.post(

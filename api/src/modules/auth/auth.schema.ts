@@ -39,5 +39,24 @@ export const browserSessionResponse = sessionResponse.pick({
 });
 export type BrowserSession = z.infer<typeof browserSessionResponse>;
 
-export const meResponse = z.object({ id: z.number().int(), username: z.string() });
+export const forgotPasswordBody = z.object({ username: loginBody.shape.username });
+
+export const resetPasswordBody = z.object({
+  token: z.string().min(1).max(200),
+  newPassword: newPasswordSchema,
+});
+export type ResetPasswordInput = z.infer<typeof resetPasswordBody>;
+
+export const setEmailBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email("enter a valid email address").max(254)),
+  currentPassword: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+});
+export type SetEmailInput = z.infer<typeof setEmailBody>;
+
+export const meResponse = z.object({
+  id: z.number().int(),
+  username: z.string(),
+  /** Where "forgot password" sends the link; null when none is set. */
+  email: z.string().nullable(),
+});
 export type Me = z.infer<typeof meResponse>;

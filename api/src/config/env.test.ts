@@ -8,6 +8,7 @@ const valid = {
   JWT_SECRET: "x".repeat(32),
   CORS_ORIGINS: "http://localhost:5173, https://ledger.example.workers.dev",
   TRUST_PROXY_HOPS: "0",
+  APP_URL: "http://localhost:5173/",
 };
 
 describe("loadEnv", () => {
@@ -18,6 +19,8 @@ describe("loadEnv", () => {
       LOG_LEVEL: "info",
       CORS_ORIGINS: ["http://localhost:5173", "https://ledger.example.workers.dev"],
       TRUST_PROXY_HOPS: 0,
+      APP_URL: "http://localhost:5173",
+      MAIL_FROM: "Sawariya Seth <onboarding@resend.dev>",
     });
   });
 
@@ -49,5 +52,12 @@ describe("loadEnv", () => {
     expect(loadEnv({ ...valid, TRUST_PROXY_HOPS: "1" }).TRUST_PROXY_HOPS).toBe(1);
     expect(() => loadEnv({ ...valid, TRUST_PROXY_HOPS: "true" })).toThrow(/TRUST_PROXY_HOPS/);
     expect(() => loadEnv({ ...valid, TRUST_PROXY_HOPS: "-1" })).toThrow(/TRUST_PROXY_HOPS/);
+  });
+
+  it("needs a Resend key in production, where emails must really go out", () => {
+    expect(() => loadEnv({ ...valid, NODE_ENV: "production" })).toThrow(/RESEND_API_KEY/);
+    expect(
+      loadEnv({ ...valid, NODE_ENV: "production", RESEND_API_KEY: "re_1" }).RESEND_API_KEY,
+    ).toBe("re_1");
   });
 });

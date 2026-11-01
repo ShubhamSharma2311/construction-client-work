@@ -90,6 +90,8 @@ export function buildApp(deps: AppDeps): App {
     clock: deps.clock,
     jwtSecret: deps.jwtSecret,
     secureCookies: deps.secureCookies,
+    mailer: deps.mailer,
+    appUrl: deps.appUrl,
   };
 
   app.register(cors, {

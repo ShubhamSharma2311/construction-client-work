@@ -69,7 +69,7 @@ describe("POST /auth/login", () => {
     });
     const whoAmI = await me(loggedIn(response).accessToken);
     expect(whoAmI.statusCode).toBe(200);
-    expect(whoAmI.json()).toEqual({ id: t.ownerId, username: OWNER.username });
+    expect(whoAmI.json()).toEqual({ id: t.ownerId, username: OWNER.username, email: null });
   });
 
   it("ignores case and surrounding spaces in the username", async () => {

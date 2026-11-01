@@ -1,5 +1,6 @@
 import { buildApp } from "./app.ts";
 import { systemClock } from "./lib/clock.ts";
+import { printMailer } from "./lib/mailer.ts";
 import { createPrisma } from "./lib/prisma.ts";
 
 // The description comes from route schemas alone. Building the app does not connect to
@@ -18,6 +19,8 @@ export async function buildOpenApiSpec(): Promise<unknown> {
     corsOrigins: [],
     trustProxyHops: 0,
     secureCookies: true,
+    mailer: printMailer(),
+    appUrl: "https://unused.example",
   });
   try {
     await app.ready();
