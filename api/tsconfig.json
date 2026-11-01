@@ -17,5 +17,7 @@
     "types": ["node"],
     "rootDir": "."
   },
-  "include": ["src", "test", "prisma.config.ts", "vitest.config.ts", "eslint.config.js"]
+  "include": ["src", "test", "prisma.config.ts", "vitest.config.ts", "eslint.config.js"],
+  // The Worker's entry uses Cloudflare's runtime types; src/worker/tsconfig.json checks it.
+  "exclude": ["src/worker/index.ts"]
 }

@@ -12,9 +12,10 @@ const keySchema = z
   .max(128)
   .regex(/^[A-Za-z0-9_-]+$/);
 
-export function readIdempotencyKey(headers: Record<string, string | string[] | undefined>): string {
-  const raw = headers[IDEMPOTENCY_HEADER];
-  if (raw === undefined) {
+export function readIdempotencyKey(headers: Headers): string {
+  // Repeated headers arrive joined with ", ", which the key's pattern then refuses.
+  const raw = headers.get(IDEMPOTENCY_HEADER);
+  if (raw === null) {
     throw new AppError("VALIDATION", "Idempotency-Key header is required");
   }
   const parsed = keySchema.safeParse(raw);

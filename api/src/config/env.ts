@@ -4,15 +4,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   PORT: z.coerce.number().int().min(0).max(65535),
   DATABASE_URL: z.string().startsWith("file:", "DATABASE_URL must be a SQLite file: URL"),
-  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   CORS_ORIGINS: z
     .string()
     .transform((value) => value.split(",").map((origin) => origin.trim()))
     .pipe(z.array(z.url()).min(1)),
-  // Number of proxies in front of the local server; 0 unless one is put in front of it.
-  // Only the addresses those proxies appended to X-Forwarded-For are trusted.
-  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5),
   // The app's public address; "forgot password" links point here.
   APP_URL: z.url().transform((url) => url.replace(/\/+$/, "")),
   // Without a key, emails are only written to the log, which production must never do.

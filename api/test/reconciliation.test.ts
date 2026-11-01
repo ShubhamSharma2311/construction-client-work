@@ -1,4 +1,4 @@
-import type { LightMyRequestResponse } from "fastify";
+import type { TestResponse } from "./response.ts";
 import { describe, expect, it } from "vitest";
 import { addDays, isoDateSchema, type ClosedRange, type IsoDate } from "../src/lib/dates.ts";
 import type {
@@ -56,10 +56,7 @@ interface Tally {
   accepted: number;
 }
 
-async function send(
-  tally: Tally,
-  request: Promise<LightMyRequestResponse>,
-): Promise<LightMyRequestResponse> {
+async function send(tally: Tally, request: Promise<TestResponse>): Promise<TestResponse> {
   const response = await request;
   tally.requests += 1;
   expect(response.statusCode, response.body).toBeLessThan(500);

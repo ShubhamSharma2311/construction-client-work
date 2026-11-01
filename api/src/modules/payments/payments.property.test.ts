@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import type { LightMyRequestResponse } from "fastify";
+import type { TestResponse } from "../../../test/response.ts";
 import { describe, expect, it } from "vitest";
 import { useTestApp } from "../../../test/app.ts";
 import { resetDb } from "../../../test/db.ts";
@@ -62,7 +62,7 @@ class Model {
     this.owed.set(customerId, (this.owed.get(customerId) ?? 0) + paise);
   }
 
-  expectResponse(response: LightMyRequestResponse, customerId: number): void {
+  expectResponse(response: TestResponse, customerId: number): void {
     const balance = response.json<{ customerBalance?: CustomerBalance }>().customerBalance;
     if (balance) {
       expect(balance.balancePaise, "balance in the response").toBe(this.owed.get(customerId) ?? 0);
@@ -120,7 +120,7 @@ async function expectedFifo(customerId: number, amountPaise: number): Promise<[n
   return lines;
 }
 
-async function perform(world: World, action: Operation): Promise<LightMyRequestResponse> {
+async function perform(world: World, action: Operation): Promise<TestResponse> {
   const { model } = world;
   switch (action.op) {
     case "trip": {

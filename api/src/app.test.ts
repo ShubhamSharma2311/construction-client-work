@@ -1,10 +1,11 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { testDeps } from "../test/app.ts";
+import { TestResponse, testDeps } from "../test/app.ts";
 import { createTestPrisma } from "../test/db.ts";
-import { buildApp } from "./app.ts";
+import { buildApp, mountRoute } from "./app.ts";
 import { AppError, ERROR_STATUS, type ErrorCode } from "./lib/errors.ts";
 import { ledgerPrisma } from "./lib/prisma.ts";
+import { RouteTable, respond } from "./lib/route.ts";
 
 const db = createTestPrisma();
 
@@ -13,30 +14,29 @@ afterAll(async () => {
 });
 
 function appWithProbeRoutes() {
-  const app = buildApp(testDeps(db, () => new Date()));
-  app.get<{ Params: { code: ErrorCode } }>("/probe/app-error/:code", (request) => {
-    throw new AppError(request.params.code, `probe ${request.params.code}`, { field: "x" });
+  const deps = testDeps(db, () => new Date());
+  const app = buildApp(deps);
+  const probes = new RouteTable(false);
+  probes.get("/probe/app-error/:code", { params: z.object({ code: z.string() }) }, (request) => {
+    const code = request.params.code as ErrorCode;
+    throw new AppError(code, `probe ${code}`, { field: "x" });
   });
-  app.get("/probe/status-without-code", () => {
-    throw Object.assign(new Error("teapot"), { statusCode: 418 });
-  });
-  app.get("/probe/crash", () => {
+  probes.get("/probe/crash", {}, () => {
     throw new Error("database password is hunter2");
   });
-  app.post(
-    "/probe/validate",
-    { schema: { body: z.object({ amount: z.number().positive() }) } },
-    (request) => request.body,
+  probes.post("/probe/validate", { body: z.object({ amount: z.number().positive() }) }, (request) =>
+    respond(200, request.body),
   );
-  return app;
+  for (const route of probes.routes) mountRoute(app, route, deps);
+  return async (path: string, init?: RequestInit) =>
+    TestResponse.from(await app.request(path, init));
 }
 
 describe("error mapping", () => {
-  const app = appWithProbeRoutes();
-  afterAll(() => app.close());
+  const call = appWithProbeRoutes();
 
   it.each(Object.entries(ERROR_STATUS))("maps AppError %s to HTTP %d", async (code, status) => {
-    const response = await app.inject({ method: "GET", url: `/probe/app-error/${code}` });
+    const response = await call(`/probe/app-error/${code}`);
 
     expect(response.statusCode).toBe(status);
     expect(response.json()).toEqual({
@@ -50,10 +50,10 @@ describe("error mapping", () => {
   });
 
   it("returns 400 with the failing field for a schema violation", async () => {
-    const response = await app.inject({
+    const response = await call("/probe/validate", {
       method: "POST",
-      url: "/probe/validate",
-      payload: { amount: -5 },
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount: -5 }),
     });
 
     expect(response.statusCode).toBe(400);
@@ -65,25 +65,27 @@ describe("error mapping", () => {
   });
 
   it("returns 400 for malformed JSON", async () => {
-    const response = await app.inject({
+    const response = await call("/probe/validate", {
       method: "POST",
-      url: "/probe/validate",
       headers: { "content-type": "application/json" },
-      payload: "{not json",
+      body: "{not json",
     });
 
     expect(response.statusCode).toBe(400);
   });
 
-  it("keeps the error shape for a 4xx error that carries no code", async () => {
-    const response = await app.inject({ method: "GET", url: "/probe/status-without-code" });
+  it("returns 415 for a body that is not JSON", async () => {
+    const response = await call("/probe/validate", {
+      method: "POST",
+      headers: { "content-type": "text/plain" },
+      body: "amount=5",
+    });
 
-    expect(response.statusCode).toBe(418);
-    expect(response.json()).toMatchObject({ error: { code: "BAD_REQUEST", message: "teapot" } });
+    expect(response.statusCode).toBe(415);
   });
 
   it("hides internal error text behind a 500 with a request id", async () => {
-    const response = await app.inject({ method: "GET", url: "/probe/crash" });
+    const response = await call("/probe/crash");
 
     expect(response.statusCode).toBe(500);
     expect(response.body).not.toContain("hunter2");
@@ -97,19 +99,15 @@ describe("error mapping", () => {
   });
 
   it("returns 404 in the same error shape for an unknown route", async () => {
-    const response = await app.inject({ method: "GET", url: "/nope" });
+    const response = await call("/nope");
 
     expect(response.statusCode).toBe(404);
     expect(response.json()).toMatchObject({ error: { code: "NOT_FOUND" } });
   });
 
   it("gives every response its own request id and ignores one sent by the client", async () => {
-    const first = await app.inject({
-      method: "GET",
-      url: "/nope",
-      headers: { "x-request-id": "spoofed" },
-    });
-    const second = await app.inject({ method: "GET", url: "/nope" });
+    const first = await call("/nope", { headers: { "x-request-id": "spoofed" } });
+    const second = await call("/nope");
 
     expect(first.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
     expect(first.headers["x-request-id"]).not.toBe(second.headers["x-request-id"]);
@@ -120,11 +118,10 @@ describe("GET /health", () => {
   it("reports ok when the database answers", async () => {
     const app = buildApp(testDeps(db, () => new Date()));
 
-    const response = await app.inject({ method: "GET", url: "/health" });
+    const response = await app.request("/health");
 
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: "ok", database: "ok" });
-    await app.close();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "ok", database: "ok" });
   });
 
   it("reports 503 when the database is unreachable", async () => {
@@ -138,11 +135,10 @@ describe("GET /health", () => {
     });
     const app = buildApp(testDeps(deadDb, () => new Date()));
 
-    const response = await app.inject({ method: "GET", url: "/health" });
+    const response = await app.request("/health");
 
-    expect(response.statusCode).toBe(503);
-    expect(response.json()).toEqual({ status: "unavailable", database: "unreachable" });
-    await app.close();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ status: "unavailable", database: "unreachable" });
     await deadDb.$disconnect();
   });
 });

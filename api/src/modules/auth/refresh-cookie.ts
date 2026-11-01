@@ -1,4 +1,5 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { Context } from "hono";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 export const REFRESH_COOKIE = "refresh_token";
 
@@ -13,25 +14,25 @@ function cookieName(secure: boolean): string {
 // sending it, which is what makes a cookie-only refresh safe without a CSRF token. The app
 // and API share one origin (the frontend proxies /api), so Strict never blocks the app itself.
 function cookieOptions(secure: boolean) {
-  return { httpOnly: true, sameSite: "strict", secure, path: "/" } as const;
+  return { httpOnly: true, sameSite: "Strict", secure, path: "/" } as const;
 }
 
-export function readRefreshCookie(request: FastifyRequest, secure: boolean): string | undefined {
-  return request.cookies[cookieName(secure)];
+export function readRefreshCookie(c: Context, secure: boolean): string | undefined {
+  return getCookie(c, cookieName(secure));
 }
 
 export function setRefreshCookie(
-  reply: FastifyReply,
+  c: Context,
   token: string,
   expiresAt: string,
   secure: boolean,
 ): void {
-  reply.setCookie(cookieName(secure), token, {
+  setCookie(c, cookieName(secure), token, {
     ...cookieOptions(secure),
     expires: new Date(expiresAt),
   });
 }
 
-export function clearRefreshCookie(reply: FastifyReply, secure: boolean): void {
-  reply.clearCookie(cookieName(secure), cookieOptions(secure));
+export function clearRefreshCookie(c: Context, secure: boolean): void {
+  deleteCookie(c, cookieName(secure), cookieOptions(secure));
 }

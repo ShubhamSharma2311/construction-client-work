@@ -1,5 +1,4 @@
-import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
-import type { AppContext } from "../../app-context.ts";
+import { respond, type RouteModule } from "../../lib/route.ts";
 import { dateRangeSchema } from "../../lib/dates.ts";
 import { csvFileName, sendCsv, sendIdempotent } from "../../lib/http.ts";
 import { readIdempotencyKey } from "../../lib/idempotency.ts";
@@ -35,47 +34,40 @@ import {
   setDriverOpening,
 } from "./driver-salary.service.ts";
 
-export const driverSalaryRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
+export const driverSalaryRoutes: RouteModule = (app, ctx) => {
   app.get(
     "/drivers/:id/salary",
     {
-      schema: {
-        params: idParams,
-        querystring: monthQuery,
-        response: { 200: salaryPreviewResponse },
-      },
+      params: idParams,
+      query: monthQuery,
+      response: { 200: salaryPreviewResponse },
     },
     (request) => salaryPreview(ctx.db, request.params.id, request.query.month),
   );
 
   app.post(
     "/drivers/:id/close-month",
-    { schema: { params: idParams, body: closeMonthBody, response: { 201: accrualSavedResponse } } },
-    async (request, reply) =>
-      reply
-        .status(201)
-        .send(await closeMonth(ctx.db, request.params.id, request.body, ctx.clock())),
+    { params: idParams, body: closeMonthBody, response: { 201: accrualSavedResponse } },
+    async (request) =>
+      respond(201, await closeMonth(ctx.db, request.params.id, request.body, ctx.clock())),
   );
 
   app.delete(
     "/drivers/:id/close-month/:month",
-    { schema: { params: monthParams, response: { 200: accrualSavedResponse } } },
+    { params: monthParams, response: { 200: accrualSavedResponse } },
     (request) => reopenMonth(ctx.db, request.params.id, request.params.month, ctx.clock()),
   );
 
   app.post(
     "/drivers/:id/opening-balance",
     {
-      schema: {
-        params: idParams,
-        body: driverOpeningBody,
-        response: { 201: accrualSavedResponse },
-      },
+      params: idParams,
+      body: driverOpeningBody,
+      response: { 201: accrualSavedResponse },
     },
-    async (request, reply) => {
+    async (request) => {
       const key = readIdempotencyKey(request.headers);
       return sendIdempotent(
-        reply,
         await setDriverOpening(ctx.db, request.params.id, request.body, key, ctx.clock()),
       );
     },
@@ -83,23 +75,20 @@ export const driverSalaryRoutes: FastifyPluginCallbackZod<AppContext> = (app, ct
 
   app.delete(
     "/drivers/:id/opening-balance",
-    { schema: { params: idParams, response: { 200: accrualSavedResponse } } },
+    { params: idParams, response: { 200: accrualSavedResponse } },
     (request) => removeDriverOpening(ctx.db, request.params.id, ctx.clock()),
   );
 
   app.post(
     "/drivers/:id/payments",
     {
-      schema: {
-        params: idParams,
-        body: driverPaymentBody,
-        response: { 201: driverPaymentSavedResponse },
-      },
+      params: idParams,
+      body: driverPaymentBody,
+      response: { 201: driverPaymentSavedResponse },
     },
-    async (request, reply) => {
+    async (request) => {
       const key = readIdempotencyKey(request.headers);
       return sendIdempotent(
-        reply,
         await payDriver(ctx.db, request.params.id, request.body, key, ctx.clock()),
       );
     },
@@ -107,13 +96,10 @@ export const driverSalaryRoutes: FastifyPluginCallbackZod<AppContext> = (app, ct
 
   app.post(
     "/drivers/:id/bonus",
-    {
-      schema: { params: idParams, body: bonusBody, response: { 201: driverPaymentSavedResponse } },
-    },
-    async (request, reply) => {
+    { params: idParams, body: bonusBody, response: { 201: driverPaymentSavedResponse } },
+    async (request) => {
       const key = readIdempotencyKey(request.headers);
       return sendIdempotent(
-        reply,
         await payBonus(ctx.db, request.params.id, request.body, key, ctx.clock()),
       );
     },
@@ -122,38 +108,29 @@ export const driverSalaryRoutes: FastifyPluginCallbackZod<AppContext> = (app, ct
   app.get(
     "/drivers/:id/ledger",
     {
-      schema: {
-        params: idParams,
-        querystring: dateRangeSchema,
-        response: { 200: driverLedgerResponse },
-      },
+      params: idParams,
+      query: dateRangeSchema,
+      response: { 200: driverLedgerResponse },
     },
     (request) => driverLedger(ctx.db, request.params.id, request.query),
   );
 
   app.get(
     "/driver-payments",
-    {
-      schema: { querystring: driverPaymentListQuery, response: { 200: driverPaymentPageResponse } },
-    },
+    { query: driverPaymentListQuery, response: { 200: driverPaymentPageResponse } },
     (request) => listDriverPayments(ctx.db, request.query),
   );
 
-  app.get(
-    "/driver-payments/export",
-    { schema: { querystring: driverPaymentFilterQuery } },
-    async (request, reply) =>
-      sendCsv(
-        reply,
-        csvFileName("driver_payments", request.query),
-        await exportDriverPayments(ctx.db, request.query),
-      ),
+  app.get("/driver-payments/export", { query: driverPaymentFilterQuery }, async (request) =>
+    sendCsv(
+      csvFileName("driver_payments", request.query),
+      await exportDriverPayments(ctx.db, request.query),
+    ),
   );
 
   app.delete(
     "/driver-payments/:id",
-    { schema: { params: idParams, response: { 200: driverPaymentSavedResponse } } },
+    { params: idParams, response: { 200: driverPaymentSavedResponse } },
     (request) => reverseDriverPayment(ctx.db, request.params.id, ctx.clock()),
   );
-  done();
 };

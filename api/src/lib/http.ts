@@ -1,4 +1,4 @@
-import type { FastifyReply } from "fastify";
+import { type Reply, respond } from "./route.ts";
 
 /** "trips_2026-10-01_to_2026-10-31.csv": what the file holds and for which dates. */
 export function csvFileName(subject: string, range: { from?: string; to?: string }): string {
@@ -7,19 +7,25 @@ export function csvFileName(subject: string, range: { from?: string; to?: string
   return `${subject}${from}${to}.csv`;
 }
 
-/** Sends a CSV download under the given file name. */
-export function sendCsv(reply: FastifyReply, fileName: string, csv: string): FastifyReply {
-  return reply
-    .type("text/csv; charset=utf-8")
-    .header("content-disposition", `attachment; filename="${fileName}"`)
-    .send(csv);
+/** A CSV download under the given file name. */
+export function sendCsv(fileName: string, csv: string): Response {
+  return new Response(csv, {
+    headers: {
+      "content-type": "text/csv; charset=utf-8",
+      "content-disposition": `attachment; filename="${fileName}"`,
+    },
+  });
 }
 
 /** Replies with a stored or fresh idempotent result; a replay is marked so clients can tell. */
-export function sendIdempotent(
-  reply: FastifyReply,
-  result: { statusCode: number; body: unknown; replayed: boolean },
-): FastifyReply {
-  if (result.replayed) reply.header("idempotent-replay", "true");
-  return reply.status(result.statusCode).send(result.body);
+export function sendIdempotent(result: {
+  statusCode: number;
+  body: unknown;
+  replayed: boolean;
+}): Reply {
+  return respond(
+    result.statusCode,
+    result.body,
+    result.replayed ? { "idempotent-replay": "true" } : {},
+  );
 }

@@ -3,5 +3,7 @@
   "compilerOptions": {
     "types": ["node", "@cloudflare/workers-types"]
   },
-  "include": ["."]
+  "include": ["."],
+  // The root config leaves the Worker's entry to this one; do not inherit that exclusion.
+  "exclude": []
 }

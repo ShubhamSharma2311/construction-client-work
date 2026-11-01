@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import type { LightMyRequestResponse } from "fastify";
 import { afterAll, beforeAll, beforeEach } from "vitest";
 import { buildApp, type App, type AppDeps } from "../src/app.ts";
+import { silentLog } from "../src/lib/log.ts";
 import type { Clock } from "../src/lib/clock.ts";
 import type { ErrorBody } from "../src/lib/errors.ts";
 import type { Mailer } from "../src/lib/mailer.ts";
@@ -9,6 +9,9 @@ import type { Db } from "../src/lib/prisma.ts";
 import { hashPassword } from "../src/modules/auth/password.ts";
 import { signAccessToken } from "../src/modules/auth/tokens.ts";
 import { createTestPrisma, resetDb } from "./db.ts";
+import { TestResponse } from "./response.ts";
+
+export { TestResponse };
 
 /** 12:00 IST on 28 Oct 2026; every test starts here unless it moves the clock. */
 export const TEST_NOW = new Date("2026-10-28T06:30:00.000Z");
@@ -22,8 +25,6 @@ export function testJwtSecret(): string {
 }
 
 export interface TestAppOptions {
-  /** Proxy hops to trust for the client IP; 0 means use the socket address. */
-  trustProxyHops?: number;
   /** Mark the refresh cookie Secure, as production over HTTPS does. */
   secureCookies?: boolean;
   /** Defaults to one that fails the test, since only email tests should send any. */
@@ -44,10 +45,9 @@ export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): Ap
   return {
     db,
     clock,
+    log: silentLog,
     jwtSecret: testJwtSecret(),
-    logLevel: "silent",
     corsOrigins: [ALLOWED_ORIGIN],
-    trustProxyHops: options.trustProxyHops ?? 0,
     secureCookies: options.secureCookies ?? false,
     mailer: options.mailer ?? noMail,
     appUrl: TEST_APP_URL,
@@ -56,7 +56,7 @@ export function testDeps(db: Db, clock: Clock, options: TestAppOptions = {}): Ap
 }
 
 /** The `error` part of a failed response, typed. */
-export function errorOf(response: LightMyRequestResponse): ErrorBody["error"] {
+export function errorOf(response: TestResponse): ErrorBody["error"] {
   return response.json<ErrorBody>().error;
 }
 
@@ -71,6 +71,7 @@ export interface RequestOptions {
   /** Defaults to true: send the owner's bearer token. */
   auth?: boolean;
   headers?: Record<string, string>;
+  /** The visitor's address as Cloudflare reports it; defaults to 127.0.0.1. */
   remoteAddress?: string;
 }
 
@@ -80,12 +81,12 @@ export interface TestContext {
   readonly ownerId: number;
   readonly now: Date;
   setNow(at: Date | string): void;
-  request(options: RequestOptions): Promise<LightMyRequestResponse>;
-  get(url: string): Promise<LightMyRequestResponse>;
-  post(url: string, body?: unknown, idempotencyKey?: string): Promise<LightMyRequestResponse>;
-  patch(url: string, body: unknown): Promise<LightMyRequestResponse>;
-  put(url: string, body: unknown): Promise<LightMyRequestResponse>;
-  delete(url: string): Promise<LightMyRequestResponse>;
+  request(options: RequestOptions): Promise<TestResponse>;
+  get(url: string): Promise<TestResponse>;
+  post(url: string, body?: unknown, idempotencyKey?: string): Promise<TestResponse>;
+  patch(url: string, body: unknown): Promise<TestResponse>;
+  put(url: string, body: unknown): Promise<TestResponse>;
+  delete(url: string): Promise<TestResponse>;
 }
 
 /**
@@ -105,7 +106,6 @@ export function useTestApp(appOptions: TestAppOptions = {}): TestContext {
   beforeAll(async () => {
     db = createTestPrisma();
     app = buildApp(testDeps(db, () => state.now, appOptions));
-    await app.ready();
     state.ownerHash = await hashPassword(OWNER.password);
   });
 
@@ -120,26 +120,26 @@ export function useTestApp(appOptions: TestAppOptions = {}): TestContext {
   });
 
   afterAll(async () => {
-    await app?.close();
     await db?.$disconnect();
   });
 
-  const request = async (options: RequestOptions): Promise<LightMyRequestResponse> => {
+  const request = async (options: RequestOptions): Promise<TestResponse> => {
     const headers: Record<string, string> = { "idempotency-key": randomUUID() };
     if (options.idempotencyKey !== undefined) headers["idempotency-key"] = options.idempotencyKey;
     if (options.auth !== false) {
       const { token } = await signAccessToken(state.ownerId, testJwtSecret(), state.now);
       headers["authorization"] = `Bearer ${token}`;
     }
+    headers["cf-connecting-ip"] = options.remoteAddress ?? "127.0.0.1";
+    if (options.body !== undefined) headers["content-type"] = "application/json";
     // A test that sets its own headers (e.g. a bad Authorization) must be the one that wins.
     Object.assign(headers, options.headers);
-    return required(app, "app").inject({
+    const response = await required(app, "app").request(options.url, {
       method: options.method,
-      url: options.url,
       headers,
-      ...(options.body === undefined ? {} : { payload: options.body as object }),
-      ...(options.remoteAddress ? { remoteAddress: options.remoteAddress } : {}),
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     });
+    return TestResponse.from(response);
   };
 
   return {

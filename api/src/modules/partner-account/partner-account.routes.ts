@@ -1,5 +1,4 @@
-import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
-import type { AppContext } from "../../app-context.ts";
+import { type RouteModule } from "../../lib/route.ts";
 import { dateRangeSchema } from "../../lib/dates.ts";
 import { csvFileName, sendCsv, sendIdempotent } from "../../lib/http.ts";
 import { readIdempotencyKey } from "../../lib/idempotency.ts";
@@ -25,20 +24,17 @@ import {
   updatePartnerTxn,
 } from "./partner-account.service.ts";
 
-export const partnerAccountRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
+export const partnerAccountRoutes: RouteModule = (app, ctx) => {
   app.post(
     "/partners/:id/txns",
     {
-      schema: {
-        params: idParams,
-        body: partnerTxnBody,
-        response: { 201: partnerTxnSavedResponse },
-      },
+      params: idParams,
+      body: partnerTxnBody,
+      response: { 201: partnerTxnSavedResponse },
     },
-    async (request, reply) => {
+    async (request) => {
       const key = readIdempotencyKey(request.headers);
       return sendIdempotent(
-        reply,
         await recordPartnerTxn(ctx.db, request.params.id, request.body, key, ctx.clock()),
       );
     },
@@ -47,62 +43,51 @@ export const partnerAccountRoutes: FastifyPluginCallbackZod<AppContext> = (app, 
   app.get(
     "/partners/:id/ledger",
     {
-      schema: {
-        params: idParams,
-        querystring: dateRangeSchema,
-        response: { 200: partnerLedgerResponse },
-      },
+      params: idParams,
+      query: dateRangeSchema,
+      response: { 200: partnerLedgerResponse },
     },
     (request) => partnerLedger(ctx.db, request.params.id, request.query),
   );
 
   app.get(
     "/partner-txns",
-    { schema: { querystring: partnerTxnListQuery, response: { 200: partnerTxnPageResponse } } },
+    { query: partnerTxnListQuery, response: { 200: partnerTxnPageResponse } },
     (request) => listPartnerTxns(ctx.db, request.query),
   );
 
-  app.get(
-    "/partner-txns/export",
-    { schema: { querystring: partnerTxnFilterQuery } },
-    async (request, reply) =>
-      sendCsv(
-        reply,
-        csvFileName("partner_transactions", request.query),
-        await exportPartnerTxns(ctx.db, request.query),
-      ),
+  app.get("/partner-txns/export", { query: partnerTxnFilterQuery }, async (request) =>
+    sendCsv(
+      csvFileName("partner_transactions", request.query),
+      await exportPartnerTxns(ctx.db, request.query),
+    ),
   );
 
   app.patch(
     "/partner-txns/:id",
     {
-      schema: {
-        params: idParams,
-        body: partnerTxnUpdateBody,
-        response: { 200: partnerTxnSavedResponse },
-      },
+      params: idParams,
+      body: partnerTxnUpdateBody,
+      response: { 200: partnerTxnSavedResponse },
     },
     (request) => updatePartnerTxn(ctx.db, request.params.id, request.body, ctx.clock()),
   );
 
   app.delete(
     "/partner-txns/:id",
-    { schema: { params: idParams, response: { 200: partnerTxnSavedResponse } } },
+    { params: idParams, response: { 200: partnerTxnSavedResponse } },
     (request) => deletePartnerTxn(ctx.db, request.params.id, ctx.clock()),
   );
   app.get(
     "/partners/:id/share",
     {
-      schema: {
-        params: idParams,
-        querystring: reportRangeQuery,
-        response: { 200: partnerShareResponse },
-      },
+      params: idParams,
+      query: reportRangeQuery,
+      response: { 200: partnerShareResponse },
     },
     async (request) => {
       await assertReportRange(ctx.db, request.query, ctx.clock());
       return partnerShare(ctx.db, request.params.id, request.query);
     },
   );
-  done();
 };

@@ -1,14 +1,12 @@
-import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
-import type { AppContext } from "../../app-context.ts";
+import { type RouteModule } from "../../lib/route.ts";
 import { pageSchema } from "../../lib/listing.ts";
 import { auditEntryDto, auditQuery } from "./audit.schema.ts";
 import { listAudit } from "./audit.service.ts";
 
-export const auditRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
+export const auditRoutes: RouteModule = (app, ctx) => {
   app.get(
     "/audit",
-    { schema: { querystring: auditQuery, response: { 200: pageSchema(auditEntryDto) } } },
+    { query: auditQuery, response: { 200: pageSchema(auditEntryDto) } },
     (request) => listAudit(ctx.db, request.query),
   );
-  done();
 };

@@ -7,18 +7,15 @@ const valid = {
   DATABASE_URL: "file:./dev.db",
   JWT_SECRET: "x".repeat(32),
   CORS_ORIGINS: "http://localhost:5173, https://ledger.example.workers.dev",
-  TRUST_PROXY_HOPS: "0",
   APP_URL: "http://localhost:5173/",
 };
 
 describe("loadEnv", () => {
-  it("parses a complete environment and defaults the log level", () => {
+  it("parses a complete environment", () => {
     expect(loadEnv(valid)).toEqual({
       ...valid,
       PORT: 3000,
-      LOG_LEVEL: "info",
       CORS_ORIGINS: ["http://localhost:5173", "https://ledger.example.workers.dev"],
-      TRUST_PROXY_HOPS: 0,
       APP_URL: "http://localhost:5173",
       MAIL_FROM: "Sawariya Seth <onboarding@resend.dev>",
     });
@@ -46,12 +43,6 @@ describe("loadEnv", () => {
     expect(() => loadEnv({ ...valid, CORS_ORIGINS: "http://ok.dev,not a url" })).toThrow(
       /CORS_ORIGINS/,
     );
-  });
-
-  it("takes a small hop count for TRUST_PROXY_HOPS", () => {
-    expect(loadEnv({ ...valid, TRUST_PROXY_HOPS: "1" }).TRUST_PROXY_HOPS).toBe(1);
-    expect(() => loadEnv({ ...valid, TRUST_PROXY_HOPS: "true" })).toThrow(/TRUST_PROXY_HOPS/);
-    expect(() => loadEnv({ ...valid, TRUST_PROXY_HOPS: "-1" })).toThrow(/TRUST_PROXY_HOPS/);
   });
 
   it("needs a Resend key in production, where emails must really go out", () => {

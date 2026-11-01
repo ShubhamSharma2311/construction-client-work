@@ -1,65 +1,50 @@
-import type { RouteOptions } from "fastify";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { ALLOWED_ORIGIN, testDeps } from "../test/app.ts";
 import { createTestPrisma } from "../test/db.ts";
-import { buildApp, type App } from "./app.ts";
+import { buildApp, routeList } from "./app.ts";
 
 /** The only routes reachable without logging in. Anything else must answer 401. */
 const PUBLIC_ROUTES = new Set([
   "GET /health",
-  "HEAD /health",
   "POST /auth/login",
   "POST /auth/refresh",
   "POST /auth/logout",
   "POST /auth/forgot-password",
   "POST /auth/reset-password",
-  "OPTIONS *",
 ]);
 
 const db = createTestPrisma();
-const routes: Pick<RouteOptions, "method" | "url">[] = [];
-let app: App;
-
-beforeAll(async () => {
-  app = buildApp(testDeps(db, () => new Date()));
-  app.addHook("onRoute", (route) => {
-    routes.push({ method: route.method, url: route.url });
-  });
-  await app.ready();
-});
+const deps = testDeps(db, () => new Date());
+const app = buildApp(deps);
+const routes = routeList(deps).map((route) => ({
+  method: route.method.toUpperCase(),
+  path: route.path,
+}));
 
 afterAll(async () => {
-  await app.close();
   await db.$disconnect();
 });
 
-function protectedRoutes(): { method: string; url: string }[] {
-  return routes
-    .flatMap((route) =>
-      (Array.isArray(route.method) ? route.method : [route.method]).map((method) => ({
-        method,
-        url: route.url,
-      })),
-    )
-    .filter((route) => !PUBLIC_ROUTES.has(`${route.method} ${route.url}`));
-}
-
 describe("route protection", () => {
-  it("finds the protected routes", () => {
-    expect(protectedRoutes().length).toBeGreaterThan(0);
+  const isPublic = (route: { method: string; path: string }) =>
+    PUBLIC_ROUTES.has(`${route.method} ${route.path}`);
+
+  it("keeps exactly the intended routes public", () => {
+    expect(routes.filter(isPublic).length).toBe(PUBLIC_ROUTES.size);
+    expect(routes.filter((route) => !isPublic(route)).length).toBeGreaterThan(0);
   });
 
   it("answers 401 on every protected route without a token", async () => {
     const failures: string[] = [];
-    for (const route of protectedRoutes()) {
-      const url = route.url.replace(/:[A-Za-z]+/g, "1");
-      const response = await app.inject({
-        method: route.method as "GET",
-        url,
-        payload: route.method === "GET" || route.method === "HEAD" ? undefined : {},
+    for (const route of routes.filter((candidate) => !isPublic(candidate))) {
+      const url = route.path.replace(/:[A-Za-z]+/g, "1");
+      const withBody = route.method !== "GET";
+      const response = await app.request(url, {
+        method: route.method,
+        ...(withBody ? { body: "{}", headers: { "content-type": "application/json" } } : {}),
       });
-      if (response.statusCode !== 401)
-        failures.push(`${route.method} ${route.url} -> ${response.statusCode}`);
+      if (response.status !== 401)
+        failures.push(`${route.method} ${route.path} -> ${String(response.status)}`);
     }
     expect(failures).toEqual([]);
   });
@@ -67,9 +52,8 @@ describe("route protection", () => {
 
 describe("CORS", () => {
   const preflight = (origin: string) =>
-    app.inject({
+    app.request("/auth/me", {
       method: "OPTIONS",
-      url: "/auth/me",
       headers: {
         origin,
         "access-control-request-method": "GET",
@@ -80,13 +64,13 @@ describe("CORS", () => {
   it("allows the configured frontend origin", async () => {
     const response = await preflight(ALLOWED_ORIGIN);
 
-    expect(response.statusCode).toBe(204);
-    expect(response.headers["access-control-allow-origin"]).toBe(ALLOWED_ORIGIN);
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe(ALLOWED_ORIGIN);
   });
 
   it("does not allow any other origin", async () => {
     const response = await preflight("https://evil.example");
 
-    expect(response.headers["access-control-allow-origin"]).toBeUndefined();
+    expect(response.headers.get("access-control-allow-origin")).toBeNull();
   });
 });

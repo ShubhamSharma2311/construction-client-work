@@ -1,23 +1,23 @@
-import { randomUUID } from "node:crypto";
-import type { IncomingMessage, Server, ServerResponse } from "node:http";
-import cookie from "@fastify/cookie";
-import cors from "@fastify/cors";
-import swagger from "@fastify/swagger";
-import Fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify";
-import {
-  hasZodFastifySchemaValidationErrors,
-  jsonSchemaTransform,
-  serializerCompiler,
-  validatorCompiler,
-  type ZodTypeProvider,
-} from "fastify-type-provider-zod";
+import { type Context, Hono } from "hono";
+import { cors } from "hono/cors";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { AppContext } from "./app-context.ts";
-import { oneRequestAtATime } from "./lib/one-at-a-time.ts";
-import type { Env } from "./config/env.ts";
 import { AppError, type ErrorBody } from "./lib/errors.ts";
+import { oneRequestAtATime } from "./lib/one-at-a-time.ts";
 import { fromPrismaError } from "./lib/prisma-errors.ts";
+import {
+  queryObject,
+  readJsonBody,
+  type RouteDef,
+  type RouteModule,
+  type RouteRequest,
+  type RouteSchemas,
+  RouteTable,
+  send,
+  validatePart,
+} from "./lib/route.ts";
 import { authPrivateRoutes, authPublicRoutes } from "./modules/auth/auth.routes.ts";
-import { requireAuth } from "./modules/auth/authenticate.ts";
+import { authenticate } from "./modules/auth/authenticate.ts";
 import { auditRoutes } from "./modules/audit/audit.routes.ts";
 import { ledgerRoutes } from "./modules/customer-ledger/ledger.routes.ts";
 import { customerRoutes } from "./modules/customers/customers.routes.ts";
@@ -39,141 +39,124 @@ import { tractorRoutes } from "./modules/tractors/tractors.routes.ts";
 import { tripRoutes } from "./modules/trips/trips.routes.ts";
 
 export interface AppDeps extends AppContext {
-  logLevel: Env["LOG_LEVEL"];
   corsOrigins: string[];
-  trustProxyHops: number;
 }
 
-export type App = FastifyInstance<
-  Server,
-  IncomingMessage,
-  ServerResponse,
-  FastifyBaseLogger,
-  ZodTypeProvider
->;
+type AppEnv = { Variables: { requestId: string } };
+export type App = Hono<AppEnv>;
 
-/** Anything a handler or Fastify itself may throw; non-Fastify errors can lack `code`. */
-type HandledError = Error & { statusCode?: number; code?: string; validationContext?: string };
+/** Reachable without a token. */
+const PUBLIC_ROUTES: RouteModule[] = [healthRoutes, authPublicRoutes];
+
+/** Every one of these requires a valid access token. */
+const PRIVATE_ROUTES: RouteModule[] = [
+  authPrivateRoutes,
+  settingsRoutes,
+  auditRoutes,
+  customerRoutes,
+  tractorRoutes,
+  driverRoutes,
+  khetRoutes,
+  labourerRoutes,
+  partnerRoutes,
+  tripRoutes,
+  paymentRoutes,
+  ledgerRoutes,
+  expenseRoutes,
+  dieselRoutes,
+  loanRoutes,
+  serviceHistoryRoutes,
+  driverSalaryRoutes,
+  partnerAccountRoutes,
+  reportRoutes,
+];
+
+/** Every route, as the app serves them and the API document describes them. */
+export function routeList(ctx: AppContext): RouteDef[] {
+  const open = new RouteTable(false);
+  const signedIn = new RouteTable(true);
+  for (const module of PUBLIC_ROUTES) module(open, ctx);
+  for (const module of PRIVATE_ROUTES) module(signedIn, ctx);
+  return [...open.routes, ...signedIn.routes];
+}
 
 export function buildApp(deps: AppDeps): App {
-  const app = Fastify({
-    logger: { level: deps.logLevel },
-    genReqId: () => randomUUID(),
-    requestIdHeader: false,
-    trustProxy: trustFirstHops(deps.trustProxyHops),
-  }).withTypeProvider<ZodTypeProvider>();
+  const app = new Hono<AppEnv>();
+  const { corsOrigins, ...ctx } = deps;
 
-  oneRequestAtATime(app);
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
-  app.decorateRequest("userId", 0);
-
-  app.addHook("onSend", async (request, reply) => {
-    reply.header("x-request-id", request.id);
+  app.use(async (c, next) => {
+    const requestId = crypto.randomUUID();
+    c.set("requestId", requestId);
+    await next();
+    c.res.headers.set("x-request-id", requestId);
   });
+  app.use(
+    cors({
+      origin: corsOrigins,
+      allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+      allowHeaders: ["Authorization", "Content-Type", "Idempotency-Key"],
+      exposeHeaders: ["x-request-id"],
+    }),
+  );
+  app.use(oneRequestAtATime());
 
-  app.setErrorHandler<HandledError>((error, request, reply) => {
-    const { status, body } = toErrorResponse(error, request.id);
-    if (status >= 500) request.log.error({ err: error }, "request failed");
-    return reply.status(status).send(body);
+  for (const route of routeList(ctx)) mountRoute(app, route, ctx);
+
+  app.notFound((c) => {
+    const url = new URL(c.req.url);
+    const message = `Route ${c.req.method} ${url.pathname}${url.search} not found`;
+    return c.json(errorBody("NOT_FOUND", message, c.get("requestId")), 404);
   });
-
-  app.setNotFoundHandler((request, reply) => {
-    const body = errorBody(
-      "NOT_FOUND",
-      `Route ${request.method} ${request.url} not found`,
-      request.id,
-    );
-    return reply.status(404).send(body);
+  app.onError((error, c) => {
+    const { status, body } = toErrorResponse(error, c.get("requestId"));
+    if (status >= 500)
+      ctx.log.error({ err: error, requestId: c.get("requestId") }, "request failed");
+    return c.json(body, status);
   });
-
-  const ctx: AppContext = {
-    db: deps.db,
-    clock: deps.clock,
-    jwtSecret: deps.jwtSecret,
-    secureCookies: deps.secureCookies,
-    mailer: deps.mailer,
-    appUrl: deps.appUrl,
-    setupToken: deps.setupToken,
-  };
-
-  app.register(cors, {
-    origin: deps.corsOrigins,
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    allowedHeaders: ["Authorization", "Content-Type", "Idempotency-Key"],
-    exposedHeaders: ["x-request-id"],
-  });
-  app.register(cookie);
-  // Collects every route schema below into an OpenAPI description for the frontend's types.
-  app.register(swagger, {
-    openapi: { info: { title: "Sand Trip Ledger API", version: "1.0.0" } },
-    transform: jsonSchemaTransform,
-  });
-  app.register(healthRoutes, { db: deps.db });
-  app.register(authPublicRoutes, ctx);
-
-  // Everything registered in this scope requires a valid access token.
-  app.register((scope, _opts, done) => {
-    scope.addHook("onRequest", requireAuth(ctx));
-    scope.register(authPrivateRoutes, ctx);
-    scope.register(settingsRoutes, ctx);
-    scope.register(auditRoutes, ctx);
-    scope.register(customerRoutes, ctx);
-    scope.register(tractorRoutes, ctx);
-    scope.register(driverRoutes, ctx);
-    scope.register(khetRoutes, ctx);
-    scope.register(labourerRoutes, ctx);
-    scope.register(partnerRoutes, ctx);
-    scope.register(tripRoutes, ctx);
-    scope.register(paymentRoutes, ctx);
-    scope.register(ledgerRoutes, ctx);
-    scope.register(expenseRoutes, ctx);
-    scope.register(dieselRoutes, ctx);
-    scope.register(loanRoutes, ctx);
-    scope.register(serviceHistoryRoutes, ctx);
-    scope.register(driverSalaryRoutes, ctx);
-    scope.register(partnerAccountRoutes, ctx);
-    scope.register(reportRoutes, ctx);
-    done();
-  });
-
   return app;
 }
 
+/** Serves one route: sign-in first, then the request parts, then the handler's reply. */
+export function mountRoute(app: App, route: RouteDef, ctx: AppContext): void {
+  app.on(route.method.toUpperCase(), route.path, async (c) => {
+    // Sign-in is checked before the request, so a stranger learns nothing from validation.
+    const userId = route.requiresAuth ? await authenticate(c.req.header("authorization"), ctx) : 0;
+    const params = validatePart("params", route.schemas.params, c.req.param());
+    const body = route.schemas.body
+      ? validatePart("body", route.schemas.body, await readJsonBody(c.req.raw))
+      : undefined;
+    const query = validatePart("querystring", route.schemas.query, queryObject(c.req.url));
+    const request = {
+      params,
+      query,
+      body,
+      headers: c.req.raw.headers,
+      userId,
+      ip: visitorAddress(c),
+      context: c,
+    } as RouteRequest<RouteSchemas>;
+    return send(c, route, await route.handler(request));
+  });
+}
+
 /**
- * Fastify 5 ignores a numeric trustProxy because a hop count cannot check who the peer is.
- * On Cloud Run every request arrives through Google's front end, so the first `hops`
- * addresses are proxies we control and the next one is the real client.
+ * The visitor's address. Cloudflare sets this header itself and replaces any a visitor sends;
+ * the local server sets it from the socket.
  */
-function trustFirstHops(hops: number): false | ((address: string, hop: number) => boolean) {
-  return hops > 0 ? (_address, hop) => hop < hops : false;
+function visitorAddress(c: Context): string {
+  return c.req.header("cf-connecting-ip") ?? "unknown";
 }
 
 function toErrorResponse(
-  error: HandledError,
+  error: Error,
   requestId: string,
-): { status: number; body: ErrorBody } {
+): { status: ContentfulStatusCode; body: ErrorBody } {
   const appError = error instanceof AppError ? error : fromPrismaError(error);
   if (appError) {
     return {
-      status: appError.httpStatus,
+      status: appError.httpStatus as ContentfulStatusCode,
       body: errorBody(appError.code, appError.message, requestId, appError.details),
     };
-  }
-  if (hasZodFastifySchemaValidationErrors(error)) {
-    const issues = error.validation.map((issue) => ({
-      path: `${error.validationContext ?? ""}${issue.instancePath}`,
-      message: issue.message,
-    }));
-    return {
-      status: 400,
-      body: errorBody("VALIDATION", "Request is not valid", requestId, { issues }),
-    };
-  }
-  // Fastify's own client errors: malformed JSON, wrong content type, body too large.
-  if (error.statusCode !== undefined && error.statusCode >= 400 && error.statusCode < 500) {
-    const code = error.code ?? "BAD_REQUEST";
-    return { status: error.statusCode, body: errorBody(code, error.message, requestId) };
   }
   return { status: 500, body: errorBody("INTERNAL", "Something went wrong", requestId) };
 }

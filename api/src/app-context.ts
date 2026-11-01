@@ -1,4 +1,5 @@
 import type { Clock } from "./lib/clock.ts";
+import type { Log } from "./lib/log.ts";
 import type { Mailer } from "./lib/mailer.ts";
 import type { Db } from "./lib/prisma.ts";
 
@@ -6,6 +7,7 @@ import type { Db } from "./lib/prisma.ts";
 export interface AppContext {
   db: Db;
   clock: Clock;
+  log: Log;
   jwtSecret: string;
   /** Mark auth cookies Secure; true whenever the app is served over HTTPS. */
   secureCookies: boolean;

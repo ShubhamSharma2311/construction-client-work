@@ -125,7 +125,7 @@ describe("runIdempotent", () => {
 
 describe("readIdempotencyKey", () => {
   it("returns a valid key", () => {
-    expect(readIdempotencyKey({ "idempotency-key": "trip_2026-10-28_ab12" })).toBe(
+    expect(readIdempotencyKey(new Headers({ "idempotency-key": "trip_2026-10-28_ab12" }))).toBe(
       "trip_2026-10-28_ab12",
     );
   });
@@ -135,7 +135,11 @@ describe("readIdempotencyKey", () => {
     [{ "idempotency-key": "short" }, "must be one value"],
     [{ "idempotency-key": "has space in it" }, "must be one value"],
     [{ "idempotency-key": ["key-00000001", "key-00000002"] }, "must be one value"],
-  ])("rejects %j", (headers, message) => {
+  ])("rejects %j", (sent, message) => {
+    const headers = new Headers();
+    for (const [name, value] of Object.entries(sent as Record<string, string | string[]>)) {
+      for (const one of [value].flat()) headers.append(name, one);
+    }
     expect(() => readIdempotencyKey(headers)).toThrow(message);
   });
 });

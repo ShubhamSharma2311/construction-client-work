@@ -1,11 +1,12 @@
-import { buildApp } from "./app.ts";
+import { routeList } from "./app.ts";
 import { systemClock } from "./lib/clock.ts";
+import { silentLog } from "./lib/log.ts";
 import { printMailer } from "./lib/mailer.ts";
+import { describeRoutes } from "./lib/openapi-doc.ts";
 import { ledgerPrisma } from "./lib/prisma.ts";
 import type { LedgerStorage } from "./lib/storage-adapter.ts";
 
-// The description comes from route schemas alone. Building the app does not query the
-// database or sign anything, so placeholder settings are enough here.
+// The description comes from route schemas alone; no handler runs, so nothing here is used.
 const NO_STORAGE: LedgerStorage = {
   sql: {
     exec() {
@@ -14,27 +15,17 @@ const NO_STORAGE: LedgerStorage = {
   },
   transaction: () => Promise.reject(new Error("building the API description must not write")),
 };
-const UNUSED_SECRET = "openapi-spec-only-never-signs-anything";
 
 /** The API's OpenAPI 3 description, used to generate the frontend's types. */
-export async function buildOpenApiSpec(): Promise<unknown> {
-  const db = ledgerPrisma(NO_STORAGE);
-  const app = buildApp({
-    db,
+export function buildOpenApiSpec(): unknown {
+  const routes = routeList({
+    db: ledgerPrisma(NO_STORAGE),
     clock: systemClock,
-    jwtSecret: UNUSED_SECRET,
-    logLevel: "silent",
-    corsOrigins: [],
-    trustProxyHops: 0,
+    log: silentLog,
+    jwtSecret: "openapi-spec-only-never-signs-anything",
     secureCookies: true,
     mailer: printMailer(),
     appUrl: "https://unused.example",
   });
-  try {
-    await app.ready();
-    return app.swagger();
-  } finally {
-    await app.close();
-    await db.$disconnect();
-  }
+  return describeRoutes(routes, { title: "Sand Trip Ledger API", version: "1.0.0" });
 }

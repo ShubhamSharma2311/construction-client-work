@@ -1,4 +1,4 @@
-import type { LightMyRequestResponse } from "fastify";
+import type { TestResponse } from "../../../test/response.ts";
 import { describe, expect, it } from "vitest";
 import { errorOf, OWNER, useTestApp } from "../../../test/app.ts";
 import type { BrowserSession } from "./auth.schema.ts";
@@ -16,12 +16,12 @@ interface LoggedIn {
   refreshToken: string;
 }
 
-function refreshCookieOf(response: LightMyRequestResponse) {
+function refreshCookieOf(response: TestResponse) {
   return response.cookies.find((cookie) => cookie.name === REFRESH_COOKIE);
 }
 
 /** The access token from the body and the refresh token from the cookie. */
-function loggedIn(response: LightMyRequestResponse): LoggedIn {
+function loggedIn(response: TestResponse): LoggedIn {
   const cookie = refreshCookieOf(response);
   if (!cookie) throw new Error(`no ${REFRESH_COOKIE} cookie in a ${String(response.statusCode)}`);
   return { accessToken: response.json<BrowserSession>().accessToken, refreshToken: cookie.value };
@@ -112,27 +112,26 @@ describe("POST /auth/login", () => {
   });
 });
 
-describe("login limit behind Cloud Run's proxy", () => {
-  const proxied = useTestApp({ trustProxyHops: 1 });
-
-  const loginVia = (forwardedFor: string, password: string) =>
-    proxied.request({
+describe("login limit on Cloudflare", () => {
+  // Cloudflare reports the visitor's address itself; X-Forwarded-For is whatever the client wrote.
+  const loginFrom = (address: string, forwardedFor: string, password: string) =>
+    t.request({
       method: "POST",
       url: "/auth/login",
       body: { ...OWNER, password },
       auth: false,
-      remoteAddress: "35.191.0.1",
+      remoteAddress: address,
       headers: { "x-forwarded-for": forwardedFor },
     });
 
-  it("counts the address the proxy saw, not one the client wrote", async () => {
+  it("counts the address Cloudflare saw, not one the client wrote", async () => {
     for (let attempt = 0; attempt < LOGIN_FAILURE_LIMIT; attempt += 1) {
-      const spoofed = `1.2.3.${String(attempt)}, 49.36.10.7`;
-      expect((await loginVia(spoofed, "wrong-password")).statusCode).toBe(401);
+      const spoofed = `1.2.3.${String(attempt)}`;
+      expect((await loginFrom("49.36.10.7", spoofed, "wrong-password")).statusCode).toBe(401);
     }
 
-    expect((await loginVia("9.9.9.9, 49.36.10.7", OWNER.password)).statusCode).toBe(429);
-    expect((await loginVia("49.36.10.8", OWNER.password)).statusCode).toBe(200);
+    expect((await loginFrom("49.36.10.7", "9.9.9.9", OWNER.password)).statusCode).toBe(429);
+    expect((await loginFrom("49.36.10.8", "49.36.10.7", OWNER.password)).statusCode).toBe(200);
   });
 });
 

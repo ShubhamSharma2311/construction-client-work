@@ -1,7 +1,6 @@
-import type { FastifyReply } from "fastify";
-import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
+import type { Context } from "hono";
+import { type RouteModule, respond } from "../../lib/route.ts";
 import { z } from "zod";
-import type { AppContext } from "../../app-context.ts";
 import {
   type BrowserSession,
   browserSessionResponse,
@@ -25,95 +24,87 @@ import {
 import { requestPasswordReset, resetPassword, setOwnerEmail } from "./password-reset.service.ts";
 import { clearRefreshCookie, readRefreshCookie, setRefreshCookie } from "./refresh-cookie.ts";
 
-function sendSession(reply: FastifyReply, session: Session, secure: boolean): BrowserSession {
-  setRefreshCookie(reply, session.refreshToken, session.refreshTokenExpiresAt, secure);
+function sendSession(c: Context, session: Session, secure: boolean): BrowserSession {
+  setRefreshCookie(c, session.refreshToken, session.refreshTokenExpiresAt, secure);
   return { accessToken: session.accessToken, accessTokenExpiresAt: session.accessTokenExpiresAt };
 }
 
 /** Reachable without a token. */
-export const authPublicRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
+export const authPublicRoutes: RouteModule = (app, ctx) => {
   app.post(
     "/auth/login",
-    { schema: { body: loginBody, response: { 200: browserSessionResponse } } },
-    async (request, reply) => {
+    { body: loginBody, response: { 200: browserSessionResponse } },
+    async (request) => {
       const input = { ...request.body, ip: request.ip };
       const session = await login(ctx.db, input, ctx.jwtSecret, ctx.clock());
-      return sendSession(reply, session, ctx.secureCookies);
+      return sendSession(request.context, session, ctx.secureCookies);
     },
   );
 
-  app.post(
-    "/auth/refresh",
-    { schema: { response: { 200: browserSessionResponse } } },
-    async (request, reply) => {
-      const token = readRefreshCookie(request, ctx.secureCookies);
-      const session = await refreshSession(ctx.db, token, ctx.jwtSecret, ctx.clock());
-      return sendSession(reply, session, ctx.secureCookies);
-    },
-  );
+  app.post("/auth/refresh", { response: { 200: browserSessionResponse } }, async (request) => {
+    const token = readRefreshCookie(request.context, ctx.secureCookies);
+    const session = await refreshSession(ctx.db, token, ctx.jwtSecret, ctx.clock());
+    return sendSession(request.context, session, ctx.secureCookies);
+  });
 
-  app.post("/auth/logout", { schema: { response: { 204: z.null() } } }, async (request, reply) => {
-    await logout(ctx.db, readRefreshCookie(request, ctx.secureCookies), ctx.clock());
-    clearRefreshCookie(reply, ctx.secureCookies);
-    return reply.status(204).send(null);
+  app.post("/auth/logout", { response: { 204: z.null() } }, async (request) => {
+    await logout(ctx.db, readRefreshCookie(request.context, ctx.secureCookies), ctx.clock());
+    clearRefreshCookie(request.context, ctx.secureCookies);
+    return respond(204, null);
   });
 
   const { setupToken } = ctx;
   if (setupToken !== undefined) {
     app.post(
       "/auth/setup-owner",
-      { schema: { body: setupOwnerBody, response: { 201: meResponse } } },
-      async (request, reply) => {
+      { body: setupOwnerBody, response: { 201: meResponse } },
+      async (request) => {
         const owner = await setupOwner(ctx.db, request.body, setupToken);
-        return reply.status(201).send(owner);
+        return respond(201, owner);
       },
     );
   }
 
   app.post(
     "/auth/forgot-password",
-    { schema: { body: forgotPasswordBody, response: { 204: z.null() } } },
-    async (request, reply) => {
+    { body: forgotPasswordBody, response: { 204: z.null() } },
+    async (request) => {
       const resetRequest = { username: request.body.username, appUrl: ctx.appUrl };
       await requestPasswordReset(ctx.db, ctx.mailer, resetRequest, ctx.clock());
-      return reply.status(204).send(null);
+      return respond(204, null);
     },
   );
 
   app.post(
     "/auth/reset-password",
-    { schema: { body: resetPasswordBody, response: { 204: z.null() } } },
-    async (request, reply) => {
+    { body: resetPasswordBody, response: { 204: z.null() } },
+    async (request) => {
       await resetPassword(ctx.db, request.body, ctx.clock());
       // Every login was just signed out, this browser's included.
-      clearRefreshCookie(reply, ctx.secureCookies);
-      return reply.status(204).send(null);
+      clearRefreshCookie(request.context, ctx.secureCookies);
+      return respond(204, null);
     },
   );
-  done();
 };
 
 /** Registered inside the authenticated scope. */
-export const authPrivateRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx, done) => {
-  app.get("/auth/me", { schema: { response: { 200: meResponse } } }, (request) =>
+export const authPrivateRoutes: RouteModule = (app, ctx) => {
+  app.get("/auth/me", { response: { 200: meResponse } }, (request) =>
     getMe(ctx.db, request.userId),
   );
 
-  app.put(
-    "/auth/email",
-    { schema: { body: setEmailBody, response: { 200: meResponse } } },
-    (request) => setOwnerEmail(ctx.db, request.userId, request.body, ctx.clock()),
+  app.put("/auth/email", { body: setEmailBody, response: { 200: meResponse } }, (request) =>
+    setOwnerEmail(ctx.db, request.userId, request.body, ctx.clock()),
   );
 
   app.post(
     "/auth/change-password",
-    { schema: { body: changePasswordBody, response: { 204: z.null() } } },
-    async (request, reply) => {
+    { body: changePasswordBody, response: { 204: z.null() } },
+    async (request) => {
       await changePassword(ctx.db, request.userId, request.body, ctx.clock());
       // Every login was just signed out, this browser's included.
-      clearRefreshCookie(reply, ctx.secureCookies);
-      return reply.status(204).send(null);
+      clearRefreshCookie(request.context, ctx.secureCookies);
+      return respond(204, null);
     },
   );
-  done();
 };

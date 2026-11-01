@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Runs against the real API and the local dev database: start Postgres with
-// `docker compose up -d db` in api/, and set E2E_USERNAME and E2E_PASSWORD to the owner.
+// Runs against the real API on its local SQLite file (started below), with E2E_USERNAME and
+// E2E_PASSWORD set to the owner made by `npm run create-owner` in api/.
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: false,

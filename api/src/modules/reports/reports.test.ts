@@ -1,4 +1,4 @@
-import type { LightMyRequestResponse } from "fastify";
+import type { TestResponse } from "../../../test/response.ts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { errorOf, useTestApp } from "../../../test/app.ts";
 import {
@@ -27,7 +27,7 @@ import type {
 const t = useTestApp();
 
 /** Scenario setup must not fail quietly; every request has to be accepted. */
-async function created(response: Promise<LightMyRequestResponse>): Promise<void> {
+async function created(response: Promise<TestResponse>): Promise<void> {
   const result = await response;
   expect(result.statusCode, result.body).toBeLessThan(300);
 }
