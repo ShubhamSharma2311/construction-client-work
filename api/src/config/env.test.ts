@@ -55,9 +55,14 @@ describe("loadEnv", () => {
   });
 
   it("needs a Resend key in production, where emails must really go out", () => {
-    expect(() => loadEnv({ ...valid, NODE_ENV: "production" })).toThrow(/RESEND_API_KEY/);
-    expect(
-      loadEnv({ ...valid, NODE_ENV: "production", RESEND_API_KEY: "re_1" }).RESEND_API_KEY,
-    ).toBe("re_1");
+    const production = { ...valid, NODE_ENV: "production", PROXY_SECRET: "p".repeat(32) };
+    expect(() => loadEnv(production)).toThrow(/RESEND_API_KEY/);
+    expect(loadEnv({ ...production, RESEND_API_KEY: "re_1" }).RESEND_API_KEY).toBe("re_1");
+  });
+
+  it("needs the Worker's proxy secret in production", () => {
+    const production = { ...valid, NODE_ENV: "production", RESEND_API_KEY: "re_1" };
+    expect(() => loadEnv(production)).toThrow(/PROXY_SECRET/);
+    expect(() => loadEnv({ ...production, PROXY_SECRET: "short" })).toThrow(/at least 32/);
   });
 });
