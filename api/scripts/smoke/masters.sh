@@ -7,7 +7,7 @@ login
 RUN="$RANDOM"
 PHONE="98$(printf '%08d' "$((RANDOM * RANDOM % 100000000))")"
 
-call PUT /settings '{"businessName":"Godara Bajri","businessStartDate":"2026-04-01","openingCash":"15000","openingOnline":0}'
+call PUT /settings '{"businessName":"Sawariya Seth Construction Materials","businessStartDate":"2026-04-01","openingCash":"15000","openingOnline":0}'
 expect 200 "settings saved"
 
 call POST /customers "{\"name\":\"Ramesh ${RUN}\",\"phone\":\"${PHONE}\",\"village\":\"Bilara\"}"

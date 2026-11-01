@@ -5,7 +5,7 @@ import { getBusinessBounds } from "./settings.service.ts";
 const t = useTestApp();
 
 const valid = {
-  businessName: "  Godara   Bajri Supply ",
+  businessName: "  Sawariya   Seth Construction Materials ",
   businessStartDate: "2026-04-01",
   openingCash: "15000",
   openingOnline: 0,
@@ -24,7 +24,7 @@ describe("business settings", () => {
 
     expect(saved.statusCode).toBe(200);
     const expected = {
-      businessName: "Godara Bajri Supply",
+      businessName: "Sawariya Seth Construction Materials",
       businessStartDate: "2026-04-01",
       openingCashPaise: 1_500_000,
       openingOnlinePaise: 0,

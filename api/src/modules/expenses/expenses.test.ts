@@ -303,7 +303,7 @@ describe("listing and totals", () => {
     await add({ category: "OTHER", notes: "x", spentOn: "2026-05-01" });
 
     const response = await t.put("/settings", {
-      businessName: "Godara Bajri",
+      businessName: "Sawariya Seth Construction Materials",
       businessStartDate: "2026-06-01",
       openingCash: 0,
       openingOnline: 0,

@@ -460,7 +460,7 @@ describe("opening balance", () => {
 describe("business start date with entries", () => {
   const settings = (businessStartDate: string) =>
     t.put("/settings", {
-      businessName: "Godara Bajri",
+      businessName: "Sawariya Seth Construction Materials",
       businessStartDate,
       openingCash: 0,
       openingOnline: 0,
@@ -580,7 +580,7 @@ describe("database guards behind the API", () => {
 describe("review fixes", () => {
   const settings = (businessStartDate: string) =>
     t.put("/settings", {
-      businessName: "Godara Bajri",
+      businessName: "Sawariya Seth Construction Materials",
       businessStartDate,
       openingCash: 0,
       openingOnline: 0,

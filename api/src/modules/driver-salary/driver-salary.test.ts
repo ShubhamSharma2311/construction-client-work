@@ -412,7 +412,7 @@ describe("rules that touch the driver's record", () => {
 
 function makeSettingsResponse(businessStartDate: string) {
   return t.put("/settings", {
-    businessName: "Godara Bajri",
+    businessName: "Sawariya Seth Construction Materials",
     businessStartDate,
     openingCash: 0,
     openingOnline: 0,

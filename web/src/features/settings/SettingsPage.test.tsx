@@ -32,7 +32,9 @@ describe("Business settings", () => {
     const { user } = await renderApp(api, { path: "/settings" });
 
     const cash = await screen.findByLabelText("Cash in hand that day");
-    expect(screen.getByLabelText("Business name")).toHaveValue("Godara Sand Supply");
+    expect(screen.getByLabelText("Business name")).toHaveValue(
+      "Sawariya Seth Construction Materials",
+    );
     await user.clear(cash);
     await user.type(cash, "12500.50");
     await user.clear(screen.getByLabelText("Money in the bank that day"));
@@ -41,7 +43,7 @@ describe("Business settings", () => {
     expect(await screen.findByText("Settings saved.")).toBeInTheDocument();
     expect(sent).toEqual([
       {
-        businessName: "Godara Sand Supply",
+        businessName: "Sawariya Seth Construction Materials",
         businessStartDate: "2026-04-01",
         openingCash: "12500.50",
         openingOnline: "0",
@@ -76,7 +78,7 @@ describe("Business settings", () => {
 
     expect(await screen.findByRole("heading", { name: "Set up the business" })).toBeInTheDocument();
     expect(screen.queryByRole("group", { name: "Show" })).toBeNull();
-    await user.type(screen.getByLabelText("Business name"), "Godara Sand Supply");
+    await user.type(screen.getByLabelText("Business name"), "Sawariya Seth Construction Materials");
     await user.click(screen.getByRole("button", { name: "Set up the business" }));
 
     expect(

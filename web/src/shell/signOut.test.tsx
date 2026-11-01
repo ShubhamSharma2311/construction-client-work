@@ -22,7 +22,7 @@ describe("signing out", () => {
       "POST /auth/logout": () => new Response(null, { status: 204 }),
     });
     const { user, router, queryClient } = await renderApp(api, { path });
-    await screen.findAllByText("Godara Sand Supply");
+    await screen.findAllByText("Sawariya Seth Construction Materials");
 
     await user.click(findButton());
 
@@ -40,7 +40,7 @@ describe("signing out", () => {
       "GET /auth/me": () => apiError(401, "UNAUTHORIZED", "expired"),
     });
     const { services, queryClient } = await renderApp(api);
-    await screen.findAllByText("Godara Sand Supply");
+    await screen.findAllByText("Sawariya Seth Construction Materials");
     expect(queryClient.getQueryData(["settings"])).toBeDefined();
 
     expired = true;

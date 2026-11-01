@@ -24,7 +24,7 @@ export async function makeSettings(
   overrides: Record<string, unknown> = {},
 ): Promise<SettingsDto> {
   const response = await t.put("/settings", {
-    businessName: "Godara Bajri",
+    businessName: "Sawariya Seth Construction Materials",
     businessStartDate: BUSINESS_START,
     openingCash: 0,
     openingOnline: 0,

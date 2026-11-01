@@ -29,7 +29,7 @@ export async function renderApp(api: FakeApi, { path = "/", restore = true }: Re
 }
 
 export const SETTINGS: Ok<"/settings", "get"> = {
-  businessName: "Godara Sand Supply",
+  businessName: "Sawariya Seth Construction Materials",
   businessStartDate: "2026-04-01",
   openingCashPaise: 0,
   openingOnlinePaise: 0,
