@@ -1,6 +1,6 @@
 import { type SubmitEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { fieldErrors } from "../api/errors.ts";
+import { ApiError, fieldErrors } from "../api/errors.ts";
 import { APP_NAME } from "../lib/appName.ts";
 import { Button } from "../ui/Button.tsx";
 import { FormError } from "../ui/FormError.tsx";
@@ -73,7 +73,7 @@ function NewPasswordForm({ token }: { token: string }) {
     <form className={styles.sheet} onSubmit={submit} noValidate>
       <h2 className={styles.heading}>Choose a new password</h2>
       <FormError error={reset.error} shownFields={["newPassword"]} />
-      {reset.isError && Object.keys(server).length === 0 ? (
+      {isUsedUpLink(reset.error) ? (
         <Link className={styles.help} to="/forgot-password">
           Ask for a new link
         </Link>
@@ -103,4 +103,9 @@ function NewPasswordForm({ token }: { token: string }) {
       </Button>
     </form>
   );
+}
+
+/** The server's answer for a link that expired or was already used, unlike a bad password. */
+function isUsedUpLink(error: Error | null): boolean {
+  return error instanceof ApiError && error.status === 400 && error.issues.length === 0;
 }

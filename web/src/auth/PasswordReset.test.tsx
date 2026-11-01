@@ -97,6 +97,21 @@ describe("choosing a new password from the emailed link", () => {
     );
   });
 
+  it("does not blame the link when the server fails", async () => {
+    const api = fakeApi({
+      ...signedOut,
+      "POST /auth/reset-password": () => apiError(500, "INTERNAL", "Something went wrong"),
+    });
+    const { user } = await renderApp(api, { path: "/reset-password?token=abc123" });
+
+    await user.type(await screen.findByLabelText("New password"), "a-brand-new-password");
+    await user.type(screen.getByLabelText("New password again"), "a-brand-new-password");
+    await user.click(screen.getByRole("button", { name: "Save new password" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Something went wrong");
+    expect(screen.queryByRole("link", { name: "Ask for a new link" })).not.toBeInTheDocument();
+  });
+
   it("says a link with no token is incomplete", async () => {
     await renderApp(fakeApi(signedOut), { path: "/reset-password" });
 

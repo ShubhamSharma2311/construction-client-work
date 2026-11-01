@@ -82,7 +82,7 @@ export const authPrivateRoutes: FastifyPluginCallbackZod<AppContext> = (app, ctx
   app.put(
     "/auth/email",
     { schema: { body: setEmailBody, response: { 200: meResponse } } },
-    (request) => setOwnerEmail(ctx.db, request.userId, request.body),
+    (request) => setOwnerEmail(ctx.db, request.userId, request.body, ctx.clock()),
   );
 
   app.post(

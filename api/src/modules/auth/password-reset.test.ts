@@ -107,6 +107,23 @@ describe("POST /auth/forgot-password", () => {
     expect(errorOf(response).message).toMatch(/could not send/i);
     expect(await t.db.passwordReset.count()).toBe(0);
   });
+
+  it("keeps the earlier link working when sending a newer one fails", async () => {
+    await forgot();
+    const delivered = tokenFromOutbox();
+    mail.failing = true;
+
+    expect((await forgot()).statusCode).toBe(503);
+
+    expect((await reset(delivered)).statusCode).toBe(204);
+  });
+
+  it("holds to three emails an hour even when asked many times at once", async () => {
+    const answers = await Promise.all(Array.from({ length: 6 }, () => forgot()));
+
+    expect(outbox).toHaveLength(3);
+    expect(answers.filter((answer) => answer.statusCode === 429)).toHaveLength(3);
+  });
 });
 
 describe("POST /auth/reset-password", () => {
@@ -165,6 +182,25 @@ describe("POST /auth/reset-password", () => {
     const short = await reset(tokenFromOutbox(), "short");
     expect(short.statusCode).toBe(400);
     expect(JSON.stringify(short.json())).toContain("at least 10");
+  });
+});
+
+describe("links already sent", () => {
+  it("stop working once the email is changed", async () => {
+    await forgot();
+    await t.put("/auth/email", { email: "new@example.com", currentPassword: OWNER.password });
+
+    expect((await reset(tokenFromOutbox())).statusCode).toBe(400);
+  });
+
+  it("stop working once the password is changed", async () => {
+    await forgot();
+    await t.post("/auth/change-password", {
+      currentPassword: OWNER.password,
+      newPassword: "changed-by-the-owner",
+    });
+
+    expect((await reset(tokenFromOutbox())).statusCode).toBe(400);
   });
 });
 

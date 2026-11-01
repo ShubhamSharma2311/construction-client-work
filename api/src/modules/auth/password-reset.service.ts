@@ -1,9 +1,9 @@
 import { writeAudit } from "../../lib/audit.ts";
 import { AppError } from "../../lib/errors.ts";
-import type { Mailer } from "../../lib/mailer.ts";
+import type { Email, Mailer } from "../../lib/mailer.ts";
 import type { Db } from "../../lib/prisma.ts";
 import type { Me, ResetPasswordInput, SetEmailInput } from "./auth.schema.ts";
-import { accountGone, revokeAllForUser } from "./auth.service.ts";
+import { accountGone, cancelPendingResets, revokeAllForUser } from "./auth.service.ts";
 import { hashPassword, verifyPassword } from "./password.ts";
 // A reset token has the same shape as a refresh token: random, with only its SHA-256 stored.
 import { hashRefreshToken, newRefreshToken } from "./tokens.ts";
@@ -17,8 +17,10 @@ export interface ResetRequest {
 }
 
 /**
- * Emails the owner a one-time link to choose a new password. An unknown name or an
- * owner with no email gets the same quiet answer, so the reply never says who exists.
+ * Emails the owner a one-time link to choose a new password. An unknown name or an owner
+ * with no email gets the same 204 as a sent email. A hit limit or a failed send is said
+ * out loud: there is one account and its name is no secret, while an owner waiting for
+ * an email that never comes is a real cost.
  */
 export async function requestPasswordReset(
   db: Db,
@@ -29,21 +31,17 @@ export async function requestPasswordReset(
   const user = await db.user.findUnique({ where: { username: request.username } });
   if (!user?.email) return;
 
-  const hourAgo = new Date(now.getTime() - 3_600_000);
-  const recent = await db.passwordReset.count({
-    where: { userId: user.id, createdAt: { gt: hourAgo } },
-  });
-  if (recent >= RESET_EMAILS_PER_HOUR) {
-    throw new AppError("RATE_LIMITED", "Too many reset emails; try again in an hour");
-  }
-
   const { token, hash } = newRefreshToken();
   const reset = await db.$transaction(async (tx) => {
-    // Only the newest link works, so an older email lying in the inbox is harmless.
-    await tx.passwordReset.updateMany({
-      where: { userId: user.id, usedAt: null },
-      data: { usedAt: now },
+    // One request per owner at a time, so a burst cannot all read the same count.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`password-reset:${String(user.id)}`}))`;
+    const hourAgo = new Date(now.getTime() - 3_600_000);
+    const recent = await tx.passwordReset.count({
+      where: { userId: user.id, createdAt: { gt: hourAgo } },
     });
+    if (recent >= RESET_EMAILS_PER_HOUR) {
+      throw new AppError("RATE_LIMITED", "Too many reset emails; try again in an hour");
+    }
     return tx.passwordReset.create({
       data: {
         userId: user.id,
@@ -59,16 +57,33 @@ export async function requestPasswordReset(
     await mailer.send(
       resetEmail(user.email, user.username, settings?.businessName, request.appUrl, token),
     );
-  } catch (cause) {
-    // A link nobody received must not count against the hourly limit or stay usable.
-    await db.passwordReset.delete({ where: { id: reset.id } });
-    throw new AppError(
-      "UNAVAILABLE",
-      "Could not send the reset email; try again in a few minutes",
-      undefined,
-      { cause },
-    );
+  } catch (sendError) {
+    throw await unsentLink(db, reset.id, sendError);
   }
+  // Only once the new email is out: only the newest link works, so an older one lying
+  // in the inbox is harmless, and a failed send never cost the owner a working link.
+  await db.passwordReset.updateMany({
+    where: { userId: user.id, usedAt: null, id: { not: reset.id } },
+    data: { usedAt: now },
+  });
+}
+
+/** A link nobody received must not count against the hourly limit or stay usable. */
+async function unsentLink(db: Db, resetId: number, sendError: unknown): Promise<AppError> {
+  const cleanupError = await db.passwordReset.deleteMany({ where: { id: resetId } }).then(
+    () => undefined,
+    (error: unknown) => error,
+  );
+  const cause =
+    cleanupError === undefined
+      ? sendError
+      : new AggregateError([sendError, cleanupError], "sending and cleaning up both failed");
+  return new AppError(
+    "UNAVAILABLE",
+    "Could not send the reset email; try again in a few minutes",
+    undefined,
+    { cause },
+  );
 }
 
 function resetEmail(
@@ -77,7 +92,7 @@ function resetEmail(
   businessName: string | undefined,
   appUrl: string,
   token: string,
-) {
+): Email {
   const app = businessName ?? "your ledger";
   return {
     to,
@@ -116,6 +131,7 @@ export async function resetPassword(db: Db, input: ResetPasswordInput, now: Date
       data: { usedAt: now },
     });
     if (count === 0) throw invalidLink();
+    await cancelPendingResets(tx, reset.userId, now);
     await revokeAllForUser(tx, reset.userId, now);
     await writeAudit(tx, {
       entity: "User",
@@ -127,7 +143,12 @@ export async function resetPassword(db: Db, input: ResetPasswordInput, now: Date
 }
 
 /** Sets where reset links go. Needs the current password, so a borrowed session cannot. */
-export async function setOwnerEmail(db: Db, userId: number, input: SetEmailInput): Promise<Me> {
+export async function setOwnerEmail(
+  db: Db,
+  userId: number,
+  input: SetEmailInput,
+  now: Date,
+): Promise<Me> {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) throw accountGone();
   if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
@@ -135,6 +156,8 @@ export async function setOwnerEmail(db: Db, userId: number, input: SetEmailInput
   }
   return db.$transaction(async (tx) => {
     const updated = await tx.user.update({ where: { id: userId }, data: { email: input.email } });
+    // A link already sent to the old address must not outlive the change.
+    await cancelPendingResets(tx, userId, now);
     await writeAudit(tx, {
       entity: "User",
       entityId: userId,

@@ -73,6 +73,7 @@ export async function resetOwnerPassword(db: Db, input: OwnerCredentials, now: D
     if (!user) throw new AppError("NOT_FOUND", `No owner account named "${username}"`);
     await tx.user.update({ where: { id: user.id }, data: { passwordHash } });
     await revokeAllForUser(tx, user.id, now);
+    await cancelPendingResets(tx, user.id, now);
     await writeAudit(tx, {
       entity: "User",
       entityId: user.id,
@@ -211,6 +212,7 @@ export async function changePassword(
     // Updating the user row first is what serialises this against refreshSession.
     await tx.user.update({ where: { id: userId }, data: { passwordHash } });
     await revokeAllForUser(tx, userId, now);
+    await cancelPendingResets(tx, userId, now);
     await writeAudit(tx, {
       entity: "User",
       entityId: userId,
@@ -251,6 +253,14 @@ async function revokeFamily(db: Db | Tx, familyId: string, now: Date): Promise<v
   await db.refreshToken.updateMany({
     where: { familyId, revokedAt: null },
     data: { revokedAt: now },
+  });
+}
+
+/** Unused "forgot password" links stop working; called whenever the password or email changes. */
+export async function cancelPendingResets(tx: Tx, userId: number, now: Date): Promise<void> {
+  await tx.passwordReset.updateMany({
+    where: { userId, usedAt: null },
+    data: { usedAt: now },
   });
 }
 
