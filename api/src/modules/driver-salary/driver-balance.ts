@@ -1,4 +1,4 @@
-import type { DriverAccrual, Prisma } from "../../generated/prisma/client.ts";
+import type { DriverAccrual, Prisma } from "#prisma/client.ts";
 import { fromDbDate, monthOf, toDbDate, type IsoDate } from "../../lib/dates.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import type { AccrualDto, DriverPaymentDto } from "./driver-salary.schema.ts";

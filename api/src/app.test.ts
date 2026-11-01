@@ -4,7 +4,7 @@ import { testDeps } from "../test/app.ts";
 import { createTestPrisma } from "../test/db.ts";
 import { buildApp } from "./app.ts";
 import { AppError, ERROR_STATUS, type ErrorCode } from "./lib/errors.ts";
-import { createPrisma } from "./lib/prisma.ts";
+import { ledgerPrisma } from "./lib/prisma.ts";
 
 const db = createTestPrisma();
 
@@ -128,7 +128,14 @@ describe("GET /health", () => {
   });
 
   it("reports 503 when the database is unreachable", async () => {
-    const deadDb = createPrisma("postgresql://ledger:ledger@127.0.0.1:1/none");
+    const deadDb = ledgerPrisma({
+      sql: {
+        exec() {
+          throw new Error("storage unavailable");
+        },
+      },
+      transaction: () => Promise.reject(new Error("storage unavailable")),
+    });
     const app = buildApp(testDeps(deadDb, () => new Date()));
 
     const response = await app.inject({ method: "GET", url: "/health" });

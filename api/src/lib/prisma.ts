@@ -1,10 +1,10 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient, type Prisma } from "../generated/prisma/client.ts";
+import { PrismaClient, type Prisma } from "#prisma/client.ts";
+import { type LedgerStorage, LedgerStorageAdapterFactory } from "./storage-adapter.ts";
 
 export type Db = PrismaClient;
 export type Tx = Prisma.TransactionClient;
 
-/** A SQLite file on this machine, for development and tests; production uses the Durable Object. */
-export function createPrisma(databaseUrl: string): Db {
-  return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: databaseUrl }) });
+/** The ledger's database client over its SQLite storage (the Durable Object's, or a local file). */
+export function ledgerPrisma(storage: LedgerStorage): Db {
+  return new PrismaClient({ adapter: new LedgerStorageAdapterFactory(storage) });
 }

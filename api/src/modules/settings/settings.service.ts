@@ -1,4 +1,4 @@
-import type { Setting } from "../../generated/prisma/client.ts";
+import type { Setting } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import {
   fromDbDate,

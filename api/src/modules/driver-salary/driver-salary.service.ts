@@ -1,4 +1,4 @@
-import type { Driver, DriverSalaryRate } from "../../generated/prisma/client.ts";
+import type { Driver, DriverSalaryRate } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { fromDbDate, monthOf, monthStart, toDbDate, type IsoMonth } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";

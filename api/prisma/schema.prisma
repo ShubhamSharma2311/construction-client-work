@@ -3,6 +3,14 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+// The same client built for Cloudflare Workers, which load the query engine as a bundled
+// WebAssembly module instead of compiling it at start-up. Code imports either through #prisma.
+generator worker {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma-workerd"
+  runtime  = "workerd"
+}
+
 datasource db {
   provider = "sqlite"
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Prisma } from "../generated/prisma/client.ts";
+import { Prisma } from "#prisma/client.ts";
 import { AppError } from "./errors.ts";
 
 // Shape of `meta` when the SQLite driver adapter reports a database error.

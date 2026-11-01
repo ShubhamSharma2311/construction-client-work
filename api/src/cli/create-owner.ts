@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { loadEnv } from "../config/env.ts";
 import { systemClock } from "../lib/clock.ts";
-import { createPrisma } from "../lib/prisma.ts";
+import { createPrisma } from "../lib/local-db.ts";
 import { createOwner, resetOwnerPassword } from "../modules/auth/auth.service.ts";
 
 // Usage: OWNER_PASSWORD='...' npm run create-owner -- --username amit [--reset]

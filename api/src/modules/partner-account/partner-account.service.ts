@@ -1,4 +1,4 @@
-import type { Partner, Prisma } from "../../generated/prisma/client.ts";
+import type { Partner, Prisma } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { assertExportable, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import {

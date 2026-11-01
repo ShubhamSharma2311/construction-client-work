@@ -1,4 +1,4 @@
-import type { Labourer, Prisma } from "../../generated/prisma/client.ts";
+import type { Labourer, Prisma } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { notFound } from "../../lib/errors.ts";
 import { activeWhere, paged, type MasterListQuery, type Page } from "../../lib/listing.ts";

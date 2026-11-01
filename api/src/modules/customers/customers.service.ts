@@ -1,4 +1,4 @@
-import type { Customer, Prisma } from "../../generated/prisma/client.ts";
+import type { Customer, Prisma } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { activeWhere, paged, type MasterListQuery, type Page } from "../../lib/listing.ts";

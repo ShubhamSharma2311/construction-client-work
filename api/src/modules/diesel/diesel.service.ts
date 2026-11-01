@@ -1,4 +1,4 @@
-import type { Prisma } from "../../generated/prisma/client.ts";
+import type { Prisma } from "#prisma/client.ts";
 import { toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { dayFilter } from "../../lib/dates.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";

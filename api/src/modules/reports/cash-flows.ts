@@ -1,5 +1,5 @@
 import { addDays, dayFilter, fromDbDate, toDbDate, type IsoDate } from "../../lib/dates.ts";
-import type { DriverPaymentType, ExpenseCategory } from "../../generated/prisma/enums.ts";
+import type { DriverPaymentType, ExpenseCategory } from "#prisma/enums.ts";
 import type { Tx } from "../../lib/prisma.ts";
 import type { PayMode } from "../trips/trips.schema.ts";
 import type { CashLine } from "./reports.schema.ts";

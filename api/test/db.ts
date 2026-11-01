@@ -1,4 +1,5 @@
-import { createPrisma, type Db } from "../src/lib/prisma.ts";
+import { createPrisma } from "../src/lib/local-db.ts";
+import type { Db } from "../src/lib/prisma.ts";
 
 export function createTestPrisma(): Db {
   const url = process.env["DATABASE_URL"];

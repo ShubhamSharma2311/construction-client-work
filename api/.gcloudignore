@@ -1,9 +1,0 @@
-# What `gcloud builds submit` leaves out of the upload; the Dockerfile builds the rest.
-.gcloudignore
-node_modules/
-dist/
-coverage/
-src/generated/
-.env
-.env.*
-*.log

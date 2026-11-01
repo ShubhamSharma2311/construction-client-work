@@ -2,7 +2,7 @@ import { buildApp } from "./app.ts";
 import { loadEnv } from "./config/env.ts";
 import { systemClock } from "./lib/clock.ts";
 import { printMailer, resendMailer } from "./lib/mailer.ts";
-import { createPrisma } from "./lib/prisma.ts";
+import { createPrisma } from "./lib/local-db.ts";
 
 const env = loadEnv();
 const db = createPrisma(env.DATABASE_URL);

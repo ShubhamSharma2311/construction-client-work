@@ -1,4 +1,4 @@
-import type { Prisma } from "../../generated/prisma/client.ts";
+import type { Prisma } from "#prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import {
   fromDbDate,

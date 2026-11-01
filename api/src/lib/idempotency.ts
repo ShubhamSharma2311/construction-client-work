@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import type { Prisma } from "../generated/prisma/client.ts";
+import type { Prisma } from "#prisma/client.ts";
 import { AppError } from "./errors.ts";
 import type { Db, Tx } from "./prisma.ts";
 

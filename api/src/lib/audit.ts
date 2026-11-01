@@ -1,4 +1,4 @@
-import { Prisma, type AuditAction } from "../generated/prisma/client.ts";
+import { Prisma, type AuditAction } from "#prisma/client.ts";
 import type { Tx } from "./prisma.ts";
 
 export interface AuditEntry {
