@@ -11,7 +11,6 @@ import {
 import { AppError, notFound } from "../../lib/errors.ts";
 import { formatPaise } from "../../lib/money.ts";
 import { activeWhere, paged, type MasterListQuery, type Page } from "../../lib/listing.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { phoneSearchTerm } from "../../lib/phone.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import { driverBalance } from "../driver-salary/driver-balance.ts";
@@ -95,7 +94,7 @@ export async function listDrivers(
   if (query.search) {
     const phone = phoneSearchTerm(query.search);
     where.OR = [
-      { name: { contains: query.search, mode: "insensitive" } },
+      { name: { contains: query.search } },
       ...(phone ? [{ phone: { contains: phone } }] : []),
     ];
   }
@@ -129,8 +128,6 @@ export async function updateDriver(
 ): Promise<DriverUpdated> {
   const today = todayIST(now);
   return db.$transaction(async (tx) => {
-    if (input.defaultTractorId) await lockRow(tx, "Tractor", input.defaultTractorId);
-    await lockRow(tx, "Driver", id);
     const before = await tx.driver.findUnique({ where: { id }, include: driverInclude });
     if (!before) throw notFound("Driver", id);
 
@@ -286,8 +283,6 @@ export async function addSalaryRate(
   now: Date,
 ): Promise<DriverDto> {
   return db.$transaction(async (tx) => {
-    // Serialises with updateDriver, which moves the first rate when the joining date changes.
-    await lockRow(tx, "Driver", driverId);
     const driver = await tx.driver.findUnique({ where: { id: driverId } });
     if (!driver) throw notFound("Driver", driverId);
     const joinMonth = monthOf(fromDbDate(driver.joinedOn));
@@ -339,7 +334,6 @@ export async function deleteSalaryRate(
   now: Date,
 ): Promise<DriverDto> {
   return db.$transaction(async (tx) => {
-    await lockRow(tx, "Driver", driverId);
     const rate = await tx.driverSalaryRate.findFirst({ where: { id: rateId, driverId } });
     if (!rate) throw notFound("Salary rate", rateId);
     const first = await tx.driverSalaryRate.findFirstOrThrow({
@@ -399,7 +393,6 @@ async function assertTractorAssignable(
   tractorId: number,
   driverId: number | null,
 ): Promise<void> {
-  await lockRow(tx, "Tractor", tractorId);
   const tractor = await tx.tractor.findUnique({
     where: { id: tractorId },
     include: { defaultDriver: { select: { id: true, name: true } } },

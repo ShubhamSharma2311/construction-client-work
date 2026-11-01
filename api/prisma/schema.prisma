@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 enum AuditAction {
@@ -15,13 +15,13 @@ enum AuditAction {
 }
 
 model AuditLog {
-  id       BigInt      @id @default(autoincrement())
+  id       Int         @id @default(autoincrement())
   entity   String
   entityId String
   action   AuditAction
   before   Json?
   after    Json?
-  at       DateTime    @default(now()) @db.Timestamptz(3)
+  at       DateTime    @default(now())
 
   @@index([entity, entityId])
 }
@@ -32,7 +32,7 @@ model IdempotencyKey {
   requestHash  String
   statusCode   Int
   responseBody Json
-  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  createdAt    DateTime @default(now())
 }
 
 model User {
@@ -41,8 +41,8 @@ model User {
   passwordHash   String
   /// Where "forgot password" sends the reset link; none set means no reset by email.
   email          String?
-  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   refreshTokens  RefreshToken[]
   passwordResets PasswordReset[]
 }
@@ -53,9 +53,9 @@ model PasswordReset {
   userId    Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String    @unique
-  expiresAt DateTime  @db.Timestamptz(3)
-  usedAt    DateTime? @db.Timestamptz(3)
-  createdAt DateTime  @db.Timestamptz(3)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime
 
   @@index([userId, createdAt])
 }
@@ -67,20 +67,20 @@ model RefreshToken {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   familyId  String
   tokenHash String    @unique
-  expiresAt DateTime  @db.Timestamptz(3)
-  revokedAt DateTime? @db.Timestamptz(3)
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([familyId])
   @@index([userId])
 }
 
 model LoginAttempt {
-  id        BigInt   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   ip        String
   username  String
   succeeded Boolean
-  at        DateTime @db.Timestamptz(3)
+  at        DateTime
 
   @@index([ip, at])
 }
@@ -89,10 +89,10 @@ model LoginAttempt {
 model Setting {
   id                 Int      @id @default(1)
   businessName       String
-  businessStartDate  DateTime @db.Date
+  businessStartDate  DateTime
   openingCashPaise   Int      @default(0)
   openingOnlinePaise Int      @default(0)
-  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt
 }
 
 model Customer {
@@ -104,8 +104,8 @@ model Customer {
   village   String?
   notes     String?
   isActive  Boolean           @default(true)
-  createdAt DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime          @updatedAt @db.Timestamptz(3)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   trips     Trip[]
   payments  CustomerPayment[]
 
@@ -118,8 +118,8 @@ model Tractor {
   regNumber     String        @unique
   label         String
   isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   defaultDriver Driver?
   trips         Trip[]
   expenses      Expense[]
@@ -130,14 +130,14 @@ model Driver {
   id               Int                @id @default(autoincrement())
   name             String
   phone            String?
-  joinedOn         DateTime           @db.Date
-  leftOn           DateTime?          @db.Date
+  joinedOn         DateTime
+  leftOn           DateTime?
   /// Each tractor is the usual tractor of at most one driver.
   defaultTractorId Int?               @unique
   defaultTractor   Tractor?           @relation(fields: [defaultTractorId], references: [id])
   isActive         Boolean            @default(true)
-  createdAt        DateTime           @default(now()) @db.Timestamptz(3)
-  updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   salaryRates      DriverSalaryRate[]
   trips            Trip[]
   expenses         Expense[]
@@ -151,8 +151,8 @@ model DriverSalaryRate {
   driver        Driver   @relation(fields: [driverId], references: [id])
   monthlyPaise  Int
   /// First day of the month the rate starts applying.
-  effectiveFrom DateTime @db.Date
-  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  effectiveFrom DateTime
+  createdAt     DateTime @default(now())
 
   @@unique([driverId, effectiveFrom])
 }
@@ -163,8 +163,8 @@ model Khet {
   nameKey   String   @unique
   location  String?
   isActive  Boolean  @default(true)
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   trips     Trip[]
 }
 
@@ -174,8 +174,8 @@ model Labourer {
   phone     String?
   notes     String?
   isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   expenses  Expense[]
 }
 
@@ -186,8 +186,8 @@ model Partner {
   shareBasisPoints Int?
   notes            String?
   isActive         Boolean      @default(true)
-  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
   txns             PartnerTxn[]
 }
 
@@ -211,7 +211,7 @@ enum CustomerPaymentKind {
 model Trip {
   id              Int                 @id @default(autoincrement())
   kind            TripKind            @default(TRIP)
-  tripDate        DateTime            @db.Date
+  tripDate        DateTime
   customerId      Int
   customer        Customer            @relation(fields: [customerId], references: [id])
   driverId        Int?
@@ -225,9 +225,9 @@ model Trip {
   receivedPaise   Int                 @default(0)
   quantityNote    String?
   notes           String?
-  deletedAt       DateTime?           @db.Timestamptz(3)
-  createdAt       DateTime            @default(now()) @db.Timestamptz(3)
-  updatedAt       DateTime            @updatedAt @db.Timestamptz(3)
+  deletedAt       DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   allocations     PaymentAllocation[]
   /// Money taken when this trip was delivered; it moves with the trip's date.
   deliveryPayment CustomerPayment?    @relation("DeliveryPayment")
@@ -240,7 +240,7 @@ model CustomerPayment {
   id             Int                 @id @default(autoincrement())
   customerId     Int
   customer       Customer            @relation(fields: [customerId], references: [id])
-  paidOn         DateTime            @db.Date
+  paidOn         DateTime
   kind           CustomerPaymentKind @default(PAYMENT)
   /// Null exactly when kind is WRITE_OFF.
   mode           PayMode?
@@ -252,9 +252,9 @@ model CustomerPayment {
   /// Set when the money was taken at a trip's delivery rather than paid later.
   deliveryTripId Int?                @unique
   deliveryTrip   Trip?               @relation("DeliveryPayment", fields: [deliveryTripId], references: [id])
-  deletedAt      DateTime?           @db.Timestamptz(3)
-  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+  deletedAt      DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
   allocations    PaymentAllocation[]
 
   @@index([customerId, paidOn])
@@ -269,7 +269,7 @@ model PaymentAllocation {
   tripId      Int
   trip        Trip            @relation(fields: [tripId], references: [id])
   amountPaise Int
-  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  createdAt   DateTime        @default(now())
 
   @@unique([paymentId, tripId])
   @@index([tripId])
@@ -291,7 +291,7 @@ enum ExpenseCategory {
 model Expense {
   id            Int             @id @default(autoincrement())
   category      ExpenseCategory
-  spentOn       DateTime        @db.Date
+  spentOn       DateTime
   amountPaise   Int
   mode          PayMode
   driverId      Int?
@@ -305,19 +305,19 @@ model Expense {
   /// Tractor service only: hour-meter reading in whole hours.
   hourMeter     Int?
   /// Royalty only: the period the payment covers.
-  periodFrom    DateTime?       @db.Date
-  periodTo      DateTime?       @db.Date
+  periodFrom    DateTime?
+  periodTo      DateTime?
   reference     String?
   notes         String?
   /// EMI only: the loan paid, and the instalment month (null for a foreclosure payment).
   tractorLoanId Int?
   tractorLoan   TractorLoan?    @relation(fields: [tractorLoanId], references: [id], onDelete: Restrict)
-  emiMonth      DateTime?       @db.Date
+  emiMonth      DateTime?
   /// EMI only: the part of amountPaise that was a late fee.
   lateFeePaise  Int?
-  deletedAt     DateTime?       @db.Timestamptz(3)
-  createdAt     DateTime        @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime        @updatedAt @db.Timestamptz(3)
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([spentOn])
   @@index([category, spentOn])
@@ -340,13 +340,13 @@ model TractorLoan {
   /// Day of the month the EMI falls due; 1-28 so every month has it.
   emiDay            Int
   /// First day of the month of the first instalment.
-  firstEmiMonth     DateTime     @db.Date
+  firstEmiMonth     DateTime
   totalInstallments Int
-  closedOn          DateTime?    @db.Date
+  closedOn          DateTime?
   closedReason      LoanClosure?
   notes             String?
-  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
   payments          Expense[]
 
   @@index([tractorId])
@@ -373,14 +373,14 @@ model DriverAccrual {
   driver       Driver            @relation(fields: [driverId], references: [id], onDelete: Restrict)
   kind         DriverAccrualKind
   /// MONTH_SALARY only: first day of the month earned.
-  month        DateTime?         @db.Date
+  month        DateTime?
   /// The day it counts in the ledger: month end for salary, the day given for others.
-  accruedOn    DateTime          @db.Date
+  accruedOn    DateTime
   amountPaise  Int
   note         String?
-  deletedAt    DateTime?         @db.Timestamptz(3)
-  createdAt    DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime          @updatedAt @db.Timestamptz(3)
+  deletedAt    DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   bonusPayment DriverPayment?
 
   @@index([driverId, accruedOn])
@@ -391,19 +391,19 @@ model DriverPayment {
   id             Int               @id @default(autoincrement())
   driverId       Int
   driver         Driver            @relation(fields: [driverId], references: [id], onDelete: Restrict)
-  paidOn         DateTime          @db.Date
+  paidOn         DateTime
   type           DriverPaymentType
   amountPaise    Int
   mode           PayMode
   /// The month this payment is for, when the owner says so.
-  forMonth       DateTime?         @db.Date
+  forMonth       DateTime?
   /// BONUS only: the earning recorded together with this payment.
   bonusAccrualId Int?              @unique
   bonusAccrual   DriverAccrual?    @relation(fields: [bonusAccrualId], references: [id], onDelete: Restrict)
   notes          String?
-  deletedAt      DateTime?         @db.Timestamptz(3)
-  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime          @updatedAt @db.Timestamptz(3)
+  deletedAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@index([driverId, paidOn])
   @@index([paidOn])
@@ -419,14 +419,14 @@ model PartnerTxn {
   id          Int                 @id @default(autoincrement())
   partnerId   Int
   partner     Partner             @relation(fields: [partnerId], references: [id], onDelete: Restrict)
-  txnDate     DateTime            @db.Date
+  txnDate     DateTime
   direction   PartnerTxnDirection
   amountPaise Int
   mode        PayMode
   notes       String?
-  deletedAt   DateTime?           @db.Timestamptz(3)
-  createdAt   DateTime            @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime            @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   @@index([partnerId, txnDate])
   @@index([txnDate])

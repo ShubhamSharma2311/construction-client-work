@@ -10,7 +10,6 @@ import {
 } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { formatPaise, paiseToRupeeString } from "../../lib/money.ts";
 import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
@@ -105,7 +104,6 @@ export async function createTrip(
     { key: idempotencyKey, route: "POST /trips", body: input },
     async (tx) => {
       assertBusinessDate(input.tripDate, await getBusinessBounds(tx, now));
-      await lockRow(tx, "Customer", input.customerId);
       const warnings = await checkTripMasters(tx, input);
       const paidPaise = paidAtDelivery(input.payment, input.amount);
 
@@ -217,19 +215,16 @@ export function tripWhere(filter: TripFilter, db: Db): Prisma.TripWhereInput {
 export async function listTrips(db: Db, query: TripListQuery): Promise<TripPage> {
   const where = tripWhere(query, db);
   // One snapshot, so the page, its count and its totals always agree.
-  const [rows, total, sums] = await db.$transaction(
-    [
-      db.trip.findMany({
-        where,
-        include: tripInclude,
-        orderBy: [{ tripDate: "desc" }, { id: "desc" }],
-        ...toSkipTake(query),
-      }),
-      db.trip.count({ where }),
-      db.trip.aggregate({ where, _sum: { amountPaise: true, receivedPaise: true } }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [rows, total, sums] = await db.$transaction([
+    db.trip.findMany({
+      where,
+      include: tripInclude,
+      orderBy: [{ tripDate: "desc" }, { id: "desc" }],
+      ...toSkipTake(query),
+    }),
+    db.trip.count({ where }),
+    db.trip.aggregate({ where, _sum: { amountPaise: true, receivedPaise: true } }),
+  ]);
   const amountPaise = sums._sum.amountPaise ?? 0;
   const receivedPaise = sums._sum.receivedPaise ?? 0;
   return {
@@ -285,7 +280,6 @@ async function lockTrip(tx: Tx, id: number, alsoLockCustomer?: number): Promise<
   const customers = [...new Set([first.customerId, alsoLockCustomer ?? first.customerId])].sort(
     (a, b) => a - b,
   );
-  for (const customerId of customers) await lockRow(tx, "Customer", customerId);
   const locked = await tx.trip.findUniqueOrThrow({ where: { id }, include: tripInclude });
   if (!customers.includes(locked.customerId)) {
     throw new AppError(

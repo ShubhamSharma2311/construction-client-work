@@ -35,35 +35,32 @@ export async function dieselReport(db: Db, range: DieselReportQuery): Promise<Di
   };
   const tripWhere: Prisma.TripWhereInput = { kind: "TRIP", deletedAt: null, tripDate: days };
 
-  const [fillsByTractor, fillsByDriver, tripsByTractor, tripsByDriver] = await db.$transaction(
-    [
-      db.expense.groupBy({
-        by: ["tractorId"],
-        where: fillWhere,
-        _sum: { dieselMl: true, amountPaise: true },
-        orderBy: { tractorId: "asc" },
-      }),
-      db.expense.groupBy({
-        by: ["driverId"],
-        where: fillWhere,
-        _sum: { dieselMl: true, amountPaise: true },
-        orderBy: { driverId: "asc" },
-      }),
-      db.trip.groupBy({
-        by: ["tractorId"],
-        where: tripWhere,
-        _count: { _all: true },
-        orderBy: { tractorId: "asc" },
-      }),
-      db.trip.groupBy({
-        by: ["driverId"],
-        where: tripWhere,
-        _count: { _all: true },
-        orderBy: { driverId: "asc" },
-      }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [fillsByTractor, fillsByDriver, tripsByTractor, tripsByDriver] = await db.$transaction([
+    db.expense.groupBy({
+      by: ["tractorId"],
+      where: fillWhere,
+      _sum: { dieselMl: true, amountPaise: true },
+      orderBy: { tractorId: "asc" },
+    }),
+    db.expense.groupBy({
+      by: ["driverId"],
+      where: fillWhere,
+      _sum: { dieselMl: true, amountPaise: true },
+      orderBy: { driverId: "asc" },
+    }),
+    db.trip.groupBy({
+      by: ["tractorId"],
+      where: tripWhere,
+      _count: { _all: true },
+      orderBy: { tractorId: "asc" },
+    }),
+    db.trip.groupBy({
+      by: ["driverId"],
+      where: tripWhere,
+      _count: { _all: true },
+      orderBy: { driverId: "asc" },
+    }),
+  ]);
 
   const tractorUsage = new Map<number, Usage>();
   const driverUsage = new Map<number, Usage>();

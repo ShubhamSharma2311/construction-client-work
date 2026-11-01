@@ -2,7 +2,6 @@ import type { Prisma } from "../../generated/prisma/client.ts";
 import { writeAudit } from "../../lib/audit.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { activeWhere, paged, type MasterListQuery, type Page } from "../../lib/listing.ts";
-import { lockRow } from "../../lib/locks.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import type {
   TractorCreateInput,
@@ -43,7 +42,7 @@ export async function listTractors(db: Db, query: MasterListQuery): Promise<Page
   if (query.search) {
     where.OR = [
       { regNumber: { contains: query.search.toUpperCase().replace(/[\s-]/g, "") } },
-      { label: { contains: query.search, mode: "insensitive" } },
+      { label: { contains: query.search } },
     ];
   }
   return paged(
@@ -73,7 +72,6 @@ export async function updateTractor(
   input: TractorUpdateInput,
 ): Promise<TractorUpdated> {
   return db.$transaction(async (tx) => {
-    await lockRow(tx, "Tractor", id);
     const before = await tx.tractor.findUnique({ where: { id }, include: withDriver });
     if (!before) throw notFound("Tractor", id);
     if (input.regNumber && input.regNumber !== before.regNumber) {

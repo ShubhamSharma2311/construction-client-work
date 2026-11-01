@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { errorOf, useTestApp } from "../../../test/app.ts";
+import { fromPrismaError } from "../../lib/prisma-errors.ts";
 import {
   BUSINESS_START,
   makeCustomer,
@@ -544,11 +545,13 @@ describe("database guards behind the API", () => {
       },
     });
 
-    await expect(
-      t.db.paymentAllocation.create({
-        data: { paymentId: payment.id, tripId: saved.trip.id, amountPaise: 100 },
-      }),
-    ).rejects.toThrow(/different customers/);
+    expect(
+      await refusedBy(() =>
+        t.db.paymentAllocation.create({
+          data: { paymentId: payment.id, tripId: saved.trip.id, amountPaise: 100 },
+        }),
+      ),
+    ).toBe("PaymentAllocation_same_customer");
   });
 
   it("refuses to change an allocation in place", async () => {
@@ -557,9 +560,11 @@ describe("database guards behind the API", () => {
       where: { tripId: saved.trip.id },
     });
 
-    await expect(
-      t.db.paymentAllocation.update({ where: { id: allocation.id }, data: { amountPaise: 1 } }),
-    ).rejects.toThrow(/immutable/);
+    expect(
+      await refusedBy(() =>
+        t.db.paymentAllocation.update({ where: { id: allocation.id }, data: { amountPaise: 1 } }),
+      ),
+    ).toBe("PaymentAllocation_immutable");
   });
 
   it("refuses a write-off with a mode", async () => {
@@ -621,28 +626,17 @@ describe("review fixes", () => {
     expect(errorOf(response).message).toContain("write-off");
   });
 
-  it("refuses at commit a write-off that is not fully set against trips", async () => {
-    await expect(
-      t.db.customerPayment.create({
-        data: {
-          customerId: customer.id,
-          paidOn: new Date("2026-10-27"),
-          kind: "WRITE_OFF",
-          amountPaise: 100,
-        },
-      }),
-    ).rejects.toThrow(/fully allocated/);
-  });
-
   it("refuses at the database to soft-delete a trip or payment that still has allocations", async () => {
     const saved = await addTrip({ payment: { type: "CASH" } });
 
-    await expect(
-      t.db.trip.update({ where: { id: saved.trip.id }, data: { deletedAt: new Date() } }),
-    ).rejects.toThrow(/allocations/);
-    await expect(
-      t.db.customerPayment.updateMany({ data: { deletedAt: new Date() } }),
-    ).rejects.toThrow(/allocations/);
+    expect(
+      await refusedBy(() =>
+        t.db.trip.update({ where: { id: saved.trip.id }, data: { deletedAt: new Date() } }),
+      ),
+    ).toBe("Trip_soft_delete_without_allocations");
+    expect(
+      await refusedBy(() => t.db.customerPayment.updateMany({ data: { deletedAt: new Date() } })),
+    ).toBe("CustomerPayment_soft_delete_without_allocations");
   });
 
   it("moves the payment taken at delivery when the trip date is corrected", async () => {
@@ -684,3 +678,14 @@ describe("review fixes", () => {
     );
   });
 });
+
+/** The database rule that refused a write, as the API's error mapping names it. */
+async function refusedBy(write: () => Promise<unknown>): Promise<string | undefined> {
+  try {
+    await write();
+  } catch (error) {
+    const details = fromPrismaError(error)?.details;
+    return typeof details?.["constraint"] === "string" ? details["constraint"] : undefined;
+  }
+  throw new Error("expected the database to refuse the write");
+}

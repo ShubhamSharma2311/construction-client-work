@@ -4,7 +4,6 @@ import { assertExportable, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { assertBusinessDate, dayFilter, monthStart, toDbDate } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";
 import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
@@ -22,7 +21,6 @@ import type {
 
 /** Old dues are settled even after a driver leaves, so inactive drivers can still be paid. */
 async function lockDriver(tx: Tx, driverId: number): Promise<void> {
-  await lockRow(tx, "Driver", driverId);
   if (!(await tx.driver.findUnique({ where: { id: driverId } })))
     throw notFound("Driver", driverId);
 }
@@ -133,7 +131,6 @@ export async function reverseDriverPayment(
   return db.$transaction(async (tx) => {
     const first = await tx.driverPayment.findUnique({ where: { id } });
     if (!first) throw notFound("Driver payment", id);
-    await lockRow(tx, "Driver", first.driverId);
     const payment = await tx.driverPayment.findUniqueOrThrow({ where: { id } });
     if (payment.deletedAt)
       throw new AppError("CONFLICT", `Driver payment #${String(id)} is already reversed`);
@@ -182,24 +179,21 @@ export async function listDriverPayments(
 ): Promise<DriverPaymentPage> {
   const where = paymentWhere(query);
   // One snapshot, so the page, its count and its totals always agree.
-  const [rows, total, groups] = await db.$transaction(
-    [
-      db.driverPayment.findMany({
-        where,
-        include: driverPaymentInclude,
-        orderBy: [{ paidOn: "desc" }, { id: "desc" }],
-        ...toSkipTake(query),
-      }),
-      db.driverPayment.count({ where }),
-      db.driverPayment.groupBy({
-        by: ["type"],
-        where,
-        _sum: { amountPaise: true },
-        orderBy: { type: "asc" },
-      }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [rows, total, groups] = await db.$transaction([
+    db.driverPayment.findMany({
+      where,
+      include: driverPaymentInclude,
+      orderBy: [{ paidOn: "desc" }, { id: "desc" }],
+      ...toSkipTake(query),
+    }),
+    db.driverPayment.count({ where }),
+    db.driverPayment.groupBy({
+      by: ["type"],
+      where,
+      _sum: { amountPaise: true },
+      orderBy: { type: "asc" },
+    }),
+  ]);
   const sumFor = (type: "ADVANCE" | "SALARY" | "BONUS") =>
     groups.find((group) => group.type === type)?._sum.amountPaise ?? 0;
   return {

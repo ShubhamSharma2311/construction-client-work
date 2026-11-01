@@ -3,7 +3,6 @@ import { writeAudit } from "../../lib/audit.ts";
 import { fromDbDate, monthOf, monthStart, toDbDate, type IsoMonth } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { formatPaise } from "../../lib/money.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
@@ -97,7 +96,6 @@ export async function closeMonth(
 ): Promise<AccrualSaved> {
   return db.$transaction(async (tx) => {
     const bounds = await getBusinessBounds(tx, now);
-    await lockRow(tx, "Driver", driverId);
     const driver = await readDriver(tx, driverId);
     assertMonthClosable(driver, input.month, bounds);
     const existing = await closedMonth(tx, driverId, input.month);
@@ -147,7 +145,6 @@ export async function reopenMonth(
   now: Date,
 ): Promise<AccrualSaved> {
   return db.$transaction(async (tx) => {
-    await lockRow(tx, "Driver", driverId);
     await readDriver(tx, driverId);
     const accrual = await closedMonth(tx, driverId, month);
     if (!accrual) throw new AppError("NOT_FOUND", `${month} is not closed`);
@@ -181,7 +178,6 @@ export async function setDriverOpening(
   };
   return runIdempotent(db, request, async (tx) => {
     const bounds = await getBusinessBounds(tx, now);
-    await lockRow(tx, "Driver", driverId);
     const driver = await readDriver(tx, driverId);
     const existing = await tx.driverAccrual.findFirst({
       where: { driverId, kind: "OPENING_BALANCE", deletedAt: null },
@@ -216,7 +212,6 @@ export async function removeDriverOpening(
   now: Date,
 ): Promise<AccrualSaved> {
   return db.$transaction(async (tx) => {
-    await lockRow(tx, "Driver", driverId);
     await readDriver(tx, driverId);
     const opening = await tx.driverAccrual.findFirst({
       where: { driverId, kind: "OPENING_BALANCE", deletedAt: null },

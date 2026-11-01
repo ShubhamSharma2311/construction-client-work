@@ -3,7 +3,7 @@ import { z } from "zod";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   PORT: z.coerce.number().int().min(0).max(65535),
-  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  DATABASE_URL: z.string().startsWith("file:", "DATABASE_URL must be a SQLite file: URL"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   CORS_ORIGINS: z

@@ -1,28 +1,19 @@
-import { execFileSync } from "node:child_process";
+import { readFileSync, rmSync } from "node:fs";
 import { parseEnv } from "node:util";
-import { readFileSync } from "node:fs";
-import pg from "pg";
+import Database from "better-sqlite3";
 
-/** Applies all migrations to the test database once per run. */
-export default async function setup(): Promise<void> {
+/** Builds a fresh SQLite test database from the migrations once per run. */
+export default function setup(): void {
   const env = parseEnv(readFileSync(".env.test", "utf8"));
   const url = env["DATABASE_URL"];
-  if (!url) throw new Error(".env.test has no DATABASE_URL");
+  if (!url?.startsWith("file:")) throw new Error(".env.test needs DATABASE_URL=file:...");
+  const path = url.slice("file:".length);
+  for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(path + suffix, { force: true });
 
-  const client = new pg.Client({ connectionString: url });
+  const db = new Database(path);
   try {
-    await client.connect();
-  } catch (cause) {
-    throw new Error(
-      `Test database at ${url} is unreachable. Start it with: docker compose up -d db-test`,
-      { cause },
-    );
+    db.exec(readFileSync("migrations/0001_init.sql", "utf8"));
   } finally {
-    await client.end();
+    db.close();
   }
-
-  execFileSync("npx", ["prisma", "migrate", "deploy"], {
-    env: { ...process.env, DATABASE_URL: url },
-    stdio: "pipe",
-  });
 }

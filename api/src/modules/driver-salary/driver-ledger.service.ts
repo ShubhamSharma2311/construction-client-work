@@ -69,42 +69,39 @@ export async function driverLedger(
   driverId: number,
   range: { from?: IsoDate; to?: IsoDate },
 ): Promise<DriverLedger> {
-  return db.$transaction(
-    async (tx) => {
-      const driver = await tx.driver.findUnique({ where: { id: driverId } });
-      if (!driver) throw notFound("Driver", driverId);
-      const opening = range.from ? await driverBalance(tx, driverId, range.from) : 0;
+  return db.$transaction(async (tx) => {
+    const driver = await tx.driver.findUnique({ where: { id: driverId } });
+    if (!driver) throw notFound("Driver", driverId);
+    const opening = range.from ? await driverBalance(tx, driverId, range.from) : 0;
 
-      let running = opening;
-      const entries: Entry[] = (await entriesIn(tx, driverId, range)).map((entry) => {
-        running += entry.earnedPaise - entry.paidPaise;
-        return { ...entry, balancePaise: running };
-      });
+    let running = opening;
+    const entries: Entry[] = (await entriesIn(tx, driverId, range)).map((entry) => {
+      running += entry.earnedPaise - entry.paidPaise;
+      return { ...entry, balancePaise: running };
+    });
 
-      const months: DriverLedger["months"] = [];
-      for (const entry of entries) {
-        const month = entry.date.slice(0, 7);
-        const last = months.at(-1);
-        const row =
-          last?.month === month
-            ? last
-            : { month, earnedPaise: 0, paidPaise: 0, closingBalancePaise: 0 };
-        if (row !== last) months.push(row);
-        row.earnedPaise += entry.earnedPaise;
-        row.paidPaise += entry.paidPaise;
-        row.closingBalancePaise = entry.balancePaise;
-      }
+    const months: DriverLedger["months"] = [];
+    for (const entry of entries) {
+      const month = entry.date.slice(0, 7);
+      const last = months.at(-1);
+      const row =
+        last?.month === month
+          ? last
+          : { month, earnedPaise: 0, paidPaise: 0, closingBalancePaise: 0 };
+      if (row !== last) months.push(row);
+      row.earnedPaise += entry.earnedPaise;
+      row.paidPaise += entry.paidPaise;
+      row.closingBalancePaise = entry.balancePaise;
+    }
 
-      return {
-        driver: { id: driver.id, name: driver.name },
-        from: range.from ?? null,
-        to: range.to ?? null,
-        openingBalancePaise: opening,
-        entries,
-        months,
-        closingBalancePaise: running,
-      };
-    },
-    { isolationLevel: "RepeatableRead" },
-  );
+    return {
+      driver: { id: driver.id, name: driver.name },
+      from: range.from ?? null,
+      to: range.to ?? null,
+      openingBalancePaise: opening,
+      entries,
+      months,
+      closingBalancePaise: running,
+    };
+  });
 }

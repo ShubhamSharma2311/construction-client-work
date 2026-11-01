@@ -50,7 +50,7 @@ export async function listCustomers(db: Db, query: MasterListQuery): Promise<Pag
     const phone = phoneSearchTerm(query.search);
     where.OR = [
       { nameKey: { contains: nameKey(query.search) } },
-      { village: { contains: query.search, mode: "insensitive" } },
+      { village: { contains: query.search } },
       ...(phone ? [{ phone: { contains: phone } }] : []),
     ];
   }

@@ -47,5 +47,5 @@ export async function profitAndLossIn(tx: Tx, range: ClosedRange): Promise<Pnl> 
 }
 
 export async function profitAndLoss(db: Db, range: ClosedRange): Promise<Pnl> {
-  return db.$transaction((tx) => profitAndLossIn(tx, range), { isolationLevel: "RepeatableRead" });
+  return db.$transaction((tx) => profitAndLossIn(tx, range));
 }

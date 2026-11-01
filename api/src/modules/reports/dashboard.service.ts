@@ -17,24 +17,21 @@ export async function dashboard(db: Db, date: IsoDate | undefined, now: Date): P
   const day = date ?? today;
   if (day > today) throw new AppError("VALIDATION", `${day} has not happened yet`);
 
-  const dayFigures = await db.$transaction(
-    async (tx) => {
-      const summary = await dailySummary(tx, { from: day, to: day });
-      const groups = await tx.expense.groupBy({
-        by: ["category"],
-        where: { deletedAt: null, spentOn: dayFilter({ from: day, to: day }) },
-        _sum: { amountPaise: true },
-        orderBy: { category: "asc" },
-      });
-      return {
-        totals: summary.totals,
-        expensesByCategory: categoryTotals(groups),
-        cash: await balanceAtEndOf(tx, "CASH", day),
-        online: await balanceAtEndOf(tx, "ONLINE", day),
-      };
-    },
-    { isolationLevel: "RepeatableRead" },
-  );
+  const dayFigures = await db.$transaction(async (tx) => {
+    const summary = await dailySummary(tx, { from: day, to: day });
+    const groups = await tx.expense.groupBy({
+      by: ["category"],
+      where: { deletedAt: null, spentOn: dayFilter({ from: day, to: day }) },
+      _sum: { amountPaise: true },
+      orderBy: { category: "asc" },
+    });
+    return {
+      totals: summary.totals,
+      expensesByCategory: categoryTotals(groups),
+      cash: await balanceAtEndOf(tx, "CASH", day),
+      online: await balanceAtEndOf(tx, "ONLINE", day),
+    };
+  });
   const [dues, emis] = await Promise.all([listDues(db, now), emiDue(db, { days: 0 }, now)]);
   return {
     date: day,

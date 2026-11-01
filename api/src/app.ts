@@ -12,6 +12,7 @@ import {
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import type { AppContext } from "./app-context.ts";
+import { oneRequestAtATime } from "./lib/one-at-a-time.ts";
 import { requireProxySecret } from "./lib/proxy-guard.ts";
 import type { Env } from "./config/env.ts";
 import { AppError, type ErrorBody } from "./lib/errors.ts";
@@ -67,6 +68,7 @@ export function buildApp(deps: AppDeps): App {
 
   if (deps.proxySecret !== undefined)
     app.addHook("onRequest", requireProxySecret(deps.proxySecret));
+  oneRequestAtATime(app);
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   app.decorateRequest("userId", 0);

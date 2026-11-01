@@ -10,7 +10,6 @@ import {
 } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";
 import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
@@ -145,7 +144,6 @@ export async function recordPartnerTxn(
 }
 
 async function lockTxn(tx: Tx, id: number): Promise<TxnRow> {
-  await lockRow(tx, "PartnerTxn", id);
   const row = await tx.partnerTxn.findUnique({ where: { id }, include: txnInclude });
   if (!row) throw notFound("Partner transaction", id);
   return row;
@@ -237,9 +235,7 @@ export async function partnerLedger(
   partnerId: number,
   range: { from?: IsoDate; to?: IsoDate },
 ): Promise<PartnerLedger> {
-  return db.$transaction((tx) => partnerLedgerIn(tx, partnerId, range), {
-    isolationLevel: "RepeatableRead",
-  });
+  return db.$transaction((tx) => partnerLedgerIn(tx, partnerId, range), {});
 }
 
 function txnWhere(filter: PartnerTxnFilter): Prisma.PartnerTxnWhereInput {
@@ -255,24 +251,21 @@ function txnWhere(filter: PartnerTxnFilter): Prisma.PartnerTxnWhereInput {
 export async function listPartnerTxns(db: Db, query: PartnerTxnListQuery): Promise<PartnerTxnPage> {
   const where = txnWhere(query);
   // One snapshot, so the page, its count and its totals always agree.
-  const [rows, total, groups] = await db.$transaction(
-    [
-      db.partnerTxn.findMany({
-        where,
-        include: txnInclude,
-        orderBy: [{ txnDate: "desc" }, { id: "desc" }],
-        ...toSkipTake(query),
-      }),
-      db.partnerTxn.count({ where }),
-      db.partnerTxn.groupBy({
-        by: ["direction"],
-        where,
-        _sum: { amountPaise: true },
-        orderBy: { direction: "asc" },
-      }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [rows, total, groups] = await db.$transaction([
+    db.partnerTxn.findMany({
+      where,
+      include: txnInclude,
+      orderBy: [{ txnDate: "desc" }, { id: "desc" }],
+      ...toSkipTake(query),
+    }),
+    db.partnerTxn.count({ where }),
+    db.partnerTxn.groupBy({
+      by: ["direction"],
+      where,
+      _sum: { amountPaise: true },
+      orderBy: { direction: "asc" },
+    }),
+  ]);
   return {
     items: rows.map(toDto),
     total,

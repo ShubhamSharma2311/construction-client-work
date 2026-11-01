@@ -4,7 +4,6 @@ import { assertExportable, toCsv, type CsvColumn } from "../../lib/csv.ts";
 import { assertBusinessDate, fromDbDate, toDbDate, dayFilter } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { formatPaise, paiseToRupeeString } from "../../lib/money.ts";
 import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
@@ -138,7 +137,6 @@ export async function createPayment(
   };
   return runIdempotent(db, request, async (tx) => {
     assertBusinessDate(input.paidOn, await getBusinessBounds(tx, now));
-    await lockRow(tx, "Customer", customerId);
     // Old dues may be cleared even after a customer is made inactive.
     if (!(await tx.customer.findUnique({ where: { id: customerId } }))) {
       throw notFound("Customer", customerId);
@@ -189,7 +187,6 @@ export async function applyCredit(
     body: {},
   };
   return runIdempotent(db, request, async (tx) => {
-    await lockRow(tx, "Customer", customerId);
     if (!(await tx.customer.findUnique({ where: { id: customerId } }))) {
       throw notFound("Customer", customerId);
     }
@@ -232,7 +229,6 @@ export async function applyCredit(
 async function lockPayment(tx: Tx, id: number): Promise<PaymentRow> {
   const first = await tx.customerPayment.findUnique({ where: { id } });
   if (!first) throw notFound("Payment", id);
-  await lockRow(tx, "Customer", first.customerId);
   return tx.customerPayment.findUniqueOrThrow({ where: { id }, include: paymentInclude });
 }
 
@@ -330,24 +326,21 @@ function paymentWhere(filter: PaymentFilter): Prisma.CustomerPaymentWhereInput {
 export async function listPayments(db: Db, query: PaymentListQuery): Promise<PaymentPage> {
   const where = paymentWhere(query);
   // One snapshot, so the page, its count and its totals always agree.
-  const [rows, total, groups] = await db.$transaction(
-    [
-      db.customerPayment.findMany({
-        where,
-        include: paymentInclude,
-        orderBy: [{ paidOn: "desc" }, { id: "desc" }],
-        ...toSkipTake(query),
-      }),
-      db.customerPayment.count({ where }),
-      db.customerPayment.groupBy({
-        by: ["kind", "mode"],
-        where,
-        _sum: { amountPaise: true },
-        orderBy: [{ kind: "asc" }, { mode: "asc" }],
-      }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [rows, total, groups] = await db.$transaction([
+    db.customerPayment.findMany({
+      where,
+      include: paymentInclude,
+      orderBy: [{ paidOn: "desc" }, { id: "desc" }],
+      ...toSkipTake(query),
+    }),
+    db.customerPayment.count({ where }),
+    db.customerPayment.groupBy({
+      by: ["kind", "mode"],
+      where,
+      _sum: { amountPaise: true },
+      orderBy: [{ kind: "asc" }, { mode: "asc" }],
+    }),
+  ]);
   const sumFor = (kind: "PAYMENT" | "WRITE_OFF", mode: "CASH" | "ONLINE" | null) =>
     groups.find((group) => group.kind === kind && group.mode === mode)?._sum.amountPaise ?? 0;
   return {

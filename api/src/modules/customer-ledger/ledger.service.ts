@@ -89,41 +89,38 @@ export async function customerLedger(
   customerId: number,
   range: LedgerQuery,
 ): Promise<Ledger> {
-  return db.$transaction(
-    async (tx) => {
-      const customer = await tx.customer.findUnique({ where: { id: customerId } });
-      if (!customer) throw notFound("Customer", customerId);
-      const opening = range.from ? await balanceBefore(tx, customerId, range.from) : 0;
+  return db.$transaction(async (tx) => {
+    const customer = await tx.customer.findUnique({ where: { id: customerId } });
+    if (!customer) throw notFound("Customer", customerId);
+    const opening = range.from ? await balanceBefore(tx, customerId, range.from) : 0;
 
-      let running = opening;
-      let debitPaise = 0;
-      let creditPaise = 0;
-      const entries = (await entriesIn(tx, customerId, range)).map((entry): LedgerEntry => {
-        running += entry.debitPaise - entry.creditPaise;
-        debitPaise += entry.debitPaise;
-        creditPaise += entry.creditPaise;
-        return {
-          date: entry.date,
-          type: entry.type,
-          refId: entry.refId,
-          description: entry.description,
-          debitPaise: entry.debitPaise,
-          creditPaise: entry.creditPaise,
-          balancePaise: running,
-        };
-      });
+    let running = opening;
+    let debitPaise = 0;
+    let creditPaise = 0;
+    const entries = (await entriesIn(tx, customerId, range)).map((entry): LedgerEntry => {
+      running += entry.debitPaise - entry.creditPaise;
+      debitPaise += entry.debitPaise;
+      creditPaise += entry.creditPaise;
       return {
-        customer: { id: customer.id, name: customer.name, phone: customer.phone },
-        from: range.from ?? null,
-        to: range.to ?? null,
-        openingBalancePaise: opening,
-        entries,
-        totals: { debitPaise, creditPaise },
-        closingBalancePaise: running,
+        date: entry.date,
+        type: entry.type,
+        refId: entry.refId,
+        description: entry.description,
+        debitPaise: entry.debitPaise,
+        creditPaise: entry.creditPaise,
+        balancePaise: running,
       };
-    },
-    { isolationLevel: "RepeatableRead" },
-  );
+    });
+    return {
+      customer: { id: customer.id, name: customer.name, phone: customer.phone },
+      from: range.from ?? null,
+      to: range.to ?? null,
+      openingBalancePaise: opening,
+      entries,
+      totals: { debitPaise, creditPaise },
+      closingBalancePaise: running,
+    };
+  });
 }
 
 interface LedgerCsvRow {
@@ -174,7 +171,8 @@ interface DueSqlRow {
   balance: bigint;
   due: bigint;
   credit: bigint;
-  oldest: Date | null;
+  /** ISO text: SQLite hands back a view's aggregated date as stored. */
+  oldest: string | null;
 }
 
 /** Every customer who owes money, largest first, aged by their oldest unpaid trip. */
@@ -195,7 +193,7 @@ export async function listDues(db: Db, now: Date): Promise<Dues> {
     // A positive balance always leaves some trip unpaid, so `oldest` is set.
     if (!row.oldest)
       throw new Error(`Customer ${String(row.id)} owes money but has no unpaid trip`);
-    const oldestDueDate = fromDbDate(row.oldest);
+    const oldestDueDate = fromDbDate(new Date(row.oldest));
     const ageDays = daysBetween(oldestDueDate, today);
     const bucket = ageBucket(ageDays);
     const balancePaise = Number(row.balance);

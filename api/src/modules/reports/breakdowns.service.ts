@@ -5,25 +5,22 @@ import type { DriverReport, KhetReport, TractorReport } from "./reports.schema.t
 /** Each tractor's trips and revenue against the costs booked to it: diesel, service, EMI, other. */
 export async function tractorReport(db: Db, range: ClosedRange): Promise<TractorReport> {
   const days = dayFilter(range);
-  const [trips, costs, tractors] = await db.$transaction(
-    [
-      db.trip.groupBy({
-        by: ["tractorId"],
-        where: { kind: "TRIP", deletedAt: null, tripDate: days },
-        _sum: { amountPaise: true },
-        _count: { _all: true },
-        orderBy: { tractorId: "asc" },
-      }),
-      db.expense.groupBy({
-        by: ["tractorId", "category"],
-        where: { deletedAt: null, spentOn: days, tractorId: { not: null } },
-        _sum: { amountPaise: true },
-        orderBy: [{ tractorId: "asc" }, { category: "asc" }],
-      }),
-      db.tractor.findMany({ orderBy: { regNumber: "asc" } }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [trips, costs, tractors] = await db.$transaction([
+    db.trip.groupBy({
+      by: ["tractorId"],
+      where: { kind: "TRIP", deletedAt: null, tripDate: days },
+      _sum: { amountPaise: true },
+      _count: { _all: true },
+      orderBy: { tractorId: "asc" },
+    }),
+    db.expense.groupBy({
+      by: ["tractorId", "category"],
+      where: { deletedAt: null, spentOn: days, tractorId: { not: null } },
+      _sum: { amountPaise: true },
+      orderBy: [{ tractorId: "asc" }, { category: "asc" }],
+    }),
+    db.tractor.findMany({ orderBy: { regNumber: "asc" } }),
+  ]);
   const costFor = (tractorId: number, categories: readonly string[]) =>
     costs
       .filter((row) => row.tractorId === tractorId && categories.includes(row.category))
@@ -57,19 +54,16 @@ export async function tractorReport(db: Db, range: ClosedRange): Promise<Tractor
 
 /** Trips and revenue by the field the sand came from. */
 export async function khetReport(db: Db, range: ClosedRange): Promise<KhetReport> {
-  const [trips, khets] = await db.$transaction(
-    [
-      db.trip.groupBy({
-        by: ["khetId"],
-        where: { kind: "TRIP", deletedAt: null, tripDate: dayFilter(range) },
-        _sum: { amountPaise: true },
-        _count: { _all: true },
-        orderBy: { khetId: "asc" },
-      }),
-      db.khet.findMany({ orderBy: { nameKey: "asc" } }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [trips, khets] = await db.$transaction([
+    db.trip.groupBy({
+      by: ["khetId"],
+      where: { kind: "TRIP", deletedAt: null, tripDate: dayFilter(range) },
+      _sum: { amountPaise: true },
+      _count: { _all: true },
+      orderBy: { khetId: "asc" },
+    }),
+    db.khet.findMany({ orderBy: { nameKey: "asc" } }),
+  ]);
   const rows = khets.flatMap((khet) => {
     const row = trips.find((trip) => trip.khetId === khet.id);
     return row
@@ -88,37 +82,34 @@ export async function khetReport(db: Db, range: ClosedRange): Promise<KhetReport
 /** Per driver: trips run, diesel filled, salary earned, and advances and salary paid. */
 export async function driverReport(db: Db, range: ClosedRange): Promise<DriverReport> {
   const days = dayFilter(range);
-  const [trips, diesel, earned, paid, drivers] = await db.$transaction(
-    [
-      db.trip.groupBy({
-        by: ["driverId"],
-        where: { kind: "TRIP", deletedAt: null, tripDate: days },
-        _sum: { amountPaise: true },
-        _count: { _all: true },
-        orderBy: { driverId: "asc" },
-      }),
-      db.expense.groupBy({
-        by: ["driverId"],
-        where: { category: "DIESEL", deletedAt: null, spentOn: days },
-        _sum: { amountPaise: true, dieselMl: true },
-        orderBy: { driverId: "asc" },
-      }),
-      db.driverAccrual.groupBy({
-        by: ["driverId"],
-        where: { kind: { in: ["MONTH_SALARY", "BONUS"] }, deletedAt: null, accruedOn: days },
-        _sum: { amountPaise: true },
-        orderBy: { driverId: "asc" },
-      }),
-      db.driverPayment.groupBy({
-        by: ["driverId", "type"],
-        where: { deletedAt: null, paidOn: days },
-        _sum: { amountPaise: true },
-        orderBy: [{ driverId: "asc" }, { type: "asc" }],
-      }),
-      db.driver.findMany({ orderBy: { name: "asc" } }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [trips, diesel, earned, paid, drivers] = await db.$transaction([
+    db.trip.groupBy({
+      by: ["driverId"],
+      where: { kind: "TRIP", deletedAt: null, tripDate: days },
+      _sum: { amountPaise: true },
+      _count: { _all: true },
+      orderBy: { driverId: "asc" },
+    }),
+    db.expense.groupBy({
+      by: ["driverId"],
+      where: { category: "DIESEL", deletedAt: null, spentOn: days },
+      _sum: { amountPaise: true, dieselMl: true },
+      orderBy: { driverId: "asc" },
+    }),
+    db.driverAccrual.groupBy({
+      by: ["driverId"],
+      where: { kind: { in: ["MONTH_SALARY", "BONUS"] }, deletedAt: null, accruedOn: days },
+      _sum: { amountPaise: true },
+      orderBy: { driverId: "asc" },
+    }),
+    db.driverPayment.groupBy({
+      by: ["driverId", "type"],
+      where: { deletedAt: null, paidOn: days },
+      _sum: { amountPaise: true },
+      orderBy: [{ driverId: "asc" }, { type: "asc" }],
+    }),
+    db.driver.findMany({ orderBy: { name: "asc" } }),
+  ]);
   const rows = drivers
     .map((driver) => {
       const tripRow = trips.find((row) => row.driverId === driver.id);

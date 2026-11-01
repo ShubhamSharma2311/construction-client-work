@@ -30,7 +30,7 @@ export async function listKhets(db: Db, query: MasterListQuery): Promise<Page<Kh
   if (query.search) {
     where.OR = [
       { nameKey: { contains: nameKey(query.search) } },
-      { location: { contains: query.search, mode: "insensitive" } },
+      { location: { contains: query.search } },
     ];
   }
   return paged(

@@ -29,7 +29,7 @@ export async function listLabourers(db: Db, query: MasterListQuery): Promise<Pag
   if (query.search) {
     const phone = phoneSearchTerm(query.search);
     where.OR = [
-      { name: { contains: query.search, mode: "insensitive" } },
+      { name: { contains: query.search } },
       ...(phone ? [{ phone: { contains: phone } }] : []),
     ];
   }

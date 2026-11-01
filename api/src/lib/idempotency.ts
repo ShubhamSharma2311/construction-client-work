@@ -58,7 +58,7 @@ export async function runIdempotent<T extends Prisma.InputJsonValue>(
   return db.$transaction(async (tx) => {
     const claimed = await tx.$executeRaw`
       INSERT INTO "IdempotencyKey" ("key", "route", "requestHash", "statusCode", "responseBody")
-      VALUES (${request.key}, ${request.route}, ${requestHash}, 0, '{}'::jsonb)
+      VALUES (${request.key}, ${request.route}, ${requestHash}, 0, '{}')
       ON CONFLICT ("key") DO NOTHING`;
 
     if (claimed === 0) {

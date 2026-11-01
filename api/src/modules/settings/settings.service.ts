@@ -44,8 +44,6 @@ export async function saveSettings(db: Db, input: SettingsInput, now: Date): Pro
   };
 
   return db.$transaction(async (tx) => {
-    // Exclusive lock: entries hold a share lock while they check dates (getBusinessBounds).
-    await tx.$executeRaw`SELECT 1 FROM "Setting" WHERE id = ${SETTINGS_ID} FOR UPDATE`;
     const before = await tx.setting.findUnique({ where: { id: SETTINGS_ID } });
     if (before)
       await moveBusinessStart(tx, fromDbDate(before.businessStartDate), input.businessStartDate);
@@ -113,7 +111,8 @@ async function moveBusinessStart(tx: Tx, from: IsoDate, to: IsoDate): Promise<vo
 
 /** Oldest live dated entry. Every table with a business date must be listed here. */
 async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
-  const [row] = await tx.$queryRaw<{ earliest: Date | null }[]>`
+  // SQLite hands back an aggregate of dates as their stored ISO text.
+  const [row] = await tx.$queryRaw<{ earliest: string | null }[]>`
     SELECT MIN(day) AS earliest FROM (
       SELECT MIN("tripDate") AS day FROM "Trip" WHERE "deletedAt" IS NULL AND "kind" = 'TRIP'
       UNION ALL
@@ -128,7 +127,7 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
       UNION ALL
       SELECT MIN("txnDate") FROM "PartnerTxn" WHERE "deletedAt" IS NULL
     ) AS dated`;
-  return row?.earliest ? fromDbDate(row.earliest) : null;
+  return row?.earliest ? fromDbDate(new Date(row.earliest)) : null;
 }
 
 /**
@@ -137,7 +136,7 @@ async function earliestEntryDate(tx: Tx): Promise<IsoDate | null> {
  */
 export async function getBusinessBounds(db: Db | Tx, now: Date): Promise<BusinessDateBounds> {
   const [row] = await db.$queryRaw<{ businessStartDate: Date }[]>`
-    SELECT "businessStartDate" FROM "Setting" WHERE id = ${SETTINGS_ID} FOR SHARE`;
+    SELECT "businessStartDate" FROM "Setting" WHERE id = ${SETTINGS_ID}`;
   if (!row) {
     throw new AppError(
       "CONFLICT",

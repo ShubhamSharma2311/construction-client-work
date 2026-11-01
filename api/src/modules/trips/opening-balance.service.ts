@@ -2,7 +2,6 @@ import { writeAudit } from "../../lib/audit.ts";
 import { toDbDate } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import type { Db } from "../../lib/prisma.ts";
 import { customerBalance } from "../customer-ledger/balance.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
@@ -27,7 +26,6 @@ export async function createOpeningBalance(
   };
   return runIdempotent(db, request, async (tx) => {
     const bounds = await getBusinessBounds(tx, now);
-    await lockRow(tx, "Customer", customerId);
     const customer = await tx.customer.findUnique({ where: { id: customerId } });
     if (!customer) throw notFound("Customer", customerId);
     if (!customer.isActive) throw new AppError("CONFLICT", `Customer ${customer.name} is inactive`);

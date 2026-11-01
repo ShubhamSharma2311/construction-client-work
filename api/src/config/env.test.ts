@@ -4,7 +4,7 @@ import { loadEnv } from "./env.ts";
 const valid = {
   NODE_ENV: "development",
   PORT: "3000",
-  DATABASE_URL: "postgresql://ledger:ledger@localhost:5432/sand_trip_ledger",
+  DATABASE_URL: "file:./dev.db",
   JWT_SECRET: "x".repeat(32),
   CORS_ORIGINS: "http://localhost:5173, https://ledger.example.workers.dev",
   TRUST_PROXY_HOPS: "0",
@@ -28,8 +28,8 @@ describe("loadEnv", () => {
     expect(() => loadEnv({})).toThrow(/NODE_ENV[\s\S]*PORT[\s\S]*DATABASE_URL[\s\S]*JWT_SECRET/);
   });
 
-  it("rejects a non-postgres database URL", () => {
-    expect(() => loadEnv({ ...valid, DATABASE_URL: "mysql://x@localhost/db" })).toThrow(
+  it("rejects a database URL that is not a SQLite file", () => {
+    expect(() => loadEnv({ ...valid, DATABASE_URL: "postgresql://x@localhost/db" })).toThrow(
       /DATABASE_URL/,
     );
   });

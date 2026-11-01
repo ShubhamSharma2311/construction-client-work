@@ -13,7 +13,6 @@ import {
 } from "../../lib/dates.ts";
 import { AppError, notFound } from "../../lib/errors.ts";
 import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { formatPaise } from "../../lib/money.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
@@ -120,7 +119,6 @@ async function readLoan(tx: Db | Tx, id: number): Promise<LoanRow> {
 
 /** Locks the loan so payments, reversals and closure never act on a stale state. */
 async function lockLoan(tx: Tx, id: number): Promise<LoanRow> {
-  await lockRow(tx, "TractorLoan", id);
   return readLoan(tx, id);
 }
 
@@ -151,7 +149,6 @@ export async function createLoan(
   now: Date,
 ): Promise<LoanDetail> {
   return db.$transaction(async (tx) => {
-    await lockRow(tx, "Tractor", tractorId);
     const tractor = await tx.tractor.findUnique({ where: { id: tractorId } });
     if (!tractor) throw notFound("Tractor", tractorId);
     if (!tractor.isActive)
@@ -426,8 +423,6 @@ export async function reverseLoanPayment(
       (loan.closedReason === "PAID_OFF" && !wasForeclosure) ||
       (loan.closedReason === "FORECLOSED" && wasForeclosure);
     if (reopens) {
-      // createLoan locks the tractor too, so a new loan and this reopen cannot both win.
-      await lockRow(tx, "Tractor", loan.tractorId);
       await assertNoOtherOpenLoan(tx, loan.tractorId, loan.id);
       const reopened = await tx.tractorLoan.update({
         where: { id: loanId },

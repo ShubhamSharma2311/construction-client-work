@@ -44,8 +44,6 @@ export async function createOwner(db: Db, input: OwnerCredentials): Promise<Me> 
   const passwordHash = await hashPassword(password);
 
   return db.$transaction(async (tx) => {
-    // Serialises concurrent attempts so two owners can never be created.
-    await tx.$executeRaw`LOCK TABLE "User" IN EXCLUSIVE MODE`;
     if ((await tx.user.count()) > 0) {
       throw new AppError(
         "CONFLICT",
@@ -91,8 +89,6 @@ export async function login(
   now: Date,
 ): Promise<Session> {
   const userId = await db.$transaction(async (tx) => {
-    // One login per IP at a time, so a parallel burst cannot all read the same failure count.
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${input.ip}))`;
     await assertLoginAllowed(tx, input.ip, now);
     const user = await tx.user.findUnique({ where: { username: input.username } });
     const passwordOk = await checkPassword(input.password, user?.passwordHash);
@@ -158,9 +154,6 @@ export async function refreshSession(
   if (!known) throw invalidSession();
 
   const session = await db.$transaction(async (tx) => {
-    // Password change and reset update this row first, so a refresh runs wholly before
-    // or wholly after them and can never mint a token they fail to revoke.
-    await tx.$executeRaw`SELECT 1 FROM "User" WHERE id = ${known.userId} FOR UPDATE`;
     const { count } = await tx.refreshToken.updateMany({
       where: { tokenHash, revokedAt: null, expiresAt: { gt: now } },
       data: { revokedAt: now },

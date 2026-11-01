@@ -39,7 +39,7 @@ export async function createPartner(db: Db, input: PartnerCreateInput): Promise<
 
 export async function listPartners(db: Db, query: MasterListQuery): Promise<Page<PartnerDto>> {
   const where: Prisma.PartnerWhereInput = { ...activeWhere(query.active) };
-  if (query.search) where.name = { contains: query.search, mode: "insensitive" };
+  if (query.search) where.name = { contains: query.search };
   return paged(
     query,
     {

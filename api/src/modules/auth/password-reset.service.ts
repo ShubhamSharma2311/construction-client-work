@@ -33,8 +33,6 @@ export async function requestPasswordReset(
 
   const { token, hash } = newRefreshToken();
   const reset = await db.$transaction(async (tx) => {
-    // One request per owner at a time, so a burst cannot all read the same count.
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`password-reset:${String(user.id)}`}))`;
     const hourAgo = new Date(now.getTime() - 3_600_000);
     const recent = await tx.passwordReset.count({
       where: { userId: user.id, createdAt: { gt: hourAgo } },

@@ -31,7 +31,7 @@ describe("fromPrismaError", () => {
 
     expect(fromPrismaError(error)).toMatchObject({
       code: "CONFLICT",
-      details: { constraint: "Khet_nameKey_key" },
+      details: { constraint: "Khet.nameKey" },
     });
   });
 
@@ -42,10 +42,8 @@ describe("fromPrismaError", () => {
       }),
     );
 
-    expect(fromPrismaError(error)).toMatchObject({
-      code: "CONFLICT",
-      details: { constraint: "DriverSalaryRate_driverId_fkey" },
-    });
+    // SQLite does not say which foreign key failed.
+    expect(fromPrismaError(error)).toMatchObject({ code: "CONFLICT" });
   });
 
   it("maps a missing record to 404", async () => {
@@ -67,10 +65,21 @@ describe("fromPrismaError", () => {
     });
   });
 
-  it("maps an out-of-range value to 400", async () => {
-    const error = await errorFrom(() => db.khet.findUnique({ where: { id: 3_000_000_000 } }));
+  it("maps a refusal by a database trigger to 409 naming the rule", async () => {
+    await db.$executeRawUnsafe(
+      `CREATE TEMP TRIGGER "probe" BEFORE INSERT ON "Labourer"
+       BEGIN SELECT RAISE(ABORT, 'Labourer_probe_rule: refused for the test'); END`,
+    );
+    try {
+      const error = await errorFrom(() => db.labourer.create({ data: { name: "Ramu" } }));
 
-    expect(fromPrismaError(error)).toMatchObject({ code: "VALIDATION" });
+      expect(fromPrismaError(error)).toMatchObject({
+        code: "CONFLICT",
+        details: { constraint: "Labourer_probe_rule" },
+      });
+    } finally {
+      await db.$executeRawUnsafe(`DROP TRIGGER "probe"`);
+    }
   });
 
   it("leaves other errors alone", () => {

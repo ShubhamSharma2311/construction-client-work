@@ -14,7 +14,6 @@ import { runIdempotent, type IdempotentResult } from "../../lib/idempotency.ts";
 import { paiseToRupeeString } from "../../lib/money.ts";
 import { toSkipTake } from "../../lib/pagination.ts";
 import type { Db, Tx } from "../../lib/prisma.ts";
-import { lockRow } from "../../lib/locks.ts";
 import { assertUsable } from "../../lib/usable.ts";
 import { getBusinessBounds } from "../settings/settings.service.ts";
 import { dieselWarnings } from "./diesel-warnings.ts";
@@ -401,7 +400,6 @@ export async function restoreExpense(db: Db, id: number, now: Date): Promise<Exp
 
 /** Locks the row so an edit, delete or restore never acts on a state another one just changed. */
 async function lockExpense(tx: Tx, id: number): Promise<ExpenseRow> {
-  await lockRow(tx, "Expense", id);
   const row = await tx.expense.findUnique({ where: { id }, include: expenseInclude });
   if (!row) throw notFound("Expense", id);
   return row;
@@ -429,24 +427,21 @@ export function expenseWhere(filter: ExpenseFilter): Prisma.ExpenseWhereInput {
 export async function listExpenses(db: Db, query: ExpenseListQuery): Promise<ExpensePage> {
   const where = expenseWhere(query);
   // One snapshot, so the page, its count and its totals always agree.
-  const [rows, total, groups] = await db.$transaction(
-    [
-      db.expense.findMany({
-        where,
-        include: expenseInclude,
-        orderBy: [{ spentOn: "desc" }, { id: "desc" }],
-        ...toSkipTake(query),
-      }),
-      db.expense.count({ where }),
-      db.expense.groupBy({
-        by: ["category"],
-        where,
-        _sum: { amountPaise: true },
-        orderBy: { category: "asc" },
-      }),
-    ],
-    { isolationLevel: "RepeatableRead" },
-  );
+  const [rows, total, groups] = await db.$transaction([
+    db.expense.findMany({
+      where,
+      include: expenseInclude,
+      orderBy: [{ spentOn: "desc" }, { id: "desc" }],
+      ...toSkipTake(query),
+    }),
+    db.expense.count({ where }),
+    db.expense.groupBy({
+      by: ["category"],
+      where,
+      _sum: { amountPaise: true },
+      orderBy: { category: "asc" },
+    }),
+  ]);
   const byCategory = Object.fromEntries(
     EXPENSE_CATEGORIES.map((category) => [
       category,
