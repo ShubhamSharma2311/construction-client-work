@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useTestApp } from "../../../test/app.ts";
+import { errorOf, useTestApp } from "../../../test/app.ts";
 
 const SETUP_TOKEN = "s".repeat(40);
 const t = useTestApp({ setupToken: SETUP_TOKEN });
@@ -37,6 +37,9 @@ describe("POST /auth/setup-owner", () => {
     });
 
     expect(second.statusCode).toBe(409);
+    expect(errorOf(second).message).toBe(
+      "An owner account already exists; use Forgot password to change its password",
+    );
   });
 
   it("refuses a wrong setup token without creating anyone", async () => {

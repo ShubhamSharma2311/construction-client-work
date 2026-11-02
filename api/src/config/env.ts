@@ -13,7 +13,10 @@ const envSchema = z.object({
   APP_URL: z.url().transform((url) => url.replace(/\/+$/, "")),
   // Without a key, emails are only written to the log, which production must never do.
   RESEND_API_KEY: z.string().min(1).optional(),
-  MAIL_FROM: z.string().min(3).default("Sawariya Seth <onboarding@resend.dev>"),
+  MAIL_FROM: z
+    .string()
+    .min(3)
+    .default("Sawariya Seth Construction Materials <onboarding@resend.dev>"),
 });
 
 const productionNeeds = envSchema.refine(

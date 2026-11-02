@@ -12,6 +12,14 @@ async function fillAndSubmit(user: Awaited<ReturnType<typeof renderApp>>["user"]
 }
 
 describe("sign in", () => {
+  it("names the business in full", async () => {
+    await renderApp(fakeApi(signedOut), { path: "/login" });
+
+    expect(
+      await screen.findByRole("heading", { name: "Sawariya Seth Construction Materials" }),
+    ).toBeInTheDocument();
+  });
+
   it("sends a signed-out visitor to sign in, then back where they were going", async () => {
     const api = fakeApi({
       ...signedInRoutes,

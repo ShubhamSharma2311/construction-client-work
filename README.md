@@ -1,6 +1,6 @@
-# Sand Trip Ledger
+# Sawariya Seth Construction Materials
 
-Accounts app for Sawariya Seth Construction Materials, a sand (reti/bajri) trip business. It replaces paper registers for trips, customer dues, drivers, diesel, expenses, tractor EMI and the partner account.
+Accounts app for a sand (reti/bajri) trip business. It replaces paper registers for trips, customer dues, drivers, diesel, expenses, tractor EMI and the partner account.
 
 | Part | Built with | Runs on |
 |---|---|---|
@@ -69,13 +69,13 @@ npx wrangler secret put RESEND_API_KEY     # paste the key when asked
 Then, every release:
 
 ```sh
-APP_URL=https://sawariya-seth.<subdomain>.workers.dev npm run deploy
+APP_URL=https://sawariya-seth-construction-materials.<subdomain>.workers.dev npm run deploy
 ```
 
 After the first release, create the owner and remove the setup token:
 
 ```sh
-APP_URL=https://sawariya-seth.<subdomain>.workers.dev npm run setup-owner
+APP_URL=https://sawariya-seth-construction-materials.<subdomain>.workers.dev npm run setup-owner
 npx wrangler secret delete SETUP_TOKEN
 ```
 

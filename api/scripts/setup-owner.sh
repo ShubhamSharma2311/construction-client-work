@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the owner's sign-in on a new install, once. Needs the SETUP_TOKEN Worker secret;
 # delete that secret afterwards (npx wrangler secret delete SETUP_TOKEN).
-# Usage: APP_URL=https://sawariya-seth.<subdomain>.workers.dev npm run setup-owner
+# Usage: APP_URL=https://sawariya-seth-construction-materials.<subdomain>.workers.dev npm run setup-owner
 set -euo pipefail
 
 [ -n "${APP_URL:-}" ] || {

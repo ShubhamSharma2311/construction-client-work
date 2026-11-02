@@ -40,7 +40,7 @@ describe("access tokens", () => {
     const { token } = await signAccessToken(42, secret, now);
     const [header, , signature] = token.split(".");
     const forgedPayload = Buffer.from(
-      JSON.stringify({ sub: "1", iss: "sand-trip-ledger" }),
+      JSON.stringify({ sub: "1", iss: "sawariya-seth-construction-materials" }),
     ).toString("base64url");
 
     await expect(
@@ -53,7 +53,7 @@ describe("access tokens", () => {
       code: "UNAUTHORIZED",
     });
     const unsigned = `${Buffer.from('{"alg":"none"}').toString("base64url")}.${Buffer.from(
-      '{"sub":"42","iss":"sand-trip-ledger"}',
+      '{"sub":"42","iss":"sawariya-seth-construction-materials"}',
     ).toString("base64url")}.`;
     await expect(verifyAccessToken(unsigned, secret, now)).rejects.toMatchObject({
       code: "UNAUTHORIZED",
@@ -64,7 +64,7 @@ describe("access tokens", () => {
     const token = await new SignJWT({})
       .setProtectedHeader({ alg: "HS256" })
       .setSubject("owner")
-      .setIssuer("sand-trip-ledger")
+      .setIssuer("sawariya-seth-construction-materials")
       .setExpirationTime(Math.floor(now.getTime() / 1000) + 60)
       .sign(new TextEncoder().encode(secret));
 

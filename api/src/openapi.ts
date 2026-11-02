@@ -27,5 +27,8 @@ export function buildOpenApiSpec(): unknown {
     mailer: printMailer(),
     appUrl: "https://unused.example",
   });
-  return describeRoutes(routes, { title: "Sand Trip Ledger API", version: "1.0.0" });
+  return describeRoutes(routes, {
+    title: "Sawariya Seth Construction Materials API",
+    version: "1.0.0",
+  });
 }

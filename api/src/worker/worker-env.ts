@@ -6,7 +6,10 @@ const workerEnvSchema = z
     APP_URL: z.url().transform((url) => url.replace(/\/+$/, "")),
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
     RESEND_API_KEY: z.string().min(1).optional(),
-    MAIL_FROM: z.string().min(3).default("Sawariya Seth <onboarding@resend.dev>"),
+    MAIL_FROM: z
+      .string()
+      .min(3)
+      .default("Sawariya Seth Construction Materials <onboarding@resend.dev>"),
     // Set only to create the owner on a new install, then removed.
     SETUP_TOKEN: z.string().min(32, "SETUP_TOKEN must be at least 32 characters").optional(),
   })

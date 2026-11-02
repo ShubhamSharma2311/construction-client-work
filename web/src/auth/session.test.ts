@@ -130,7 +130,7 @@ describe("session", () => {
 
     await session.restore();
 
-    expect(held).toEqual(["sand-trip-ledger-refresh"]);
+    expect(held).toEqual(["sawariya-seth-construction-materials-refresh"]);
   });
 
   it("signs out when the refresh is refused, and returns the original 401", async () => {

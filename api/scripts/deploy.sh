@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds the website and deploys the whole app (website, API and its database) to Cloudflare.
-# Usage: APP_URL=https://sawariya-seth.<subdomain>.workers.dev npm run deploy
+# Usage: APP_URL=https://sawariya-seth-construction-materials.<subdomain>.workers.dev npm run deploy
 set -euo pipefail
 
 case "${APP_URL:-}" in

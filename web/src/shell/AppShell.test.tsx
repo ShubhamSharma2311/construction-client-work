@@ -19,7 +19,7 @@ describe("app frame", () => {
 
     await renderApp(api);
 
-    expect(await screen.findAllByText("Sawariya Seth")).toHaveLength(2);
+    expect(await screen.findAllByText("Sawariya Seth Construction Materials")).toHaveLength(2);
   });
 
   it("says so when the settings cannot be loaded, instead of quietly using the app's name", async () => {

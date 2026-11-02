@@ -49,7 +49,7 @@ export async function createOwner(db: Db, input: OwnerCredentials): Promise<Me> 
     if ((await tx.user.count()) > 0) {
       throw new AppError(
         "CONFLICT",
-        "An owner account already exists; use --reset to change its password",
+        "An owner account already exists; use Forgot password to change its password",
       );
     }
     const user = await tx.user.create({ data: { username, passwordHash } });

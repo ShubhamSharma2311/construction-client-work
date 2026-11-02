@@ -5,7 +5,7 @@ import { AppError } from "../../lib/errors.ts";
 export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 export const REFRESH_TOKEN_TTL_DAYS = 30;
 
-const ISSUER = "sand-trip-ledger";
+const ISSUER = "sawariya-seth-construction-materials";
 const ALGORITHM = "HS256";
 
 function keyFrom(secret: string): Uint8Array {

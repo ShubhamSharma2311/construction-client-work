@@ -9,14 +9,17 @@ describe("loadWorkerEnv", () => {
       appUrl: "http://localhost:8787",
       jwtSecret: "j".repeat(32),
       resendApiKey: undefined,
-      mailFrom: "Sawariya Seth <onboarding@resend.dev>",
+      mailFrom: "Sawariya Seth Construction Materials <onboarding@resend.dev>",
       setupToken: undefined,
       live: false,
     });
   });
 
   it("needs a Resend key once the app is live on https", () => {
-    const live = { ...local, APP_URL: "https://sawariya-seth.example.workers.dev" };
+    const live = {
+      ...local,
+      APP_URL: "https://sawariya-seth-construction-materials.example.workers.dev",
+    };
 
     expect(() => loadWorkerEnv(live)).toThrow(/RESEND_API_KEY/);
     expect(loadWorkerEnv({ ...live, RESEND_API_KEY: "re_1" })).toMatchObject({ live: true });

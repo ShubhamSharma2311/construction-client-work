@@ -17,7 +17,7 @@ describe("loadEnv", () => {
       PORT: 3000,
       CORS_ORIGINS: ["http://localhost:5173", "https://ledger.example.workers.dev"],
       APP_URL: "http://localhost:5173",
-      MAIL_FROM: "Sawariya Seth <onboarding@resend.dev>",
+      MAIL_FROM: "Sawariya Seth Construction Materials <onboarding@resend.dev>",
     });
   });
 

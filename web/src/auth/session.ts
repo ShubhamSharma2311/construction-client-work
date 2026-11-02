@@ -35,7 +35,7 @@ export interface SessionDeps {
 
 // The backend treats a refresh token used twice as stolen and signs that login out, so
 // refreshes must never overlap: one at a time per tab, and one at a time across tabs.
-const REFRESH_LOCK = "sand-trip-ledger-refresh";
+const REFRESH_LOCK = "sawariya-seth-construction-materials-refresh";
 
 export function createSession(deps: SessionDeps): Session {
   const publicApi = createApi(deps.baseUrl, deps.fetch);

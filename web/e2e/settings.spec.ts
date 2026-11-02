@@ -38,7 +38,8 @@ test("settings save as they are, history lists changes, deleted entries open", a
   });
 
   await page.getByRole("group", { name: "Show" }).getByRole("button", { name: "Password" }).click();
-  await expect(page.getByLabel("Current password")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Change password" })).toBeVisible();
+  await expect(page.getByRole("form", { name: "Reset email" })).toBeVisible();
   await expectNoSidewaysScroll(page);
   await page.screenshot({
     path: `test-results/evidence/${info.project.name}-settings-password.png`,
