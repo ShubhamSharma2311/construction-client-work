@@ -2,12 +2,12 @@
 
 Accounts app for a sand (reti/bajri) trip business. It replaces paper registers for trips, customer dues, drivers, diesel, expenses, tractor EMI and the partner account.
 
-| Part | Built with | Runs on |
-|---|---|---|
-| `web/` | React, Vite, shadcn/ui | Cloudflare Workers (static assets) |
-| `api/` | TypeScript, Hono, Prisma | Cloudflare Workers, inside one Durable Object |
-| Database | SQLite | The Durable Object's own storage, with 30-day point-in-time restore |
-| Email | Resend | "Forgot password" links |
+| Part     | Built with               | Runs on                                                             |
+| -------- | ------------------------ | ------------------------------------------------------------------- |
+| `web/`   | React, Vite, shadcn/ui   | Cloudflare Workers (static assets)                                  |
+| `api/`   | TypeScript, Hono, Prisma | Cloudflare Workers, inside one Durable Object                       |
+| Database | SQLite                   | The Durable Object's own storage, with 30-day point-in-time restore |
+| Email    | Resend                   | "Forgot password" links                                             |
 
 One Worker serves the website and `/api`. The API and its database live in a single Durable Object, so every request runs one at a time against one SQLite database, and nothing outside the Worker can reach it.
 
@@ -66,7 +66,13 @@ openssl rand -hex 32 | tee /dev/tty | npx wrangler secret put SETUP_TOKEN   # no
 npx wrangler secret put RESEND_API_KEY     # paste the key when asked
 ```
 
-Then, every release:
+Every push to `main` then deploys by itself: [deploy.yml](.github/workflows/deploy.yml) runs both gates and, only if they pass, deploys. It needs, once, in the GitHub repo's settings:
+
+- variable `APP_URL`: `https://sawariya-seth-construction-materials.<subdomain>.workers.dev`
+- variable `CLOUDFLARE_ACCOUNT_ID`: the account id `npx wrangler whoami` shows
+- secret `CLOUDFLARE_API_TOKEN`: a Cloudflare API token made from the "Edit Cloudflare Workers" template
+
+To deploy by hand instead:
 
 ```sh
 APP_URL=https://sawariya-seth-construction-materials.<subdomain>.workers.dev npm run deploy
