@@ -2,12 +2,11 @@ import { DurableObject } from "cloudflare:workers";
 import { type App, buildApp } from "../app.ts";
 import { systemClock } from "../lib/clock.ts";
 import { consoleLog } from "../lib/log.ts";
-import { printMailer, resendMailer } from "../lib/mailer.ts";
 import { migrate } from "../lib/migrate.ts";
 import { ledgerPrisma } from "../lib/prisma.ts";
 import type { LedgerStorage } from "../lib/storage-adapter.ts";
 import { MIGRATIONS } from "./migrations.ts";
-import { loadWorkerEnv } from "./worker-env.ts";
+import { loadWorkerEnv, workerMailer } from "./worker-env.ts";
 
 interface Env {
   ASSETS: Fetcher;
@@ -41,11 +40,7 @@ export class Ledger extends DurableObject<Env> {
       jwtSecret: settings.jwtSecret,
       corsOrigins: [settings.appUrl],
       secureCookies: settings.live,
-      mailer: settings.resendApiKey
-        ? resendMailer(settings.resendApiKey, settings.mailFrom)
-        : printMailer((line) => {
-            console.log(line);
-          }),
+      mailer: workerMailer(settings),
       appUrl: settings.appUrl,
       setupToken: settings.setupToken,
     });

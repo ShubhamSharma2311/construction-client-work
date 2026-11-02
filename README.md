@@ -63,7 +63,7 @@ npx wrangler auth create sawariya          # log in to the client's account
 npx wrangler auth activate sawariya .      # use that login in this folder only
 openssl rand -hex 32 | npx wrangler secret put JWT_SECRET
 openssl rand -hex 32 | tee /dev/tty | npx wrangler secret put SETUP_TOKEN   # note it for the next step
-npx wrangler secret put RESEND_API_KEY     # paste the key when asked
+npx wrangler secret put RESEND_API_KEY     # paste the key; until then, reset emails fail and say so
 ```
 
 Every push to `main` then deploys by itself: [deploy.yml](.github/workflows/deploy.yml) runs both gates and, only if they pass, deploys. It needs, once, in the GitHub repo's settings:
